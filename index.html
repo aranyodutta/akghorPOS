@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AK Ghor POS System — 2025</title>
+
+  <!-- Firebase SDK v8 (compatible with your current project) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+Bengali:400,700|Roboto:400,700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ========== Base Styles ========== */
+    :root{
+      --brand:#b8100d;
+      --brand-dark:#a50e0c;
+      --ink:#333;
+      --bg:#ffffff;
+      --panel:#f7f7f7;
+      --muted:#f0f0f0;
+      --ok:#17803d;
+      --warn:#b26a00;
+      --danger:#b8100d;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family:'Roboto',sans-serif;
+      background-color:var(--bg);
+      margin:0;
+      color:var(--ink);
+    }
+    .hide{display:none !important;}
+
+    /* Top bar */
+    .top-section{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 20px;
+      background-color:var(--brand);
+      color:#fff;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .search{min-width:220px;flex:1 1 260px;max-width:420px}
+    .search input{
+      width:100%;
+      padding:8px 10px;
+      border-radius:6px;
+      border:none;
+      font-size:16px;
+    }
+    .day-switch{
+      display:flex; gap:8px; align-items:center;
+    }
+    .day-switch button{
+      padding:8px 12px;
+      border:none; border-radius:6px; cursor:pointer;
+      font-weight:bold;
+      background:#fff2; color:#fff;
+    }
+    .day-switch button.active{ background:#fff; color:var(--brand); }
+
+    .ticket-section{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .ticket{display:flex;align-items:center;gap:6px}
+    .ticket-label{
+      background:#eee;color:#333;padding:6px 10px;border-radius:6px;font-weight:bold;font-size:14px
+    }
+    .ticket-count{font-size:16px;color:#fff}
+
+    /* Layout */
+    .container{display:flex}
+    .item-grid{
+      flex:1;padding:20px;display:flex;flex-wrap:wrap;gap:12px;
+      justify-content:flex-start;background:#f9f9f9;min-height:calc(100vh - 140px);
+    }
+    .order-summary{
+      width:360px;background:var(--panel);padding:20px;border-left:1px solid #ddd;position:relative;
+    }
+    .order-summary h2{margin:0 0 12px;font-size:22px}
+    .order-item{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:10px;padding:8px 0;border-bottom:1px solid #e9e9e9
+    }
+    .order-item .delete-item{
+      background:transparent;border:none;color:var(--danger);font-size:18px;cursor:pointer;padding:0 5px;
+    }
+    .total-amount{
+      font-size:32px;font-weight:bold;color:var(--brand);margin-top:12px;text-align:center;
+      display:flex;align-items:center;justify-content:center;gap:10px
+    }
+    .edit-total-icon{cursor:pointer;font-size:18px;color:#333}
+
+    .payment-buttons{display:flex;gap:10px;margin-top:18px}
+    .payment-button{
+      flex:1;padding:14px;background:var(--brand);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:18px
+    }
+    .payment-button:hover{background:var(--brand-dark)}
+    .next-button{
+      margin-top:14px;padding:14px;background:#333;color:#fff;cursor:pointer;border:none;border-radius:6px;
+      text-align:center;width:100%;font-size:18px;font-weight:bold
+    }
+    .next-button:hover{background:#555}
+
+    /* Item cards */
+    .item-box{
+      background:#fff;padding:10px;width:160px;border:1px solid #ddd;text-align:center;cursor:pointer;border-radius:8px;
+      transition:transform .1s ease, background-color .2s; box-shadow:0 2px 5px rgba(0,0,0,.06);
+      display:flex;flex-direction:column;align-items:center
+    }
+    .item-box:hover{background:#f7f7f7; transform:translateY(-2px)}
+    .item-box strong{font-size:14px;color:#333}
+    .item-box .price{font-size:14px;color:var(--brand);font-weight:bold;margin-top:2px}
+    .item-box img{max-width:100%;height:auto;margin-top:6px;flex-grow:1;object-fit:contain}
+    .item-actions{display:flex;gap:6px;margin-top:8px}
+    .oos-btn{
+      padding:6px 8px;font-size:12px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer
+    }
+    .oos-tag{
+      font-size:11px;color:#fff;background:#777;border-radius:6px;padding:2px 6px;margin-left:6px
+    }
+    .is-oos{opacity:.45; outline:2px dashed #aaa; outline-offset:-6px}
+
+    /* Bottom tabs */
+    .bottom-tabs{
+      position:fixed;bottom:0;left:0;width:100%;background:var(--brand);
+      display:flex;justify-content:center;gap:12px;padding:10px
+    }
+    .tab-button{
+      padding:10px 16px;margin:0;border:none;border-radius:6px;font-weight:bold;color:#fff;background:var(--brand);
+      cursor:pointer
+    }
+    .tab-button.active{background:var(--brand-dark)}
+
+    /* Display Mode */
+    .display-mode .top-section, .display-mode .bottom-tabs{display:none}
+    .qr-section{
+      background:#f9f9f9;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh
+    }
+    .display-mode .qr-section{
+      background-image:url('https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/durga_puja_background.jpg');
+      background-size:cover;background-position:center;
+    }
+    .logo{width:260px;margin-bottom:10px;z-index:2;position:relative}
+    .qr-container{
+      background:rgba(255,255,255,.9);padding:20px;border-radius:16px;box-shadow:0 4px 10px rgba(0,0,0,.1);text-align:center;z-index:2
+    }
+    .display-payment-method{font-size:28px;margin-bottom:6px;color:#333;font-weight:bold;display:flex;gap:10px;align-items:center;justify-content:center}
+    .display-payment-method img{height:48px}
+    #total-price{font-size:64px;margin:12px 0 0;color:var(--brand);font-weight:bold}
+    .zelle-instructions{font-size:18px;margin-top:8px;color:#333;line-height:1.4}
+    .quote-container{
+      position:absolute;bottom:20px;width:80%;text-align:center;background:rgba(255,255,255,.72);
+      padding:10px;border-radius:10px;font-family:'Noto Sans Bengali',sans-serif;font-size:22px;color:#333;animation:fadeInOut 10s infinite
+    }
+    .fullscreen-button{
+      position:fixed;bottom:10px;right:10px;padding:10px;background:#333;color:#fff;border:none;border-radius:6px;z-index:1000;font-weight:bold;cursor:pointer
+    }
+
+    @keyframes fadeInOut{
+      0%{opacity:0}10%{opacity:1}90%{opacity:1}100%{opacity:0}
+    }
+
+    /* Order Tracking */
+    .order-tracking{display:none;padding:20px}
+    .order-tracking h2{margin:0 0 10px}
+    .subtabs{display:flex;gap:8px;margin:8px 0 12px}
+    .subtabs button{padding:8px 12px;border:none;border-radius:6px;background:#eee;cursor:pointer;font-weight:bold}
+    .subtabs button.active{background:var(--brand);color:#fff}
+    .order-tracking table{width:100%;border-collapse:collapse;overflow-x:auto}
+    .order-tracking th, .order-tracking td{border:1px solid #ddd;padding:6px;text-align:center;font-size:12px}
+    .order-tracking tr:nth-child(even){background:#f7f7f7}
+    .order-tracking th{background:#4CAF50;color:#fff;position:sticky;top:0;z-index:1}
+    .order-overwritten td{background:#fff3cd}
+    #download-csv{margin-top:10px;padding:10px;background:#333;color:#fff;border:none;border-radius:6px;font-weight:bold;cursor:pointer}
+    .delete-order-button{background:transparent;border:none;color:var(--danger);font-size:18px;cursor:pointer}
+    .controls-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+    /* Zelle confirmations small buttons */
+    .btn-small{padding:6px 10px;border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:bold}
+    .btn-ok{background:var(--ok)}
+    .btn-warn{background:var(--warn)}
+    .btn-muted{background:#6b7280}
+
+    /* Analytics */
+    .analytics{display:none;padding:20px}
+    .analytics-summary{display:flex;justify-content:center;margin-bottom:20px}
+    .total-sales{font-size:44px;font-weight:bold;color:var(--brand)}
+    .charts-container{display:flex;flex-wrap:wrap;justify-content:center}
+    .chart-wrapper{width:45%;min-width:320px;margin:18px}
+    .charts-container canvas{max-width:100%;height:auto}
+    @media (max-width:900px){.chart-wrapper{width:100%}}
+
+    /* Modals */
+    .modal{display:none;position:fixed;z-index:1001;left:0;top:0;width:100%;height:100%;overflow:auto;background:rgba(0,0,0,.4)}
+    .modal-content{
+      background:#fff;margin:8% auto;padding:20px;border:1px solid #888;width:420px;max-width:92%;
+      text-align:center;border-radius:12px;position:relative
+    }
+    .close-modal-button{
+      position:absolute;top:10px;right:16px;background:transparent;border:none;color:#999;font-size:28px;font-weight:bold;cursor:pointer
+    }
+    .close-modal-button:hover{color:#000}
+    .payment-option-button{
+      width:85%;padding:14px;margin:10px 0;background:var(--brand);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:18px
+    }
+    .payment-option-button:hover{background:var(--brand-dark)}
+    .row{display:flex;justify-content:space-between;align-items:center;margin:10px 0}
+    .pill{
+      border:1px solid #ccc;border-radius:20px;padding:6px 10px;display:inline-flex;gap:6px;align-items:center
+    }
+    .pill button{
+      border:none;background:#eee;border-radius:14px;padding:4px 8px;cursor:pointer;font-weight:bold
+    }
+    .pill button.active{background:var(--brand);color:#fff}
+  </style>
+</head>
+<body>
+
+  <!-- Top: Search + Day switch + Tickets -->
+  <div class="top-section">
+    <div class="search">
+      <input type="text" placeholder="Search" id="search-input" onkeyup="searchItems()" />
+    </div>
+
+    <div class="day-switch">
+      <span style="font-weight:bold;">Day:</span>
+      <button id="btn-day-sat" class="active" onclick="setDay('SAT')">Saturday</button>
+      <button id="btn-day-sun" onclick="setDay('SUN')">Sunday</button>
+      <span class="oos-tag">2025</span>
+    </div>
+
+    <div class="ticket-section">
+      <div class="ticket"><div class="ticket-label">100</div><span class="ticket-count" id="ticket-100-count">0</span></div>
+      <div class="ticket"><div class="ticket-label">200</div><span class="ticket-count" id="ticket-200-count">0</span></div>
+      <div class="ticket"><div class="ticket-label">300</div><span class="ticket-count" id="ticket-300-count">0</span></div>
+      <div class="ticket"><div class="ticket-label">400</div><span class="ticket-count" id="ticket-400-count">0</span></div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="container">
+    <div class="item-grid" id="item-grid"></div>
+
+    <div class="order-summary">
+      <h2>Order Summary</h2>
+      <div id="order-list"></div>
+      <div class="total-amount">
+        $<span id="total-price-summary">0.00</span>
+        <span class="edit-total-icon" title="Edit Total" onclick="openEditTotalModal()">&#9998;</span>
+      </div>
+      <div class="payment-buttons">
+        <button class="payment-button" onclick="processPayment('Cash')">Cash</button>
+        <button class="payment-button" onclick="processPayment('Zelle')">Zelle</button>
+      </div>
+      <button class="next-button" onclick="clearOrder()">Next Customer</button>
+    </div>
+  </div>
+
+  <!-- Display Section (for Display Mode) -->
+  <div class="qr-section">
+    <img src="https://assets.cdn.filesafe.space/slWdpqUTRhMfisMySSJ0/media/66f7050f5b684e16ab132d41.jpeg" alt="Company Logo" class="logo">
+    <div class="qr-container">
+      <div class="display-payment-method" id="display-payment-method"></div>
+      <p style="font-size: 48px; color: #b8100d; font-weight: bold;">$<span id="total-price">0</span></p>
+      <div class="zelle-instructions" id="zelle-instructions" style="display:none"></div>
+    </div>
+    <div class="quote-container" id="quote-container"></div>
+  </div>
+
+  <!-- Fullscreen -->
+  <button class="fullscreen-button" onclick="toggleFullscreen()">Fullscreen</button>
+
+  <!-- Mode Switch -->
+  <div style="padding:10px 20px;display:flex;gap:10px;align-items:center;">
+    <button onclick="setMode('POS')">POS Mode (iPad/Computer)</button>
+    <button onclick="setMode('Display')">Display Mode (Phone)</button>
+  </div>
+
+  <!-- Order Tracking -->
+  <div class="order-tracking" id="order-tracking">
+    <div class="controls-row">
+      <h2 style="margin-right:auto">Order Log</h2>
+      <div class="subtabs">
+        <button id="ot-sat" class="active" onclick="switchDaySubtab('SAT','ot')">Saturday</button>
+        <button id="ot-sun" onclick="switchDaySubtab('SUN','ot')">Sunday</button>
+      </div>
+    </div>
+    <div class="controls-row">
+      <button id="download-csv" onclick="downloadCSV()">Download CSV</button>
+      <button id="clear-orders" onclick="clearAllOrders()">Clear Orders</button>
+    </div>
+    <div style="overflow-x:auto; margin-top:10px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Time</th>
+            <!-- Item Codes will be auto headers from menuItems -->
+            <th id="th-dynamic-start" colspan="1"></th>
+            <th>Total</th>
+            <th>Payment Method</th>
+            <th>Pass Fee</th>
+            <th>Fee</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody id="order-log"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Zelle Confirmations -->
+  <div class="order-tracking" id="zelle-confirmations">
+    <div class="controls-row">
+      <h2 style="margin-right:auto">Zelle Confirmations</h2>
+      <div class="subtabs">
+        <button id="ze-sat" class="active" onclick="switchDaySubtab('SAT','ze')">Saturday</button>
+        <button id="ze-sun" onclick="switchDaySubtab('SUN','ze')">Sunday</button>
+      </div>
+    </div>
+    <div class="controls-row">
+      <button onclick="downloadZelleCSV()">Download CSV</button>
+    </div>
+    <div style="overflow-x:auto; margin-top:10px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Order #</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="zelle-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Stock Log -->
+  <div class="order-tracking" id="stock-log">
+    <div class="controls-row">
+      <h2 style="margin-right:auto">Stock Log</h2>
+      <div class="subtabs">
+        <button id="sl-sat" class="active" onclick="switchDaySubtab('SAT','sl')">Saturday</button>
+        <button id="sl-sun" onclick="switchDaySubtab('SUN','sl')">Sunday</button>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <button id="stock-download-csv" onclick="downloadStockCSV()">Download CSV</button>
+      <button id="stock-clear" onclick="clearAllStockLog()">Clear Stock Log</button>
+    </div>
+
+    <div style="overflow-x:auto; margin-top:10px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Code</th>
+            <th>Item</th>
+            <th>Status</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody id="stock-log-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <!-- Analytics -->
+  <div class="analytics" id="analytics">
+    <div class="controls-row">
+      <h2 style="margin-right:auto">Sales Analytics</h2>
+      <div class="subtabs">
+        <button id="an-sat" class="active" onclick="switchDaySubtab('SAT','an')">Saturday</button>
+        <button id="an-sun" onclick="switchDaySubtab('SUN','an')">Sunday</button>
+      </div>
+    </div>
+    <div class="analytics-summary">
+      <div class="total-sales">Total Sales: $<span id="grand-total-sales">0.00</span></div>
+    </div>
+    <div class="charts-container">
+      <div class="chart-wrapper"><canvas id="sales-over-time-chart"></canvas></div>
+      <div class="chart-wrapper"><canvas id="best-selling-items-chart"></canvas></div>
+      <div class="chart-wrapper"><canvas id="payment-methods-chart"></canvas></div>
+      <div class="chart-wrapper"><canvas id="orders-over-time-chart"></canvas></div>
+      <div class="chart-wrapper"><canvas id="hourly-sales-chart"></canvas></div>
+      <!-- OOS analytics could go here in the future -->
+    </div>
+  </div>
+
+  <!-- Footer Tabs -->
+   <div class="bottom-tabs">
+    <button id="pos-tab-button" class="tab-button active" onclick="switchTab('POS')">POS</button>
+    <button id="order-tracking-tab-button" class="tab-button" onclick="switchTab('Order Tracking')">Order Tracking</button>
+    <button id="zelle-tab-button" class="tab-button" onclick="switchTab('Zelle')">Zelle Confirmations</button>
+    <button id="stock-tab-button" class="tab-button" onclick="switchTab('Stock Log')">Stock Log</button>
+    <button id="analytics-tab-button" class="tab-button" onclick="switchTab('Analytics')">Analytics</button>
+  </div>
+
+  <!-- Edit Total Modal -->
+  <div id="edit-total-modal" class="modal">
+    <div class="modal-content">
+      <button class="close-modal-button" onclick="closeEditTotalModal()">&times;</button>
+      <h2>Edit Total Price</h2>
+      <input type="number" id="new-total-price" step="0.01" min="0" style="width: 80%; padding: 10px; font-size: 18px;">
+      <button class="payment-option-button" style="margin-top: 20px;" onclick="updateTotalPrice()">Update</button>
+    </div>
+  </div>
+
+  <!-- (Stripe card modal removed for Zelle/Cash flow) -->
+
+  <script>
+    /* ==========================
+       CONFIG + GLOBAL STATE
+       ========================== */
+
+    // Firebase configuration (same project)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDHoasqENlnp0zSAsz-3HfMkx4tgG-oZhA",
+      authDomain: "akghorpos.firebaseapp.com",
+      databaseURL: "https://akghorpos-default-rtdb.firebaseio.com",
+      projectId: "akghorpos",
+      storageBucket: "akghorpos.appspot.com",
+      messagingSenderId: "791887148716",
+      appId: "1:791887148716:web:5c8fb06053dcd6e5799109",
+      measurementId: "G-7DE60HHEK8"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 2025 Season + Day split
+    const SEASON = '2025';
+    let DAY = 'SAT'; // default; can switch to 'SUN'
+
+    // Zelle config (replace handle/QR as needed)
+    const ZELLE_HANDLE = 'your-zelle-handle@example.com';
+    const ZELLE_QR_IMAGE_URL = ''; // optional
+
+    // App state
+    let total = 0;
+    let tickets100 = 0, tickets200 = 0, tickets300 = 0, tickets400 = 0;
+    let orderList = [];
+    let orderNumber = 0; // per-day, as in original
+    let currentOrderRef = null;
+    let orderHistory = {};
+    let ordersRef = null;
+    let isTotalOverwritten = false;
+    const oosMap = {}; // code -> boolean (true = OOS)
+
+   /* ==========================
+       MENU (2025 — per day)
+       ========================== */
+// SATURDAY
+const menuItemsSAT = [
+  { name:'Mochar Chop (2)',    price:8.00, ticketSeries:'300', code:'MCH',
+    image:'https://i.ibb.co/svz40VyF/Mochar-Chop-02-removebg-preview.png' },
+  { name:'Vegetable Chop (2)', price:8.00, ticketSeries:'300', code:'VC',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f3c2e6fb4a6.png' },
+  { name:'Phuchka (6)',        price:8.00, ticketSeries:'300', code:'PK',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0b27ab06b35ca1f6a.png' },
+  { name:'Chandrapouli (2)',   price:8.00, ticketSeries:'300', code:'CP',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f61a06fb4a5.png' },
+  { name:'Chanar Payesh',      price:8.00, ticketSeries:'300', code:'CPY',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba956a9ab6c7b9.png' },
+  { name:'Patisapta (2)',      price:10.00, ticketSeries:'400', code:'PS',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d060741004166cbed6.png' },
+  { name:'Jhal Muri',          price:7.00, ticketSeries:'200', code:'JM',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d05b2570a5a1cb27bb.png' },
+  { name:'Misti Paan',         price:2.50, ticketSeries:null,  code:'MP',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d08c006b5d16abcfae.png' },
+  { name:'Coffee',             price:5.00, ticketSeries:'100', code:'MC',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d06074102d146cbed5.png' },
+  { name:'Cha',                price:3.00, ticketSeries:'100', code:'CHA',
+    image:'https://i.ibb.co/gFFK4CzL/sddefault-removebg-preview.png' },
+  { name:'Water',              price:1.00, ticketSeries:null,  code:'W',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0ed66479dc3b42f76.png' },
+  { name:'Coke',               price:2.00, ticketSeries:null,  code:'C',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95a7dbb6c7ba.png' },
+  { name:'Pujor Mishti Box',   price:12.00, ticketSeries:null, code:'PMB',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95c546b6c7b8.png' },
+  { name:'Sindoor',            price:2.00, ticketSeries:null,  code:'SND',
+    image:'https://i.ibb.co/6R4YKNf6/40332013-3-1-pearlfiesta-red-sindoor-powder-each-box-contains-10-gm-each-removebg-preview.png' },
+];
+
+
+// SUNDAY
+const menuItemsSUN = [
+  { name:'Mochar Chop (2)',    price:8.00, ticketSeries:'300', code:'MCH',
+    image:'https://i.ibb.co/svz40VyF/Mochar-Chop-02-removebg-preview.png' },
+  { name:'Vegetable Chop (2)', price:8.00, ticketSeries:'300', code:'VC',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f3c2e6fb4a6.png' },
+  { name:'Phuchka (6)',        price:8.00, ticketSeries:'300', code:'PK',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0b27ab06b35ca1f6a.png' },
+  { name:'Chandrapouli (2)',   price:8.00, ticketSeries:'300', code:'CP',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f61a06fb4a5.png' },
+  { name:'Baked Sandesh (2)',  price:8.00, ticketSeries:'300', code:'BS',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f83316fb4a4.png' },
+  { name:'Patisapta (2)',      price:10.00, ticketSeries:'400', code:'PS',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d060741004166cbed6.png' },
+  { name:'Jhal Muri',          price:7.00, ticketSeries:'200', code:'JM',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d05b2570a5a1cb27bb.png' },
+  { name:'Misti Paan',         price:2.50, ticketSeries:null,  code:'MP',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d08c006b5d16abcfae.png' },
+  { name:'Coffee',             price:5.00, ticketSeries:'100', code:'MC',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d06074102d146cbed5.png' },
+  { name:'Cha',                price:3.00, ticketSeries:'100', code:'CHA',
+    image:'https://i.ibb.co/gFFK4CzL/sddefault-removebg-preview.png' },
+  { name:'Water',              price:1.00, ticketSeries:null,  code:'W',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0ed66479dc3b42f76.png' },
+  { name:'Coke',               price:2.00, ticketSeries:null,  code:'C',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95a7dbb6c7ba.png' },
+  { name:'Pujor Mishti Box',   price:12.00, ticketSeries:null, code:'PMB',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95c546b6c7b8.png' },
+  { name:'Sindoor',            price:2.00, ticketSeries:null,  code:'SND',
+    image:'https://i.ibb.co/6R4YKNf6/40332013-3-1-pearlfiesta-red-sindoor-powder-each-box-contains-10-gm-each-removebg-preview.png' },
+  { name:'Paan Leaves (2)',    price:1.00, ticketSeries:null,  code:'PL',
+    image:'https://i.ibb.co/XkFsRwKL/download-removebg-preview.png' },
+];
+
+function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
+
+    // Map name -> code (rebuild when needed)
+    const itemCodeMap = {};
+    function rebuildItemCodeMap(){
+      Object.keys(itemCodeMap).forEach(k=>delete itemCodeMap[k]);
+      currentMenu().forEach(it => { itemCodeMap[it.name] = it.code; });
+    }
+
+    /* ==========================
+       Quotes (Display Mode)
+       ========================== */
+    const quotes = [
+      'যদি তোর ডাক শুনে কেউ না আসে তবে একলা চলো রে',
+      'আমার মুক্তি আলোয় আলোয় এই আকাশে',
+      'প্রাণ ভরিয়ে, তৃষা হরিয়ে, মোরে আরো আরো আরো দাও প্রাণ',
+      'আমার সকল রসের ধারা তুমি হরছো শুকায়ে',
+      'দাও ফিরে সে অরণ্য লও এ নগর',
+      'পুরানো সেই দিনের কথা ভুলবি কিরে হায়',
+      'আমি চিরতরে দূরে চলে যাবো তবু আমারে দেবো না ভুলিতে',
+      'তুমি সন্ধ্যার মেঘমালা তুমি তারার আলো',
+      'তুমি রবে নীরবে হৃদয়ে মম',
+      'হৃদয় আমার নাচেরে আজিকে ময়ূরের মত নাচেরে'
+    ];
+    let currentQuoteIndex = 0, quoteInterval;
+
+    /* ==========================
+       Mode: POS vs Display
+       ========================== */
+    function setMode(mode){
+      if(mode==='POS'){
+        document.body.classList.remove('display-mode');
+        document.querySelector('.item-grid').style.display='flex';
+        document.querySelector('.order-summary').style.display='block';
+        document.querySelector('.top-section').style.display='flex';
+        document.querySelector('.bottom-tabs').style.display='flex';
+        document.querySelector('.qr-section').style.display='none';
+        if(currentOrderRef){ currentOrderRef.off(); currentOrderRef=null; }
+        document.getElementById('display-payment-method').innerHTML='';
+        document.getElementById('total-price').innerText='';
+        document.getElementById('zelle-instructions').style.display='none';
+        clearInterval(quoteInterval);
+      }else{
+        document.body.classList.add('display-mode');
+        document.querySelector('.item-grid').style.display='none';
+        document.querySelector('.order-summary').style.display='none';
+        document.querySelector('.top-section').style.display='none';
+        document.querySelector('.bottom-tabs').style.display='none';
+        document.querySelector('.qr-section').style.display='flex';
+
+        currentOrderRef = firebase.database().ref('currentOrder');
+        currentOrderRef.on('value',(snapshot)=>{
+          const data = snapshot.val();
+          const display = document.getElementById('display-payment-method');
+          const zInst = document.getElementById('zelle-instructions');
+
+          if(data && data.total && data.paymentMethod){
+            document.getElementById('total-price').innerText = data.total;
+            display.innerHTML = '';
+            zInst.style.display = 'none';
+            zInst.innerHTML = '';
+
+            if(data.paymentMethod==='Zelle'){
+              const lbl = document.createElement('span');
+              lbl.textContent='ZELLE';
+              display.appendChild(lbl);
+
+              zInst.style.display = 'block';
+              const handleLine = `Send to: <strong>${ZELLE_HANDLE}</strong>`;
+              const memoLine = data.orderNumber ? `Memo: <strong>Order #${data.orderNumber}</strong>` : '';
+              const qrLine = ZELLE_QR_IMAGE_URL ? `<div><img src="${ZELLE_QR_IMAGE_URL}" alt="Zelle QR" style="max-width:220px;margin-top:8px"></div>` : '';
+              zInst.innerHTML = `${handleLine}<br>${memoLine}${qrLine}`;
+            }else if(data.paymentMethod==='Cash'){
+              const lbl = document.createElement('span');
+              lbl.textContent='TOTAL';
+              display.appendChild(lbl);
+            }
+
+            document.getElementById('quote-container').style.display='none';
+          }else{
+            document.getElementById('total-price').innerText='';
+            display.innerHTML='';
+            zInst.style.display='none';
+            zInst.innerHTML='';
+            document.getElementById('quote-container').style.display='block';
+          }
+        });
+        rotateQuotes();
+      }
+    }
+
+    function rotateQuotes(){
+      const qc = document.getElementById('quote-container');
+      qc.innerText = quotes[currentQuoteIndex];
+      quoteInterval = setInterval(()=>{
+        currentQuoteIndex = (currentQuoteIndex+1) % quotes.length;
+        qc.innerText = quotes[currentQuoteIndex];
+      },10000);
+    }
+
+    function toggleFullscreen(){
+      const qrSection = document.querySelector('.qr-section');
+      if(!document.fullscreenElement){
+        if(qrSection.requestFullscreen) qrSection.requestFullscreen();
+        else if(qrSection.webkitRequestFullscreen) qrSection.webkitRequestFullscreen();
+        else if(qrSection.msRequestFullscreen) qrSection.msRequestFullscreen();
+      }else{
+        if(document.exitFullscreen) document.exitFullscreen();
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if(document.msExitFullscreen) document.msExitFullscreen();
+      }
+    }
+
+    /* ==========================
+       POS: Add/Remove + Tickets
+       ========================== */
+    function addItem(name, price, ticketSeries){
+      const code = itemCodeMap[name];
+      if(oosMap[code]) return; // blocked when out of stock
+      const existing = orderList.find(i=>i.name===name);
+      if(existing) existing.quantity += 1;
+      else orderList.push({name, price, ticketSeries, quantity:1});
+      total += price;
+      updateOrderSummary();
+      updateTicketCount(ticketSeries);
+    }
+
+    function removeItem(name){
+      const idx = orderList.findIndex(i=>i.name===name);
+      if(idx>-1){
+        const it = orderList[idx];
+        total -= it.price*it.quantity;
+        if(it.ticketSeries==='100'){ tickets100 -= it.quantity; document.getElementById('ticket-100-count').innerText=tickets100; }
+        if(it.ticketSeries==='200'){ tickets200 -= it.quantity; document.getElementById('ticket-200-count').innerText=tickets200; }
+        if(it.ticketSeries==='300'){ tickets300 -= it.quantity; document.getElementById('ticket-300-count').innerText=tickets300; }
+        if(it.ticketSeries==='400'){ tickets400 -= it.quantity; document.getElementById('ticket-400-count').innerText=tickets400; }
+        orderList.splice(idx,1);
+        updateOrderSummary();
+      }
+    }
+
+    function updateOrderSummary(){
+      const listEl = document.getElementById('order-list');
+      const totalEl = document.getElementById('total-price-summary');
+      listEl.innerHTML='';
+      orderList.forEach(item=>{
+        const row = document.createElement('div');
+        row.className='order-item';
+        row.innerHTML = `<span>${item.name} x ${item.quantity}</span>
+                         <span>$${(item.price*item.quantity).toFixed(2)}</span>`;
+        const del = document.createElement('button');
+        del.className='delete-item';
+        del.innerHTML='&times;';
+        del.onclick=()=>removeItem(item.name);
+        row.appendChild(del);
+        listEl.appendChild(row);
+      });
+      totalEl.innerText = total.toFixed(2);
+    }
+
+    function updateTicketCount(ticketSeries){
+      if(ticketSeries==='100'){ tickets100++; document.getElementById('ticket-100-count').innerText=tickets100; }
+      if(ticketSeries==='200'){ tickets200++; document.getElementById('ticket-200-count').innerText=tickets200; }
+      if(ticketSeries==='300'){ tickets300++; document.getElementById('ticket-300-count').innerText=tickets300; }
+      if(ticketSeries==='400'){ tickets400++; document.getElementById('ticket-400-count').innerText=tickets400; }
+    }
+
+    /* ==========================
+       Payment Flow (Cash / Zelle)
+       ========================== */
+    function processPayment(method){
+      if(orderList.length===0){ alert('Add at least one item.'); return; }
+
+      orderNumber = Number(orderNumber)+1; // keep original per-day sequence
+      const orderDetails = {
+        orderNumber,
+        items: orderList,
+        total: total.toFixed(2),
+        method,
+        zelleStatus: (method==='Zelle') ? 'PENDING' : undefined,
+        passFee: false, // columns remain in Order Log; always false here
+        fee: '0.00',    // not used for Zelle/Cash; keeps CSV shape intact
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        overwritten: isTotalOverwritten,
+        day: DAY
+      };
+      saveOrderToFirebase(orderDetails);
+
+      // Update Display device
+      db.ref('currentOrder').set({ total: total.toFixed(2), paymentMethod: method, orderNumber });
+
+      // Operator still presses "Next Customer" when ready (manual step kept)
+    }
+
+    /* ==========================
+       Edit Total
+       ========================== */
+    function openEditTotalModal(){
+      document.getElementById('new-total-price').value = total.toFixed(2);
+      document.getElementById('edit-total-modal').style.display='block';
+    }
+    function closeEditTotalModal(){ document.getElementById('edit-total-modal').style.display='none'; }
+    function updateTotalPrice(){
+      const newTotal = parseFloat(document.getElementById('new-total-price').value);
+      if(!isNaN(newTotal) && newTotal>=0){
+        total = newTotal;
+        updateOrderSummary();
+        isTotalOverwritten = true;
+        closeEditTotalModal();
+      }else{
+        alert('Please enter a valid amount.');
+      }
+    }
+
+    /* ==========================
+       Save / Load Orders
+       ========================== */
+    function ordersPath(){ return `orders/${SEASON}/${DAY}`; }
+
+    function saveOrderToFirebase(orderDetails){
+      const ref = db.ref(ordersPath()).push();
+      ref.set(orderDetails);
+    }
+
+    function deleteOrder(orderKey){
+      if(confirm('Are you sure you want to delete this order?')){
+        db.ref(`${ordersPath()}/${orderKey}`).remove();
+      }
+    }
+
+    function loadOrdersFromFirebase(){
+      if(ordersRef) ordersRef.off();
+      ordersRef = db.ref(ordersPath());
+      ordersRef.on('value',(snapshot)=>{
+        const orders = snapshot.val();
+        orderHistory = {};
+        const tbody = document.getElementById('order-log');
+        tbody.innerHTML = '';
+        if(orders){
+          // Build dynamic item columns header (only once)
+          buildDynamicHeader();
+
+          Object.keys(orders).forEach(key=>{
+            const order = orders[key];
+            logOrder(key, order);
+          });
+          const numbers = Object.values(orders).map(o=>Number(o.orderNumber)).filter(n=>!isNaN(n));
+          orderNumber = numbers.length>0 ? Math.max(...numbers) : 0;
+        }else{
+          orderNumber = 0;
+        }
+      });
+    }
+
+    function buildDynamicHeader(){
+      // Rebuild the header cells for item codes based on current menu
+      const theadRow = document.querySelector('#order-tracking thead tr');
+      const codes = currentMenu().map(i=>i.code);
+      theadRow.innerHTML = `
+        <th>Order #</th>
+        <th>Time</th>
+        ${codes.map(c=>`<th>${c}</th>`).join('')}
+        <th>Total</th>
+        <th>Payment Method</th>
+        <th>Pass Fee</th>
+        <th>Fee</th>
+        <th>Delete</th>
+      `;
+    }
+
+    function logOrder(orderKey, order){
+      const tbody = document.getElementById('order-log');
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-order-key', orderKey);
+
+      if(order.overwritten){ tr.classList.add('order-overwritten'); }
+
+      const timeString = new Date(order.timestamp || Date.now()).toLocaleTimeString();
+
+      const itemQuantities = {};
+      currentMenu().forEach(i => itemQuantities[i.code] = '');
+
+      if(order.items){
+        order.items.forEach(it=>{
+          const code = itemCodeMap[it.name];
+          if(code) itemQuantities[code] = it.quantity;
+        });
+      }
+
+      const codes = currentMenu().map(i=>i.code);
+      tr.innerHTML = `
+        <td>${order.orderNumber ?? ''}</td>
+        <td>${timeString}</td>
+        ${codes.map(c=>`<td>${itemQuantities[c] ?? ''}</td>`).join('')}
+        <td>$${(order.total ?? '0.00')}</td>
+        <td>${order.method ?? ''}</td>
+        <td>${order.passFee ? 'Yes' : 'No'}</td>
+        <td>${order.fee ? ('$'+order.fee) : ''}</td>
+        <td><button class="delete-order-button" onclick="deleteOrder('${orderKey}')">&times;</button></td>
+      `;
+      tbody.appendChild(tr);
+      orderHistory[orderKey] = order;
+    }
+
+    function downloadCSV(){
+      let csv = "data:text/csv;charset=utf-8,";
+      const codes = currentMenu().map(i=>i.code);
+      csv += "Order #,Time," + codes.join(',') + ",Total,Payment Method,Pass Fee,Fee,Overwritten\n";
+      Object.values(orderHistory).forEach(o=>{
+        const timeString = new Date(o.timestamp || Date.now()).toLocaleString();
+        const qty = {};
+        currentMenu().forEach(i=>qty[i.code]='');
+        if(o.items){ o.items.forEach(it=>{ const c=itemCodeMap[it.name]; if(c) qty[c]=it.quantity; }); }
+        const row = [
+          o.orderNumber ?? '',
+          `"${timeString}"`,
+          ...codes.map(c=>qty[c] ?? ''),
+          o.total ?? '',
+          o.method ?? '',
+          o.passFee ? 'Yes' : 'No',
+          o.fee ?? '',
+          o.overwritten ? 'Yes' : 'No'
+        ];
+        csv += row.join(',') + "\n";
+      });
+      const link = document.createElement('a');
+      link.setAttribute('href', encodeURI(csv));
+      link.setAttribute('download', `order_log_${SEASON}_${DAY}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function clearAllOrders(){
+      if(confirm('Are you sure you want to clear all orders for this day? This cannot be undone.')){
+        db.ref(ordersPath()).remove().then(()=>{
+          alert('All orders have been cleared for ' + DAY + '.');
+          orderHistory = {};
+          orderNumber = 0;
+          document.getElementById('order-log').innerHTML='';
+        }).catch(err=>{
+          console.error('Error clearing orders:', err);
+          alert('An error occurred while clearing orders.');
+        });
+      }
+    }
+
+    /* ==========================
+       Zelle Confirmations (per-day)
+       ========================== */
+    function zellePathDay(){ return `orders/${SEASON}/${DAY}`; } // orders carry zelleStatus
+
+    let zelleRef = null;
+
+    function attachZelleListener(){
+      if(zelleRef) zelleRef.off();
+      const tbody = document.getElementById('zelle-body');
+      tbody.innerHTML = '';
+
+      zelleRef = db.ref(zellePathDay());
+      zelleRef.on('value', (snap)=>{
+        const orders = snap.val() || {};
+        const zelleOrders = Object.entries(orders)
+          .map(([key, o])=>({key, ...o}))
+          .filter(o=>o.method==='Zelle');
+
+        tbody.innerHTML='';
+        if(zelleOrders.length===0){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td colspan="5" style="text-align:center;color:#666;">No Zelle orders yet.</td>`;
+          tbody.appendChild(tr);
+          return;
+        }
+
+        zelleOrders.sort((a,b)=>(a.orderNumber||0)-(b.orderNumber||0));
+
+        zelleOrders.forEach(o=>{
+          const tr = document.createElement('tr');
+          const timeString = new Date(o.timestamp || Date.now()).toLocaleString();
+          const status = o.zelleStatus || 'PENDING';
+          tr.innerHTML = `
+            <td>${timeString}</td>
+            <td>${o.orderNumber || ''}</td>
+            <td>$${(o.total||'0.00')}</td>
+            <td>${status}</td>
+            <td>
+              <button class="btn-small btn-ok" onclick="markZelleStatus('${o.key}','CONFIRMED')">Confirm</button>
+              <button class="btn-small btn-warn" onclick="markZelleStatus('${o.key}','MISSING')">Missing</button>
+              <button class="btn-small btn-muted" onclick="markZelleStatus('${o.key}','PENDING')">Reset</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    function markZelleStatus(orderKey, status){
+      db.ref(`${zellePathDay()}/${orderKey}`).update({ zelleStatus: status, zelleCheckedTs: firebase.database.ServerValue.TIMESTAMP });
+    }
+
+    function downloadZelleCSV(){
+      db.ref(zellePathDay()).once('value').then(snap=>{
+        const orders = snap.val() || {};
+        const rows = Object.values(orders).filter(o=>o.method==='Zelle');
+        let csv = "data:text/csv;charset=utf-8,Time,Order #,Total,Status\n";
+        rows.forEach(o=>{
+          const t = new Date(o.timestamp || Date.now()).toLocaleString();
+          csv += `"${t}",${o.orderNumber||''},${o.total||''},${(o.zelleStatus||'PENDING')}\n`;
+        });
+        const link = document.createElement('a');
+        link.setAttribute('href', encodeURI(csv));
+        link.setAttribute('download', `zelle_${SEASON}_${DAY}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    }
+
+    /* ==========================
+       Out-of-Stock tracking + Stock Log helpers (fixed)
+       ========================== */
+    function stockPath(code){ return `stock/${SEASON}/${DAY}/${code}`; }
+    function stockPathDay(){ return `stock/${SEASON}/${DAY}`; }
+
+    // Keep a live listener for the Stock Log so the table stays in sync.
+    // We also clean it up when switching days/tabs.
+    let stockListenerRef = null;
+
+    function toggleOOS(item){
+      const code = item.code;
+      const newVal = !oosMap[code];
+      oosMap[code] = newVal;
+
+      const ref = db.ref(stockPath(code)).push();
+      ref.set({
+        status: newVal ? 'OOS' : 'RESTOCKED',
+        by: null,
+        ts: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      // Refresh the POS buttons immediately
+      initializeMenuItems();
+    }
+
+    function loadOOSMap(){
+      const path = stockPathDay();
+      db.ref(path).once('value',(snap)=>{
+        const node = snap.val() || {};
+        Object.keys(node).forEach(code=>{
+          const arr = Object.values(node[code]||{});
+          if(arr.length){
+            arr.sort((a,b)=>(a.ts||0)-(b.ts||0));
+            const last = arr[arr.length-1];
+            oosMap[code] = !!(last && last.status === 'OOS');
+          } else {
+            oosMap[code] = false;
+          }
+        });
+        initializeMenuItems();
+      });
+    }
+
+    /* ==========================
+       Stock Log view (per-day, live)
+       ========================== */
+    function mapCodeToName(){
+      const m = {};
+      currentMenu().forEach(i=>{ m[i.code] = i.name; });
+      return m;
+    }
+
+    function attachStockLogListener(){
+      // Detach any previous listener (e.g., when switching days)
+      if(stockListenerRef){ stockListenerRef.off(); stockListenerRef = null; }
+
+      const tbody = document.getElementById('stock-log-body');
+      if(!tbody) return;
+
+      stockListenerRef = db.ref(stockPathDay());
+      stockListenerRef.on('value', (snap)=>{
+        const byCode = snap.val() || {};
+        const rows = [];
+
+        Object.keys(byCode).forEach(code=>{
+          const entries = byCode[code] || {};
+          Object.keys(entries).forEach(key=>{
+            const e = entries[key] || {};
+            rows.push({
+              code,
+              key,
+              status: e.status || '',
+              ts: e.ts || 0
+            });
+          });
+        });
+
+        // Render
+        tbody.innerHTML = '';
+        if(rows.length === 0){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td colspan="5" style="text-align:center;color:#666;">No stock activity yet.</td>`;
+          tbody.appendChild(tr);
+          return;
+        }
+
+        rows.sort((a,b)=>(b.ts||0)-(a.ts||0));
+        const codeNameMap = mapCodeToName();
+
+        rows.forEach(row=>{
+          const tr = document.createElement('tr');
+          const timeString = row.ts ? new Date(row.ts).toLocaleString() : '';
+          tr.innerHTML = `
+            <td>${timeString}</td>
+            <td>${row.code}</td>
+            <td>${codeNameMap[row.code] || ''}</td>
+            <td>${row.status}</td>
+            <td><button class="delete-order-button" onclick="deleteStockEvent('${row.code}','${row.key}')">&times;</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    // Keep the old name for compatibility with switchTab()
+    function loadStockLogFromFirebase(){
+      attachStockLogListener();
+    }
+
+    function deleteStockEvent(code, key){
+      if(!confirm('Delete this stock entry? This may change the current OOS/RESTOCKED state if it was the latest entry.')) return;
+      db.ref(`${stockPathDay()}/${code}/${key}`).remove().then(()=>{
+        // No manual refresh needed; live listener will redraw.
+        loadOOSMap();
+      }).catch(err=>{
+        console.error('Error deleting stock entry:', err);
+        alert('An error occurred while deleting this entry.');
+      });
+    }
+
+    function downloadStockCSV(){
+      db.ref(stockPathDay()).once('value',(snap)=>{
+        const byCode = snap.val() || {};
+        const codeNameMap = mapCodeToName();
+        const rows = [];
+
+        Object.keys(byCode).forEach(code=>{
+          const entries = byCode[code] || {};
+          Object.keys(entries).forEach(key=>{
+            const e = entries[key] || {};
+            rows.push([
+              new Date(e.ts||Date.now()).toLocaleString(),
+              code,
+              codeNameMap[code] || '',
+              e.status || ''
+            ]);
+          });
+        });
+
+        rows.sort((a,b)=> new Date(b[0]) - new Date(a[0]) );
+
+        let csv = "data:text/csv;charset=utf-8,Time,Code,Item,Status\n";
+        rows.forEach(r=>{
+          csv += r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',') + "\n";
+        });
+
+        const link = document.createElement('a');
+        link.setAttribute('href', encodeURI(csv));
+        link.setAttribute('download', `stock_log_${SEASON}_${DAY}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    }
+
+    function clearAllStockLog(){
+      if(!confirm('Clear the entire stock log for this day? This cannot be undone.')) return;
+      db.ref(stockPathDay()).remove().then(()=>{
+        alert('Stock log cleared for ' + DAY + '.');
+        // Live listener will show the empty state automatically
+        loadOOSMap();
+      }).catch(err=>{
+        console.error('Error clearing stock log:', err);
+        alert('An error occurred while clearing the stock log.');
+      });
+    }
+
+    /* ==========================
+       POS UI helpers
+       ========================== */
+    function searchItems(){
+      const q = (document.getElementById('search-input').value||'').toLowerCase();
+      document.querySelectorAll('.item-box').forEach(box=>{
+        const name = box.querySelector('strong').innerText.toLowerCase();
+        box.style.display = name.includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    function initializeMenuItems(){
+      rebuildItemCodeMap();
+      const grid = document.getElementById('item-grid');
+      grid.innerHTML = '';
+      currentMenu().forEach(item=>{
+        const card = document.createElement('div');
+        card.className='item-box';
+        if(oosMap[item.code]) card.classList.add('is-oos');
+        card.onclick = ()=>{ if(!oosMap[item.code]) addItem(item.name, item.price, item.ticketSeries); };
+
+        card.innerHTML = `
+          <strong>${item.name} ${oosMap[item.code] ? '<span class="oos-tag">OOS</span>' : ''}</strong>
+          <span class="price">$${item.price.toFixed(2)}</span>
+          <img src="${item.image}" alt="${item.name}">
+        `;
+        const actions = document.createElement('div');
+        actions.className='item-actions';
+        const oosBtn = document.createElement('button');
+        oosBtn.className='oos-btn';
+        oosBtn.textContent = oosMap[item.code] ? 'RESTOCK' : 'OOS';
+        oosBtn.onclick = (e)=>{ e.stopPropagation(); toggleOOS(item); };
+        actions.appendChild(oosBtn);
+        card.appendChild(actions);
+        grid.appendChild(card);
+      });
+    }
+
+    function clearOrder(){
+      total=0; tickets100=0; tickets200=0; tickets300=0; tickets400=0;
+      orderList=[]; updateOrderSummary();
+      document.getElementById('ticket-100-count').innerText='0';
+      document.getElementById('ticket-200-count').innerText='0';
+      document.getElementById('ticket-300-count').innerText='0';
+      document.getElementById('ticket-400-count').innerText='0';
+      isTotalOverwritten=false;
+      db.ref('currentOrder').remove();
+    }
+
+    /* ==========================
+       Tabs + Day Subtabs
+       ========================== */
+    function switchTab(tab){
+      const posView = document.querySelector('.container');
+      const orderTrackingView = document.getElementById('order-tracking');
+      const zelleView = document.getElementById('zelle-confirmations');
+      const stockLogView = document.getElementById('stock-log');
+      const analyticsView = document.getElementById('analytics');
+
+      // reset all
+      posView.style.display='none';
+      orderTrackingView.style.display='none';
+      if(zelleView) zelleView.style.display='none';
+      analyticsView.style.display='none';
+      if(stockLogView) stockLogView.style.display='none';
+
+      document.getElementById('pos-tab-button').classList.remove('active');
+      document.getElementById('order-tracking-tab-button').classList.remove('active');
+      document.getElementById('zelle-tab-button').classList.remove('active');
+      if(document.getElementById('stock-tab-button')) document.getElementById('stock-tab-button').classList.remove('active');
+      document.getElementById('analytics-tab-button').classList.remove('active');
+
+      if(tab==='POS'){
+        posView.style.display='flex';
+        document.getElementById('pos-tab-button').classList.add('active');
+      }else if(tab==='Order Tracking'){
+        orderTrackingView.style.display='block';
+        document.getElementById('order-tracking-tab-button').classList.add('active');
+        loadOrdersFromFirebase();
+      }else if(tab==='Zelle'){
+        if(zelleView){
+          zelleView.style.display='block';
+          document.getElementById('zelle-tab-button').classList.add('active');
+          attachZelleListener();
+        }
+      }else if(tab==='Stock Log'){
+        if(stockLogView){
+          stockLogView.style.display='block';
+          document.getElementById('stock-tab-button').classList.add('active');
+          loadStockLogFromFirebase();
+        }
+      }else{
+        analyticsView.style.display='block';
+        document.getElementById('analytics-tab-button').classList.add('active');
+        generateAnalytics();
+      }
+    }
+
+    function setDay(next){
+      if(DAY===next) return;
+      DAY = next;
+
+      // Toggle active states in top bar
+      document.getElementById('btn-day-sat').classList.toggle('active', DAY==='SAT');
+      document.getElementById('btn-day-sun').classList.toggle('active', DAY==='SUN');
+
+      // Toggle active states in subtabs, if present
+      const otSat = document.getElementById('ot-sat'); if(otSat) otSat.classList.toggle('active', DAY==='SAT');
+      const otSun = document.getElementById('ot-sun'); if(otSun) otSun.classList.toggle('active', DAY==='SUN');
+      const anSat = document.getElementById('an-sat'); if(anSat) anSat.classList.toggle('active', DAY==='SAT');
+      const anSun = document.getElementById('an-sun'); if(anSun) anSun.classList.toggle('active', DAY==='SUN');
+      const slSat = document.getElementById('sl-sat'); if(slSat) slSat.classList.toggle('active', DAY==='SAT');
+      const slSun = document.getElementById('sl-sun'); if(slSun) slSun.classList.toggle('active', DAY==='SUN');
+      const zeSat = document.getElementById('ze-sat'); if(zeSat) zeSat.classList.toggle('active', DAY==='SAT');
+      const zeSun = document.getElementById('ze-sun'); if(zeSun) zeSun.classList.toggle('active', DAY==='SUN');
+
+      // Immediately rebuild the item grid for the new day
+      initializeMenuItems();
+
+      // Then load OOS map to update badges/buttons from Firebase
+      loadOOSMap();
+
+      // Refresh other views if currently visible
+      if(document.getElementById('order-tracking').style.display==='block'){
+        buildDynamicHeader();
+        loadOrdersFromFirebase();
+      }
+      if(document.getElementById('zelle-confirmations') && document.getElementById('zelle-confirmations').style.display==='block'){
+        attachZelleListener();
+      }
+      if(document.getElementById('analytics').style.display==='block'){ generateAnalytics(); }
+      if(document.getElementById('stock-log') && document.getElementById('stock-log').style.display==='block'){ loadStockLogFromFirebase(); }
+    }
+
+    function switchDaySubtab(next, where){
+      if(DAY===next) return;
+      DAY = next;
+
+      // Mark the active subtab
+      if(where==='ot'){
+        document.getElementById('ot-sat').classList.toggle('active', DAY==='SAT');
+        document.getElementById('ot-sun').classList.toggle('active', DAY==='SUN');
+        buildDynamicHeader();
+        loadOrdersFromFirebase();
+      }else if(where==='an'){
+        document.getElementById('an-sat').classList.toggle('active', DAY==='SAT');
+        document.getElementById('an-sun').classList.toggle('active', DAY==='SUN'); generateAnalytics();
+      }else if(where==='sl'){
+        document.getElementById('sl-sat').classList.toggle('active', DAY==='SAT');
+        document.getElementById('sl-sun').classList.toggle('active', DAY==='SUN');
+        loadStockLogFromFirebase();
+      }else if(where==='ze'){
+        document.getElementById('ze-sat').classList.toggle('active', DAY==='SAT');
+        document.getElementById('ze-sun').classList.toggle('active', DAY==='SUN');
+        attachZelleListener();
+      }
+
+      // Sync top bar buttons
+      document.getElementById('btn-day-sat').classList.toggle('active', DAY==='SAT');
+      document.getElementById('btn-day-sun').classList.toggle('active', DAY==='SUN');
+
+      // Rebuild POS grid and refresh OOS state
+      initializeMenuItems();
+      loadOOSMap();
+    }
+
+    /* ==========================
+       Analytics (per-day)
+       ========================== */
+    function generateAnalytics(){
+      db.ref(ordersPath()).once('value',(snapshot)=>{
+        const orders = snapshot.val() || {};
+        const list = Object.values(orders);
+        const grand = list.reduce((s,o)=>s + parseFloat(o.total||0), 0);
+        document.getElementById('grand-total-sales').innerText = grand.toFixed(2);
+
+        // Draw charts
+        createSalesOverTimeChart(list);
+        createBestSellingItemsChart(list);
+        createPaymentMethodsChart(list);
+        createOrdersOverTimeChart(list);
+        createHourlySalesChart(list);
+      });
+    }
+
+    // Reusable chart killer (avoid stacking multiple instances)
+    const chartStore = {};
+    function killChart(id){ if(chartStore[id]){ chartStore[id].destroy(); chartStore[id]=null; } }
+
+    function createSalesOverTimeChart(orderList){
+      const salesData = {};
+      orderList.forEach(o=>{
+        const date = new Date(o.timestamp || Date.now()).toLocaleDateString();
+        const tot = parseFloat(o.total||0);
+        salesData[date] = (salesData[date]||0) + tot;
+      });
+      const labels = Object.keys(salesData);
+      const data = Object.values(salesData);
+
+      const ctx = document.getElementById('sales-over-time-chart').getContext('2d');
+      killChart('sales'); chartStore['sales'] = new Chart(ctx,{
+        type:'line',
+        data:{ labels, datasets:[{label:'Total Sales ($)', data, backgroundColor:'rgba(184,16,13,.2)', borderColor:'rgba(184,16,13,1)', borderWidth:2, fill:true}]},
+        options:{ scales:{ x:{ title:{display:true,text:'Date'}}, y:{ title:{display:true,text:'Sales ($)'}, beginAtZero:true } } }
+      });
+    }
+
+    function createBestSellingItemsChart(orderList){
+      const itemsSold = {};
+      orderList.forEach(o=>{
+        (o.items||[]).forEach(it=>{
+          const q = parseInt(it.quantity||0);
+          itemsSold[it.name] = (itemsSold[it.name]||0) + q;
+        });
+      });
+      const sorted = Object.entries(itemsSold).sort((a,b)=>b[1]-a[1]).slice(0,5);
+      const labels = sorted.map(x=>x[0]);
+      const data = sorted.map(x=>x[1]);
+
+      const ctx = document.getElementById('best-selling-items-chart').getContext('2d');
+      killChart('bestsell'); chartStore['bestsell'] = new Chart(ctx,{
+        type:'bar',
+        data:{ labels, datasets:[{label:'Units Sold', data, backgroundColor:'rgba(184,16,13,.6)', borderColor:'rgba(184,16,13,1)', borderWidth:1}]},
+        options:{ scales:{ x:{ title:{display:true,text:'Items'}}, y:{ title:{display:true,text:'Units'}, beginAtZero:true } } }
+      });
+    }
+
+    function createPaymentMethodsChart(orderList){
+      const methods = {};
+      orderList.forEach(o=>{
+        const m = o.method || 'Unknown';
+        methods[m] = (methods[m]||0)+1;
+      });
+      const labels = Object.keys(methods);
+      const data = Object.values(methods);
+
+      const ctx = document.getElementById('payment-methods-chart').getContext('2d');
+      killChart('pay'); chartStore['pay'] = new Chart(ctx,{
+        type:'pie',
+        data:{ labels, datasets:[{label:'Payment Methods', data,
+          backgroundColor:[
+            'rgba(184,16,13,.6)','rgba(16,184,13,.6)','rgba(13,16,184,.6)','rgba(184,184,13,.6)','rgba(184,13,184,.6)'],
+          borderColor:[
+            'rgba(184,16,13,1)','rgba(16,184,13,1)','rgba(13,16,184,1)','rgba(184,184,13,1)','rgba(184,13,184,1)'],
+          borderWidth:1}]},
+        options:{responsive:true}
+      });
+    }
+
+    function createOrdersOverTimeChart(orderList){
+      const count = {};
+      orderList.forEach(o=>{
+        const d = new Date(o.timestamp || Date.now()).toLocaleDateString();
+        count[d] = (count[d]||0)+1;
+      });
+      const labels = Object.keys(count);
+      const data = Object.values(count);
+
+      const ctx = document.getElementById('orders-over-time-chart').getContext('2d');
+      killChart('orders'); chartStore['orders'] = new Chart(ctx,{
+        type:'line',
+        data:{ labels, datasets:[{label:'Number of Orders', data, backgroundColor:'rgba(16,184,13,.2)', borderColor:'rgba(16,184,13,1)', borderWidth:2, fill:true}]},
+        options:{ scales:{ x:{ title:{display:true,text:'Date'}}, y:{ title:{display:true,text:'Orders'}, beginAtZero:true } } }
+      });
+    }
+
+    function createHourlySalesChart(orderList){
+      const hourly = {}; for(let i=0;i<24;i++) hourly[i]=0;
+      orderList.forEach(o=>{
+        const h = new Date(o.timestamp || Date.now()).getHours();
+        hourly[h] += parseFloat(o.total||0);
+      });
+      const labels = Object.keys(hourly).map(h=>`${h}:00`);
+      const data = Object.values(hourly);
+      const ctx = document.getElementById('hourly-sales-chart').getContext('2d');
+      killChart('hourly'); chartStore['hourly'] = new Chart(ctx,{
+        type:'bar',
+        data:{ labels, datasets:[{label:'Sales ($)', data, backgroundColor:'rgba(13,16,184,.6)', borderColor:'rgba(13,16,184,1)', borderWidth:1}]},
+        options:{ scales:{ x:{ title:{display:true,text:'Hour'}}, y:{ title:{display:true,text:'Sales ($)'}, beginAtZero:true } } }
+      });
+    }
+
+    /* ==========================
+       Day Init + App Init
+       ========================== */
+    function initApp(){
+      initializeMenuItems();
+      setMode('POS');
+      loadOOSMap();
+      loadOrdersFromFirebase();
+    }
+    initApp();
+
+    /* ==========================
+       Utilities
+       ========================== */
+    function round2(x){ return Math.round((x + Number.EPSILON) * 100)/100; }
+  </script>
+</body>
+</html>
+
+
+
+
+
