@@ -230,6 +230,7 @@
     .switch-log-arrow{color:#555}
     .switch-log-empty{font-size:12px;color:#666}
 
+
     /* Analytics */
     .analytics{display:none;padding:20px}
     .analytics-summary{display:flex;justify-content:center;margin-bottom:20px}
@@ -499,6 +500,7 @@
     const SEASON = '2025';
     let DAY = 'SAT'; // default; can switch to 'SUN'
 
+
     // Ticket display metadata (color -> element id)
     const TICKET_COLOR_META = {
       'Purple': { elementId:'ticket-purple-count' },
@@ -507,6 +509,7 @@
       'Blue': { elementId:'ticket-blue-count' }
     };
     const TICKET_COLOR_KEYS = Object.keys(TICKET_COLOR_META);
+
 
     // Zelle account state
     let activeZelleAccount = null;
@@ -532,9 +535,11 @@
 const menuItemsSAT = [
   { name:'Vegetable Chop (2)', price:8.00, ticketColor:'Purple', code:'VC',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f3c2e6fb4a6.png' },
+
   { name:'Mochar Chop (2)',    price:8.00, ticketColor:'Purple', code:'MCH',
     image:'https://i.ibb.co/svz40VyF/Mochar-Chop-02-removebg-preview.png' },
   { name:'Phuchka (6)',        price:8.00, ticketColor:'Purple', code:'PK',
+
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0b27ab06b35ca1f6a.png' },
   { name:'Chandrapouli (2)',   price:8.00, ticketColor:'Purple', code:'CP',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f61a06fb4a5.png' },
@@ -1023,6 +1028,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(!account) return null;
       const infoFromConfig = (zelleAccountConfig && zelleAccountConfig[account]) ? zelleAccountConfig[account] : null;
       return infoFromConfig || ZELLE_ACCOUNT_PLACEHOLDERS[account] || null;
+
     }
 
     function renderZelleAccountButtons(){
@@ -1030,6 +1036,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(!container) return;
       container.innerHTML = '';
       ZELLE_ACCOUNT_CODES.forEach(account=>{
+
         const btn = document.createElement('button');
         btn.type='button';
         btn.className='zelle-account-button';
@@ -1196,6 +1203,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         const totals = {};
         ZELLE_ACCOUNT_CODES.forEach(code=>{ totals[code] = { count:0, sum:0 }; });
 
+
         zelleOrders.forEach(o=>{
           const tr = document.createElement('tr');
           const timeString = new Date(o.timestamp || Date.now()).toLocaleString();
@@ -1206,6 +1214,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             totals[normalizedAccount].sum += Number(o.total || 0);
           }
           const accountDisplay = normalizedAccount || (o.zelleAccount || '—');
+
           tr.innerHTML = `
             <td>${timeString}</td>
             <td>${o.orderNumber || ''}</td>
