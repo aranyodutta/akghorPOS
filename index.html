@@ -1750,7 +1750,6 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             addItem(Object.assign({}, item, { price:getEffectivePriceFor(item) }));
           }
         };
-
         card.innerHTML = `
           <strong>${item.name} ${oosMap[item.code] ? '<span class="oos-tag">OOS</span>' : ''}</strong>
           <span class="price">$${effectivePrice.toFixed(2)}</span>
@@ -1968,6 +1967,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const zeSun = document.getElementById('ze-sun'); if(zeSun) zeSun.classList.toggle('active', DAY==='SUN');
 
       refreshMenuOverridesListener();
+
 
       latestZelleAccountTotals = {};
       updateZelleAccountTotalsDisplay({});
