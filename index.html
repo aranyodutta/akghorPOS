@@ -280,7 +280,7 @@
     }
     .switch-log-delete:hover{background:rgba(184,16,13,.1)}
     .switch-log-empty{font-size:12px;color:#666;padding:6px 0}
-
+    
     /* Analytics */
     .analytics{display:none;padding:20px}
     .analytics-summary{display:flex;justify-content:center;margin-bottom:20px}
@@ -439,6 +439,11 @@
         </div>
         <div id="zelle-switch-log" class="switch-log-list"></div>
       </div>
+    </div>
+    <div id="zelle-account-totals" class="zelle-account-totals"></div>
+    <div class="zelle-switch-log-container">
+      <h3>Switch Log</h3>
+      <div id="zelle-switch-log" class="zelle-switch-log"></div>
     </div>
     <div style="overflow-x:auto; margin-top:10px;">
       <table>
@@ -1821,7 +1826,6 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             addItem(Object.assign({}, item, { price:getEffectivePriceFor(item) }));
           }
         };
-
         card.innerHTML = `
           <strong>${item.name} ${oosMap[item.code] ? '<span class="oos-tag">OOS</span>' : ''}</strong>
           <span class="price">$${effectivePrice.toFixed(2)}</span>
