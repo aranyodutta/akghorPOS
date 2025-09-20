@@ -122,9 +122,26 @@
     .item-box .price{font-size:14px;color:var(--brand);font-weight:bold;margin-top:2px}
     .item-box img{max-width:100%;height:auto;margin-top:6px;flex-grow:1;object-fit:contain}
     .item-actions{display:flex;gap:6px;margin-top:8px}
+    .edit-price-btn{
+      padding:6px 8px;font-size:12px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:4px
+    }
+    .edit-price-btn:hover{background:#f1f5f9}
     .oos-btn{
       padding:6px 8px;font-size:12px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer
     }
+    .modal-actions{display:flex;justify-content:center;gap:12px;margin-top:18px}
+    .modal-button{
+      padding:10px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:16px
+    }
+    .modal-button.primary{background:var(--brand);color:#fff}
+    .modal-button.primary:hover{background:var(--brand-dark)}
+    .modal-button.secondary{background:#e5e7eb;color:#111}
+    .modal-button.secondary:hover{background:#d1d5db}
+    .modal-label{display:block;text-align:left;font-size:14px;font-weight:600;color:#333;margin-bottom:6px}
+    .modal-reset{margin-top:12px;font-size:13px;color:var(--brand);background:none;border:none;cursor:pointer;text-decoration:underline}
+    .modal-reset:hover{color:var(--brand-dark)}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(17,24,39,.92);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;box-shadow:0 10px 25px rgba(0,0,0,.18);z-index:2000;opacity:0;pointer-events:none;transition:opacity .2s ease}
+    .toast.show{opacity:1}
     .oos-tag{
       font-size:11px;color:#fff;background:#777;border-radius:6px;padding:2px 6px;margin-left:6px
     }
@@ -485,6 +502,25 @@
     </div>
   </div>
 
+  <!-- Edit Price Modal -->
+  <div id="edit-price-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-price-title">
+    <div class="modal-content" role="document">
+      <button class="close-modal-button" onclick="closeEditPriceModal()" aria-label="Close edit price dialog">&times;</button>
+      <h2 id="edit-price-title">Edit Price</h2>
+      <div style="margin:18px 0 0;text-align:left">
+        <label for="edit-price-input" class="modal-label">Price</label>
+        <input type="number" id="edit-price-input" step="0.01" min="0" style="width:100%;padding:10px;font-size:18px;">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-button secondary" onclick="closeEditPriceModal()">Cancel</button>
+        <button type="button" class="modal-button primary" onclick="savePriceOverride()">Save</button>
+      </div>
+      <button type="button" id="reset-price-button" class="modal-reset" onclick="resetPriceOverride()">Reset to default</button>
+    </div>
+  </div>
+
+  <div id="price-toast" class="toast" role="status" aria-live="polite"></div>
+
   <!-- (Stripe card modal removed for Zelle/Cash flow) -->
 
   <script>
@@ -526,6 +562,13 @@
       logoText: "https://i.postimg.cc/mhHz9cjj/SMALL-sm-logo-black-TEXT.png",
       link: null
     };
+
+    // Menu price overrides
+    let priceOverrides = {};
+    let menuOverridesRef = null;
+    let currentPriceEdit = null;
+    let lastFocusBeforePriceModal = null;
+    let priceToastTimeout = null;
 
     // Zelle account state
     let activeZelleAccount = null;
@@ -627,6 +670,37 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       currentMenu().forEach(it => {
         itemCodeMap[it.name] = it.code;
       });
+    }
+
+    function menuOverridesPath(){ return `menu/${SEASON}/${DAY}`; }
+    function menuOverrideItemPath(code){ return `${menuOverridesPath()}/${code}`; }
+
+    function refreshMenuOverridesListener(){
+      if(menuOverridesRef){ menuOverridesRef.off(); }
+      priceOverrides = {};
+      menuOverridesRef = db.ref(menuOverridesPath());
+      menuOverridesRef.on('value', snapshot=>{
+        const node = snapshot.val() || {};
+        const next = {};
+        Object.keys(node).forEach(code=>{
+          const raw = parseFloat(node[code]?.price);
+          if(!isNaN(raw)) next[code] = raw;
+        });
+        priceOverrides = next;
+        initializeMenuItems();
+      });
+    }
+
+    function hasPriceOverride(code){ return Object.prototype.hasOwnProperty.call(priceOverrides, code); }
+
+    function getEffectivePriceFor(item){
+      if(!item) return 0;
+      const fallback = parseFloat(item.price) || 0;
+      const code = item.code;
+      if(code && hasPriceOverride(code)){
+        return parseFloat(priceOverrides[code]) || fallback;
+      }
+      return fallback;
     }
 
     /* ==========================
@@ -873,7 +947,6 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             const badge = buildBrandBadge({ logo:BRAND.logoSquare, small:true });
             if(badge) right.appendChild(badge);
           }
-
         }else if(paymentMethod==='Cash'){
           const logo = document.createElement('img');
           logo.src = 'https://assets.cdn.filesafe.space/slWdpqUTRhMfisMySSJ0/media/66f7050f5b684e16ab132d41.jpeg';
@@ -990,7 +1063,6 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         quantity:item.quantity
       }));
     }
-
 
     function syncCurrentOrderBroadcast(){
       if(!db) return;
@@ -1669,18 +1741,29 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const grid = document.getElementById('item-grid');
       grid.innerHTML = '';
       currentMenu().forEach(item=>{
+        const effectivePrice = getEffectivePriceFor(item);
         const card = document.createElement('div');
         card.className='item-box';
         if(oosMap[item.code]) card.classList.add('is-oos');
-        card.onclick = ()=>{ if(!oosMap[item.code]) addItem(item); };
-
+        card.onclick = ()=>{
+          if(!oosMap[item.code]){
+            addItem(Object.assign({}, item, { price:getEffectivePriceFor(item) }));
+          }
+        };
         card.innerHTML = `
           <strong>${item.name} ${oosMap[item.code] ? '<span class="oos-tag">OOS</span>' : ''}</strong>
-          <span class="price">$${item.price.toFixed(2)}</span>
+          <span class="price">$${effectivePrice.toFixed(2)}</span>
           <img src="${item.image}" alt="${item.name}">
         `;
         const actions = document.createElement('div');
         actions.className='item-actions';
+        const editBtn = document.createElement('button');
+        editBtn.type='button';
+        editBtn.className='edit-price-btn';
+        editBtn.innerHTML='✏️ Edit';
+        editBtn.setAttribute('aria-label', `Edit price for ${item.name}`);
+        editBtn.onclick = (e)=>{ e.stopPropagation(); openEditPriceModal(item); };
+        actions.appendChild(editBtn);
         const oosBtn = document.createElement('button');
         oosBtn.className='oos-btn';
         oosBtn.textContent = oosMap[item.code] ? 'RESTOCK' : 'OOS';
@@ -1689,6 +1772,121 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         card.appendChild(actions);
         grid.appendChild(card);
       });
+    }
+
+    function getPriceModalFocusableElements(){
+      const modal = document.getElementById('edit-price-modal');
+      if(!modal) return [];
+      return Array.from(modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+        .filter(el=>!el.hasAttribute('disabled') && el.offsetParent !== null);
+    }
+
+    function handleEditPriceModalKeydown(event){
+      if(event.key === 'Escape'){
+        event.preventDefault();
+        closeEditPriceModal();
+        return;
+      }
+      if(event.key === 'Tab'){
+        const focusable = getPriceModalFocusableElements();
+        if(focusable.length===0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length-1];
+        if(event.shiftKey){
+          if(document.activeElement === first){
+            event.preventDefault();
+            last.focus();
+          }
+        }else if(document.activeElement === last){
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    }
+
+    function openEditPriceModal(item){
+      if(!item) return;
+      currentPriceEdit = { code:item.code, name:item.name, defaultPrice:parseFloat(item.price)||0 };
+      const modal = document.getElementById('edit-price-modal');
+      const title = document.getElementById('edit-price-title');
+      const input = document.getElementById('edit-price-input');
+      const resetBtn = document.getElementById('reset-price-button');
+      if(title) title.innerText = `Edit Price — ${item.name}`;
+      if(input){
+        const price = getEffectivePriceFor(item);
+        input.value = price.toFixed(2);
+      }
+      if(resetBtn){
+        resetBtn.style.display = hasPriceOverride(item.code) ? 'inline-block' : 'none';
+      }
+      lastFocusBeforePriceModal = document.activeElement;
+      if(modal){
+        modal.style.display='block';
+        modal.removeEventListener('keydown', handleEditPriceModalKeydown);
+        modal.addEventListener('keydown', handleEditPriceModalKeydown);
+      }
+      setTimeout(()=>{
+        if(input) input.focus();
+      }, 0);
+    }
+
+    function closeEditPriceModal(){
+      const modal = document.getElementById('edit-price-modal');
+      if(modal){
+        modal.style.display='none';
+        modal.removeEventListener('keydown', handleEditPriceModalKeydown);
+      }
+      currentPriceEdit = null;
+      const input = document.getElementById('edit-price-input');
+      if(input) input.value = '';
+      if(lastFocusBeforePriceModal && typeof lastFocusBeforePriceModal.focus === 'function'){
+        lastFocusBeforePriceModal.focus();
+      }
+      lastFocusBeforePriceModal = null;
+    }
+
+    function savePriceOverride(){
+      if(!currentPriceEdit) return;
+      const input = document.getElementById('edit-price-input');
+      if(!input) return;
+      const value = parseFloat(input.value);
+      if(isNaN(value) || value < 0){
+        alert('Please enter a valid price.');
+        return;
+      }
+      const code = currentPriceEdit.code;
+      db.ref(menuOverrideItemPath(code)).update({ price: round2(value) })
+        .then(()=>{
+          showPriceToast('Price updated.');
+          closeEditPriceModal();
+        })
+        .catch(()=>{
+          alert('Unable to update price. Please try again.');
+        });
+    }
+
+    function resetPriceOverride(){
+      if(!currentPriceEdit) return;
+      const code = currentPriceEdit.code;
+      db.ref(menuOverrideItemPath(code)).remove()
+        .then(()=>{
+          showPriceToast('Price reset to default.');
+          closeEditPriceModal();
+        })
+        .catch(()=>{
+          alert('Unable to reset price. Please try again.');
+        });
+    }
+
+    function showPriceToast(message){
+      const toast = document.getElementById('price-toast');
+      if(!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      if(priceToastTimeout) clearTimeout(priceToastTimeout);
+      priceToastTimeout = setTimeout(()=>{
+        toast.classList.remove('show');
+      }, 2400);
     }
 
     function clearOrder(){
@@ -1768,6 +1966,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const zeSat = document.getElementById('ze-sat'); if(zeSat) zeSat.classList.toggle('active', DAY==='SAT');
       const zeSun = document.getElementById('ze-sun'); if(zeSun) zeSun.classList.toggle('active', DAY==='SUN');
 
+      refreshMenuOverridesListener();
+
+
       latestZelleAccountTotals = {};
       updateZelleAccountTotalsDisplay({});
       refreshZelleCurrentAccountListener();
@@ -1794,6 +1995,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function switchDaySubtab(next, where){
       if(DAY===next) return;
       DAY = next;
+
+      refreshMenuOverridesListener();
 
       // Mark the active subtab
       if(where==='ot'){
@@ -1946,7 +2149,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     /* ==========================
        Day Init + App Init
        ========================== */
+    const editPriceModalEl = document.getElementById('edit-price-modal');
+    if(editPriceModalEl){
+      editPriceModalEl.addEventListener('click', event=>{
+        if(event.target === editPriceModalEl) closeEditPriceModal();
+      });
+    }
     function initApp(){
+      refreshMenuOverridesListener();
       initializeMenuItems();
       syncTicketCounters();
       setMode('POS');
