@@ -873,6 +873,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             const badge = buildBrandBadge({ logo:BRAND.logoSquare, small:true });
             if(badge) right.appendChild(badge);
           }
+
         }else if(paymentMethod==='Cash'){
           const logo = document.createElement('img');
           logo.src = 'https://assets.cdn.filesafe.space/slWdpqUTRhMfisMySSJ0/media/66f7050f5b684e16ab132d41.jpeg';
@@ -989,6 +990,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         quantity:item.quantity
       }));
     }
+
 
     function syncCurrentOrderBroadcast(){
       if(!db) return;
