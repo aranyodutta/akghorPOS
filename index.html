@@ -160,6 +160,11 @@
     .display-right{
       background:#fff;border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;box-shadow:0 4px 12px rgba(0,0,0,.06);max-height:calc(100vh - 160px);overflow:auto
     }
+    .brand-badge{display:inline-flex;gap:8px;align-items:center;font-size:12px;color:#6b7280;background:#fff;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    .brand-badge img{height:16px;width:16px;object-fit:contain;border-radius:4px}
+    .brand-ghost{opacity:.8}
+    .display-brand{position:fixed;right:14px;bottom:12px;z-index:1000}
+    @media (max-width:900px){.display-brand{right:8px;bottom:8px}}
     .display-order-header{font-size:24px;font-weight:700;color:var(--brand)}
     .display-order-items{display:flex;flex-direction:column;gap:12px}
     .display-order-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
@@ -514,6 +519,14 @@
     };
     const TICKET_COLOR_KEYS = Object.keys(TICKET_COLOR_META);
 
+    const BRAND = {
+      enabled: true,
+      name: "Stratford Meridian",
+      logoSquare: "https://i.postimg.cc/WdXhV0pN/SMALL-sm-logo-main-2.png",
+      logoText: "https://i.postimg.cc/mhHz9cjj/SMALL-sm-logo-black-TEXT.png",
+      link: null
+    };
+
     // Zelle account state
     let activeZelleAccount = null;
     let zelleAccountConfig = {};
@@ -530,6 +543,8 @@
     let ordersRef = null;
     let isTotalOverwritten = false;
     const oosMap = {}; // code -> boolean (true = OOS)
+    let posBrandBadgeEl = null;
+    let displayBrandFloatingEl = null;
 
    /* ==========================
        MENU (2025 — per day)
@@ -642,6 +657,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         document.querySelector('.top-section').style.display='flex';
         document.querySelector('.bottom-tabs').style.display='flex';
         document.querySelector('.qr-section').style.display='none';
+        ensurePOSBrandBadge();
+        refreshDisplayFloatingBrand(false);
         if(currentOrderRef){ currentOrderRef.off(); currentOrderRef=null; }
         resetDisplayPanels();
         clearInterval(quoteInterval);
@@ -652,6 +669,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         document.querySelector('.top-section').style.display='none';
         document.querySelector('.bottom-tabs').style.display='none';
         document.querySelector('.qr-section').style.display='flex';
+        refreshDisplayFloatingBrand(true);
         updateZelleAccountDisplay();
         resetDisplayPanels();
 
@@ -675,6 +693,65 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(container) container.style.display='none';
       const quoteEl = document.getElementById('quote-container');
       if(quoteEl) quoteEl.style.display='block';
+    }
+
+    function buildBrandBadge(options={}){
+      if(!BRAND.enabled) return null;
+      const tag = BRAND.link ? 'a' : 'div';
+      const badge = document.createElement(tag);
+      badge.className = 'brand-badge brand-ghost';
+      if(BRAND.link){
+        badge.href = BRAND.link;
+        badge.target = '_blank';
+        badge.rel = 'noopener noreferrer';
+      }else{
+        badge.style.pointerEvents = 'none';
+      }
+      const img = document.createElement('img');
+      img.src = options.logo || BRAND.logoSquare;
+      img.alt = `${BRAND.name} logo`;
+      badge.appendChild(img);
+      const text = document.createElement('span');
+      text.textContent = `Powered by ${BRAND.name}`;
+      badge.appendChild(text);
+      if(options.small) badge.style.fontSize = '11px';
+      return badge;
+    }
+
+    function ensurePOSBrandBadge(){
+      const topSection = document.querySelector('.top-section');
+      if(!topSection){
+        if(posBrandBadgeEl){ posBrandBadgeEl.remove(); posBrandBadgeEl=null; }
+        return;
+      }
+      if(!BRAND.enabled){
+        if(posBrandBadgeEl){ posBrandBadgeEl.remove(); posBrandBadgeEl=null; }
+        return;
+      }
+      if(posBrandBadgeEl && posBrandBadgeEl.parentElement===topSection) return;
+      if(posBrandBadgeEl) posBrandBadgeEl.remove();
+      const badge = buildBrandBadge({ logo:BRAND.logoText });
+      if(badge){
+        badge.style.marginLeft = 'auto';
+        posBrandBadgeEl = badge;
+        topSection.appendChild(posBrandBadgeEl);
+      }
+    }
+
+    function refreshDisplayFloatingBrand(isDisplay){
+      if(!BRAND.enabled){
+        if(displayBrandFloatingEl){ displayBrandFloatingEl.remove(); displayBrandFloatingEl=null; }
+        return;
+      }
+      if(!displayBrandFloatingEl){
+        const badge = buildBrandBadge({ logo:BRAND.logoSquare, small:true });
+        if(badge){
+          badge.classList.add('display-brand');
+          displayBrandFloatingEl = badge;
+          document.body.appendChild(displayBrandFloatingEl);
+        }
+      }
+      if(displayBrandFloatingEl) displayBrandFloatingEl.style.display = isDisplay ? 'inline-flex' : 'none';
     }
 
     function renderDisplayState(data){
@@ -792,6 +869,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             missing.textContent = 'QR not set';
             right.appendChild(missing);
           }
+          if(BRAND.enabled){
+            const badge = buildBrandBadge({ logo:BRAND.logoSquare, small:true });
+            if(badge) right.appendChild(badge);
+          }
+
         }else if(paymentMethod==='Cash'){
           const logo = document.createElement('img');
           logo.src = 'https://assets.cdn.filesafe.space/slWdpqUTRhMfisMySSJ0/media/66f7050f5b684e16ab132d41.jpeg';
@@ -908,6 +990,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         quantity:item.quantity
       }));
     }
+
 
     function syncCurrentOrderBroadcast(){
       if(!db) return;
