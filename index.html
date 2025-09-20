@@ -71,6 +71,10 @@
     .ticket-label{
       background:#eee;color:#333;padding:6px 10px;border-radius:6px;font-weight:bold;font-size:14px
     }
+    .ticket-label.ticket-purple{background:#6f42c1;color:#fff}
+    .ticket-label.ticket-red{background:#d6336c;color:#fff}
+    .ticket-label.ticket-green{background:#2f9e44;color:#fff}
+    .ticket-label.ticket-blue{background:#1c7ed6;color:#fff}
     .ticket-count{font-size:16px;color:#fff}
 
     /* Layout */
@@ -150,10 +154,19 @@
     .qr-container{
       background:rgba(255,255,255,.9);padding:20px;border-radius:16px;box-shadow:0 4px 10px rgba(0,0,0,.1);text-align:center;z-index:2
     }
-    .display-payment-method{font-size:28px;margin-bottom:6px;color:#333;font-weight:bold;display:flex;gap:10px;align-items:center;justify-content:center}
-    .display-payment-method img{height:48px}
+    .display-payment-method{
+      font-size:28px;margin-bottom:6px;color:#333;font-weight:bold;
+      display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;text-align:center
+    }
+    .display-payment-method img{height:60px}
+    .display-zelle-logo{height:64px;object-fit:contain}
+    .display-account-label{font-size:22px;font-weight:600;color:#333}
+    .memo-number-display{font-size:72px;font-weight:700;color:var(--brand);margin-top:8px;display:none}
+    .display-qr-image-holder{margin-top:12px;display:flex;justify-content:center}
+    .display-qr-image-holder img{max-width:260px;width:100%;height:auto;object-fit:contain}
+    .qr-missing{font-size:20px;color:var(--danger);font-weight:bold}
     #total-price{font-size:64px;margin:12px 0 0;color:var(--brand);font-weight:bold}
-    .zelle-instructions{font-size:18px;margin-top:8px;color:#333;line-height:1.4}
+    .zelle-instructions{font-size:18px;margin-top:8px;color:#333;line-height:1.4;text-align:center}
     .quote-container{
       position:absolute;bottom:20px;width:80%;text-align:center;background:rgba(255,255,255,.72);
       padding:10px;border-radius:10px;font-family:'Noto Sans Bengali',sans-serif;font-size:22px;color:#333;animation:fadeInOut 10s infinite
@@ -186,6 +199,36 @@
     .btn-ok{background:var(--ok)}
     .btn-warn{background:var(--warn)}
     .btn-muted{background:#6b7280}
+
+    .zelle-account-control{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+    .current-account-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .current-account-row strong{font-size:16px}
+    .current-account-detail{font-size:14px;color:#555}
+    .zelle-account-buttons{display:flex;flex-wrap:wrap;gap:8px}
+    .zelle-account-button{
+      padding:8px 14px;border:1px solid var(--brand);border-radius:6px;background:#fff;color:var(--brand);
+      font-weight:bold;cursor:pointer;transition:background .2s,color .2s;display:flex;flex-direction:column;align-items:center;
+      gap:4px;min-width:86px
+    }
+    .zelle-account-button:hover{background:var(--brand);color:#fff}
+    .zelle-account-button.active{background:var(--brand);color:#fff;box-shadow:0 0 0 1px #fff inset}
+    .zelle-account-button:disabled{cursor:default;opacity:.9}
+    .zelle-account-button .account-code{font-size:16px}
+    .zelle-account-button .account-label{font-size:12px;color:#555;font-weight:500}
+    .zelle-account-button .account-action{font-size:12px;font-weight:bold;color:inherit}
+    .zelle-account-totals{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .account-total-card{
+      background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 14px;display:flex;
+      flex-direction:column;gap:4px;min-width:140px
+    }
+    .account-total-card.active{border-color:var(--brand);box-shadow:0 0 0 2px rgba(184,16,13,.15)}
+    .zelle-switch-log-container{margin-top:16px}
+    .zelle-switch-log-container h3{margin:0 0 6px;font-size:16px;color:#333}
+    .zelle-switch-log{display:flex;flex-direction:column;gap:6px}
+    .switch-log-entry{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #ddd;border-radius:6px;padding:6px 10px;font-size:12px;color:#333}
+    .switch-log-time{font-weight:bold}
+    .switch-log-arrow{color:#555}
+    .switch-log-empty{font-size:12px;color:#666}
 
     /* Analytics */
     .analytics{display:none;padding:20px}
@@ -236,10 +279,10 @@
     </div>
 
     <div class="ticket-section">
-      <div class="ticket"><div class="ticket-label">100</div><span class="ticket-count" id="ticket-100-count">0</span></div>
-      <div class="ticket"><div class="ticket-label">200</div><span class="ticket-count" id="ticket-200-count">0</span></div>
-      <div class="ticket"><div class="ticket-label">300</div><span class="ticket-count" id="ticket-300-count">0</span></div>
-      <div class="ticket"><div class="ticket-label">400</div><span class="ticket-count" id="ticket-400-count">0</span></div>
+      <div class="ticket"><div class="ticket-label ticket-purple">Purple</div><span class="ticket-count" id="ticket-purple-count">0</span></div>
+      <div class="ticket"><div class="ticket-label ticket-red">Red</div><span class="ticket-count" id="ticket-red-count">0</span></div>
+      <div class="ticket"><div class="ticket-label ticket-green">Green</div><span class="ticket-count" id="ticket-green-count">0</span></div>
+      <div class="ticket"><div class="ticket-label ticket-blue">Blue</div><span class="ticket-count" id="ticket-blue-count">0</span></div>
     </div>
   </div>
 
@@ -268,6 +311,7 @@
     <div class="qr-container">
       <div class="display-payment-method" id="display-payment-method"></div>
       <p style="font-size: 48px; color: #b8100d; font-weight: bold;">$<span id="total-price">0</span></p>
+      <div id="memo-number-display" class="memo-number-display"></div>
       <div class="zelle-instructions" id="zelle-instructions" style="display:none"></div>
     </div>
     <div class="quote-container" id="quote-container"></div>
@@ -318,14 +362,27 @@
   <!-- Zelle Confirmations -->
   <div class="order-tracking" id="zelle-confirmations">
     <div class="controls-row">
-      <h2 style="margin-right:auto">Zelle Confirmations</h2>
+      <h2 style="margin-right:auto">Zelle Control</h2>
       <div class="subtabs">
         <button id="ze-sat" class="active" onclick="switchDaySubtab('SAT','ze')">Saturday</button>
         <button id="ze-sun" onclick="switchDaySubtab('SUN','ze')">Sunday</button>
       </div>
     </div>
-    <div class="controls-row">
+    <div class="zelle-account-control">
+      <div class="current-account-row">
+        <strong>Current Account:</strong>
+        <span id="current-zelle-account">—</span>
+        <span id="current-zelle-account-detail" class="current-account-detail" style="display:none"></span>
+      </div>
+      <div id="zelle-account-buttons" class="zelle-account-buttons"></div>
+    </div>
+    <div class="controls-row" style="margin-top:12px">
       <button onclick="downloadZelleCSV()">Download CSV</button>
+    </div>
+    <div id="zelle-account-totals" class="zelle-account-totals"></div>
+    <div class="zelle-switch-log-container">
+      <h3>Switch Log</h3>
+      <div id="zelle-switch-log" class="zelle-switch-log"></div>
     </div>
     <div style="overflow-x:auto; margin-top:10px;">
       <table>
@@ -334,6 +391,7 @@
             <th>Time</th>
             <th>Order #</th>
             <th>Total</th>
+            <th>Account</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -401,7 +459,7 @@
    <div class="bottom-tabs">
     <button id="pos-tab-button" class="tab-button active" onclick="switchTab('POS')">POS</button>
     <button id="order-tracking-tab-button" class="tab-button" onclick="switchTab('Order Tracking')">Order Tracking</button>
-    <button id="zelle-tab-button" class="tab-button" onclick="switchTab('Zelle')">Zelle Confirmations</button>
+    <button id="zelle-tab-button" class="tab-button" onclick="switchTab('Zelle')">Zelle Control</button>
     <button id="stock-tab-button" class="tab-button" onclick="switchTab('Stock Log')">Stock Log</button>
     <button id="analytics-tab-button" class="tab-button" onclick="switchTab('Analytics')">Analytics</button>
   </div>
@@ -441,13 +499,24 @@
     const SEASON = '2025';
     let DAY = 'SAT'; // default; can switch to 'SUN'
 
-    // Zelle config (replace handle/QR as needed)
-    const ZELLE_HANDLE = 'your-zelle-handle@example.com';
-    const ZELLE_QR_IMAGE_URL = ''; // optional
+    // Ticket display metadata (color -> element id)
+    const TICKET_COLOR_META = {
+      'Purple': { elementId:'ticket-purple-count' },
+      'Red': { elementId:'ticket-red-count' },
+      'Green': { elementId:'ticket-green-count' },
+      'Blue': { elementId:'ticket-blue-count' }
+    };
+    const TICKET_COLOR_KEYS = Object.keys(TICKET_COLOR_META);
+
+    // Zelle account state
+    let activeZelleAccount = null;
+    let zelleAccountConfig = {};
+    let zelleConfigRef = null;
+    let zelleCurrentAccountRef = null;
+    let latestZelleAccountTotals = {};
 
     // App state
     let total = 0;
-    let tickets100 = 0, tickets200 = 0, tickets300 = 0, tickets400 = 0;
     let orderList = [];
     let orderNumber = 0; // per-day, as in original
     let currentOrderRef = null;
@@ -461,69 +530,71 @@
        ========================== */
 // SATURDAY
 const menuItemsSAT = [
-  { name:'Mochar Chop (2)',    price:8.00, ticketSeries:'300', code:'MCH',
-    image:'https://i.ibb.co/svz40VyF/Mochar-Chop-02-removebg-preview.png' },
-  { name:'Vegetable Chop (2)', price:8.00, ticketSeries:'300', code:'VC',
+  { name:'Vegetable Chop (2)', price:8.00, ticketColor:'Purple', code:'VC',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f3c2e6fb4a6.png' },
-  { name:'Phuchka (6)',        price:8.00, ticketSeries:'300', code:'PK',
+  { name:'Mochar Chop (2)',    price:8.00, ticketColor:'Purple', code:'MCH',
+    image:'https://i.ibb.co/svz40VyF/Mochar-Chop-02-removebg-preview.png' },
+  { name:'Phuchka (6)',        price:8.00, ticketColor:'Purple', code:'PK',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0b27ab06b35ca1f6a.png' },
-  { name:'Chandrapouli (2)',   price:8.00, ticketSeries:'300', code:'CP',
+  { name:'Chandrapouli (2)',   price:8.00, ticketColor:'Purple', code:'CP',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f61a06fb4a5.png' },
-  { name:'Chanar Payesh',      price:8.00, ticketSeries:'300', code:'CPY',
-    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba956a9ab6c7b9.png' },
-  { name:'Patisapta (2)',      price:10.00, ticketSeries:'400', code:'PS',
+  { name:'Kacha Golla',        price:8.00, ticketColor:'Purple', code:'KG',
+    image:'https://i.postimg.cc/bGbLMVgS/download-removebg-preview-1.png' },
+  { name:'Patisapta (2)',      price:10.00, ticketColor:'Red',    code:'PS',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d060741004166cbed6.png' },
-  { name:'Jhal Muri',          price:7.00, ticketSeries:'200', code:'JM',
+  { name:'Jhal Muri',          price:7.00,  ticketColor:'Green',  code:'JM',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d05b2570a5a1cb27bb.png' },
-  { name:'Misti Paan',         price:2.50, ticketSeries:null,  code:'MP',
+  { name:'Misti Paan',         price:2.50,  ticketColor:null,     code:'MP',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d08c006b5d16abcfae.png' },
-  { name:'Coffee',             price:5.00, ticketSeries:'100', code:'MC',
+  { name:'Coffee',             price:5.00,  ticketColor:'Blue',   code:'MC',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d06074102d146cbed5.png' },
-  { name:'Cha',                price:3.00, ticketSeries:'100', code:'CHA',
+  { name:'Bengali Cha',        price:5.00,  ticketColor:'Blue',   code:'CHA',
     image:'https://i.ibb.co/gFFK4CzL/sddefault-removebg-preview.png' },
-  { name:'Water',              price:1.00, ticketSeries:null,  code:'W',
+  { name:'Water',              price:1.00,  ticketColor:null,     code:'W',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0ed66479dc3b42f76.png' },
-  { name:'Coke',               price:2.00, ticketSeries:null,  code:'C',
+  { name:'Coke',               price:2.00,  ticketColor:null,     code:'C',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95a7dbb6c7ba.png' },
-  { name:'Pujor Mishti Box',   price:12.00, ticketSeries:null, code:'PMB',
+  { name:'Pujor Mishti Box',   price:12.00, ticketColor:null,     code:'PMB',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95c546b6c7b8.png' },
-  { name:'Sindoor',            price:2.00, ticketSeries:null,  code:'SND',
-    image:'https://i.ibb.co/6R4YKNf6/40332013-3-1-pearlfiesta-red-sindoor-powder-each-box-contains-10-gm-each-removebg-preview.png' },
+  { name:'Sindoor',            price:2.00,  ticketColor:null,     code:'SND',
+    image:'https://i.ibb.co/6R4YKNf6/40332013-3-1-pearlfiesta-red-sindoor-powder-each-box-contains-10-gm-each-removebg-preview.png' }
 ];
 
 
 // SUNDAY
 const menuItemsSUN = [
-  { name:'Mochar Chop (2)',    price:8.00, ticketSeries:'300', code:'MCH',
-    image:'https://i.ibb.co/svz40VyF/Mochar-Chop-02-removebg-preview.png' },
-  { name:'Vegetable Chop (2)', price:8.00, ticketSeries:'300', code:'VC',
+  { name:'Vegetable Chop (2)', price:8.00,  ticketColor:'Purple', code:'VC',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f3c2e6fb4a6.png' },
-  { name:'Phuchka (6)',        price:8.00, ticketSeries:'300', code:'PK',
+  { name:'Mochar Chop (2)',    price:8.00,  ticketColor:'Purple', code:'MCH',
+    image:'https://i.ibb.co/svz40VyF/Mochar-Chop-02-removebg-preview.png' },
+  { name:'Phuchka (6)',        price:8.00,  ticketColor:'Purple', code:'PK',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0b27ab06b35ca1f6a.png' },
-  { name:'Chandrapouli (2)',   price:8.00, ticketSeries:'300', code:'CP',
+  { name:'Chandrapouli (2)',   price:8.00,  ticketColor:'Purple', code:'CP',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f61a06fb4a5.png' },
-  { name:'Baked Sandesh (2)',  price:8.00, ticketSeries:'300', code:'BS',
+  { name:'Baked Sandesh (2)',  price:8.00,  ticketColor:'Purple', code:'BS',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f83316fb4a4.png' },
-  { name:'Patisapta (2)',      price:10.00, ticketSeries:'400', code:'PS',
+  { name:'Kacha Golla',        price:8.00,  ticketColor:'Purple', code:'KG',
+    image:'https://i.postimg.cc/bGbLMVgS/download-removebg-preview-1.png' },
+  { name:'Patisapta (2)',      price:10.00, ticketColor:'Red',    code:'PS',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d060741004166cbed6.png' },
-  { name:'Jhal Muri',          price:7.00, ticketSeries:'200', code:'JM',
+  { name:'Jhal Muri',          price:7.00,  ticketColor:'Green',  code:'JM',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d05b2570a5a1cb27bb.png' },
-  { name:'Misti Paan',         price:2.50, ticketSeries:null,  code:'MP',
+  { name:'Misti Paan',         price:2.50,  ticketColor:null,     code:'MP',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d08c006b5d16abcfae.png' },
-  { name:'Coffee',             price:5.00, ticketSeries:'100', code:'MC',
+  { name:'Coffee',             price:5.00,  ticketColor:'Blue',   code:'MC',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d06074102d146cbed5.png' },
-  { name:'Cha',                price:3.00, ticketSeries:'100', code:'CHA',
+  { name:'Bengali Cha',        price:5.00,  ticketColor:'Blue',   code:'CHA',
     image:'https://i.ibb.co/gFFK4CzL/sddefault-removebg-preview.png' },
-  { name:'Water',              price:1.00, ticketSeries:null,  code:'W',
+  { name:'Water',              price:1.00,  ticketColor:null,     code:'W',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0ed66479dc3b42f76.png' },
-  { name:'Coke',               price:2.00, ticketSeries:null,  code:'C',
+  { name:'Coke',               price:2.00,  ticketColor:null,     code:'C',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95a7dbb6c7ba.png' },
-  { name:'Pujor Mishti Box',   price:12.00, ticketSeries:null, code:'PMB',
+  { name:'Pujor Mishti Box',   price:12.00, ticketColor:null,     code:'PMB',
     image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95c546b6c7b8.png' },
-  { name:'Sindoor',            price:2.00, ticketSeries:null,  code:'SND',
+  { name:'Sindoor',            price:2.00,  ticketColor:null,     code:'SND',
     image:'https://i.ibb.co/6R4YKNf6/40332013-3-1-pearlfiesta-red-sindoor-powder-each-box-contains-10-gm-each-removebg-preview.png' },
-  { name:'Paan Leaves (2)',    price:1.00, ticketSeries:null,  code:'PL',
-    image:'https://i.ibb.co/XkFsRwKL/download-removebg-preview.png' },
+  { name:'Paan Leaves (2)',    price:1.00,  ticketColor:null,     code:'PL',
+    image:'https://i.ibb.co/XkFsRwKL/download-removebg-preview.png' }
 ];
 
 function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
@@ -532,7 +603,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     const itemCodeMap = {};
     function rebuildItemCodeMap(){
       Object.keys(itemCodeMap).forEach(k=>delete itemCodeMap[k]);
-      currentMenu().forEach(it => { itemCodeMap[it.name] = it.code; });
+      currentMenu().forEach(it => {
+        itemCodeMap[it.name] = it.code;
+      });
     }
 
     /* ==========================
@@ -566,7 +639,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         if(currentOrderRef){ currentOrderRef.off(); currentOrderRef=null; }
         document.getElementById('display-payment-method').innerHTML='';
         document.getElementById('total-price').innerText='';
-        document.getElementById('zelle-instructions').style.display='none';
+        const zDisplayInfo = document.getElementById('zelle-instructions');
+        if(zDisplayInfo){ zDisplayInfo.style.display='none'; zDisplayInfo.innerHTML=''; }
+        const memoEl = document.getElementById('memo-number-display');
+        if(memoEl){ memoEl.style.display='none'; memoEl.innerText=''; }
         clearInterval(quoteInterval);
       }else{
         document.body.classList.add('display-mode');
@@ -575,42 +651,61 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         document.querySelector('.top-section').style.display='none';
         document.querySelector('.bottom-tabs').style.display='none';
         document.querySelector('.qr-section').style.display='flex';
+        updateZelleAccountDisplay();
 
         currentOrderRef = firebase.database().ref('currentOrder');
         currentOrderRef.on('value',(snapshot)=>{
           const data = snapshot.val();
           const display = document.getElementById('display-payment-method');
           const zInst = document.getElementById('zelle-instructions');
+          const memoEl = document.getElementById('memo-number-display');
+          const totalEl = document.getElementById('total-price');
+          const quoteEl = document.getElementById('quote-container');
+
+          display.innerHTML = '';
+          if(zInst){ zInst.style.display='none'; zInst.innerHTML=''; }
+          if(memoEl){ memoEl.style.display='none'; memoEl.innerText=''; }
 
           if(data && data.total && data.paymentMethod){
-            document.getElementById('total-price').innerText = data.total;
-            display.innerHTML = '';
-            zInst.style.display = 'none';
-            zInst.innerHTML = '';
+            if(totalEl) totalEl.innerText = data.total;
+            if(quoteEl) quoteEl.style.display='none';
 
             if(data.paymentMethod==='Zelle'){
-              const lbl = document.createElement('span');
-              lbl.textContent='ZELLE';
-              display.appendChild(lbl);
+              const accountCode = data.zelleAccount || activeZelleAccount;
+              const info = getZelleAccountInfo(accountCode) || {};
+              const logo = document.createElement('img');
+              logo.src = 'https://i.postimg.cc/v4407Z6z/Zelle-payment-service-Logo-wine-1.png';
+              logo.alt = 'Zelle logo';
+              logo.className = 'display-zelle-logo';
+              display.appendChild(logo);
 
-              zInst.style.display = 'block';
-              const handleLine = `Send to: <strong>${ZELLE_HANDLE}</strong>`;
-              const memoLine = data.orderNumber ? `Memo: <strong>Order #${data.orderNumber}</strong>` : '';
-              const qrLine = ZELLE_QR_IMAGE_URL ? `<div><img src="${ZELLE_QR_IMAGE_URL}" alt="Zelle QR" style="max-width:220px;margin-top:8px"></div>` : '';
-              zInst.innerHTML = `${handleLine}<br>${memoLine}${qrLine}`;
-            }else if(data.paymentMethod==='Cash'){
+              const accountLabel = document.createElement('div');
+              accountLabel.className = 'display-account-label';
+              accountLabel.textContent = accountCode ? `Account: ${accountCode}` : 'Account not set';
+              display.appendChild(accountLabel);
+
+              if(memoEl && data.orderNumber){
+                memoEl.innerText = data.orderNumber;
+                memoEl.style.display='block';
+              }
+
+              if(zInst){
+                const qrUrl = info.qr || '';
+                zInst.style.display='block';
+                if(qrUrl){
+                  zInst.innerHTML = `<div class="display-qr-image-holder"><img src="${qrUrl}" alt="${accountCode || 'Zelle'} QR"></div>`;
+                }else{
+                  zInst.innerHTML = `<div class="display-qr-image-holder"><div class="qr-missing">QR not set</div></div>`;
+                }
+              }
+            }else{
               const lbl = document.createElement('span');
-              lbl.textContent='TOTAL';
+              lbl.textContent = data.paymentMethod==='Cash' ? 'CASH' : data.paymentMethod.toUpperCase();
               display.appendChild(lbl);
             }
-
-            document.getElementById('quote-container').style.display='none';
           }else{
-            document.getElementById('total-price').innerText='';
-            display.innerHTML='';
-            zInst.style.display='none';
-            zInst.innerHTML='';
-            document.getElementById('quote-container').style.display='block';
+            if(totalEl) totalEl.innerText='';
+            if(quoteEl) quoteEl.style.display='block';
           }
         });
         rotateQuotes();
@@ -642,28 +737,32 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     /* ==========================
        POS: Add/Remove + Tickets
        ========================== */
-    function addItem(name, price, ticketSeries){
-      const code = itemCodeMap[name];
+    function addItem(item){
+      if(!item) return;
+      const code = item.code || itemCodeMap[item.name];
       if(oosMap[code]) return; // blocked when out of stock
-      const existing = orderList.find(i=>i.name===name);
+      const existing = orderList.find(i=>i.code===code);
       if(existing) existing.quantity += 1;
-      else orderList.push({name, price, ticketSeries, quantity:1});
-      total += price;
+      else orderList.push({
+        code,
+        name:item.name,
+        price:item.price,
+        ticketColor:item.ticketColor || null,
+        quantity:1
+      });
+      total = round2(total + item.price);
       updateOrderSummary();
-      updateTicketCount(ticketSeries);
+      syncTicketCounters();
     }
 
-    function removeItem(name){
-      const idx = orderList.findIndex(i=>i.name===name);
+    function removeItem(code){
+      const idx = orderList.findIndex(i=>i.code===code);
       if(idx>-1){
         const it = orderList[idx];
-        total -= it.price*it.quantity;
-        if(it.ticketSeries==='100'){ tickets100 -= it.quantity; document.getElementById('ticket-100-count').innerText=tickets100; }
-        if(it.ticketSeries==='200'){ tickets200 -= it.quantity; document.getElementById('ticket-200-count').innerText=tickets200; }
-        if(it.ticketSeries==='300'){ tickets300 -= it.quantity; document.getElementById('ticket-300-count').innerText=tickets300; }
-        if(it.ticketSeries==='400'){ tickets400 -= it.quantity; document.getElementById('ticket-400-count').innerText=tickets400; }
+        total = Math.max(0, round2(total - (it.price*it.quantity)));
         orderList.splice(idx,1);
         updateOrderSummary();
+        syncTicketCounters();
       }
     }
 
@@ -679,18 +778,26 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         const del = document.createElement('button');
         del.className='delete-item';
         del.innerHTML='&times;';
-        del.onclick=()=>removeItem(item.name);
+        del.onclick=()=>removeItem(item.code);
         row.appendChild(del);
         listEl.appendChild(row);
       });
       totalEl.innerText = total.toFixed(2);
     }
 
-    function updateTicketCount(ticketSeries){
-      if(ticketSeries==='100'){ tickets100++; document.getElementById('ticket-100-count').innerText=tickets100; }
-      if(ticketSeries==='200'){ tickets200++; document.getElementById('ticket-200-count').innerText=tickets200; }
-      if(ticketSeries==='300'){ tickets300++; document.getElementById('ticket-300-count').innerText=tickets300; }
-      if(ticketSeries==='400'){ tickets400++; document.getElementById('ticket-400-count').innerText=tickets400; }
+    function syncTicketCounters(){
+      const counts = { Purple:0, Red:0, Green:0, Blue:0 };
+      orderList.forEach(item=>{
+        const qty = Number(item.quantity)||0;
+        if(item.ticketColor && counts.hasOwnProperty(item.ticketColor)){
+          counts[item.ticketColor] += qty;
+        }
+      });
+      TICKET_COLOR_KEYS.forEach(color=>{
+        const meta = TICKET_COLOR_META[color];
+        const el = document.getElementById(meta.elementId);
+        if(el) el.innerText = counts[color] || 0;
+      });
     }
 
     /* ==========================
@@ -699,23 +806,40 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function processPayment(method){
       if(orderList.length===0){ alert('Add at least one item.'); return; }
 
+      if(method==='Zelle' && !activeZelleAccount){
+        alert('Select a Zelle account before recording a Zelle payment.');
+        return;
+      }
+
       orderNumber = Number(orderNumber)+1; // keep original per-day sequence
+      const orderItemsSnapshot = orderList.map(item=>({
+        name:item.name,
+        code:item.code,
+        price:item.price,
+        ticketColor:item.ticketColor || null,
+        quantity:item.quantity
+      }));
       const orderDetails = {
         orderNumber,
-        items: orderList,
+        items: orderItemsSnapshot,
         total: total.toFixed(2),
         method,
-        zelleStatus: (method==='Zelle') ? 'PENDING' : undefined,
         passFee: false, // columns remain in Order Log; always false here
         fee: '0.00',    // not used for Zelle/Cash; keeps CSV shape intact
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         overwritten: isTotalOverwritten,
         day: DAY
       };
+      if(method==='Zelle'){
+        orderDetails.zelleStatus = 'PENDING';
+        orderDetails.zelleAccount = activeZelleAccount;
+      }
       saveOrderToFirebase(orderDetails);
 
       // Update Display device
-      db.ref('currentOrder').set({ total: total.toFixed(2), paymentMethod: method, orderNumber });
+      const currentOrderPayload = { total: total.toFixed(2), paymentMethod: method, orderNumber };
+      if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
+      db.ref('currentOrder').set(currentOrderPayload);
 
       // Operator still presses "Next Customer" when ready (manual step kept)
     }
@@ -731,7 +855,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function updateTotalPrice(){
       const newTotal = parseFloat(document.getElementById('new-total-price').value);
       if(!isNaN(newTotal) && newTotal>=0){
-        total = newTotal;
+        total = round2(newTotal);
         updateOrderSummary();
         isTotalOverwritten = true;
         closeEditTotalModal();
@@ -810,7 +934,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
       if(order.items){
         order.items.forEach(it=>{
-          const code = itemCodeMap[it.name];
+          const code = it.code || itemCodeMap[it.name];
           if(code) itemQuantities[code] = it.quantity;
         });
       }
@@ -838,7 +962,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         const timeString = new Date(o.timestamp || Date.now()).toLocaleString();
         const qty = {};
         currentMenu().forEach(i=>qty[i.code]='');
-        if(o.items){ o.items.forEach(it=>{ const c=itemCodeMap[it.name]; if(c) qty[c]=it.quantity; }); }
+        if(o.items){ o.items.forEach(it=>{ const c = it.code || itemCodeMap[it.name]; if(c) qty[c]=it.quantity; }); }
         const row = [
           o.orderNumber ?? '',
           `"${timeString}"`,
@@ -877,8 +1001,174 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
        Zelle Confirmations (per-day)
        ========================== */
     function zellePathDay(){ return `orders/${SEASON}/${DAY}`; } // orders carry zelleStatus
+    function zelleControlPath(){ return `zelle/${SEASON}/${DAY}`; }
+    function zelleConfigPath(){ return `zelle/${SEASON}/config/accounts`; }
+    function zelleCurrentAccountPath(){ return `${zelleControlPath()}/currentAccount`; }
+    function zelleSwitchLogPath(){ return `${zelleControlPath()}/switchLog`; }
+
+    const ZELLE_ACCOUNT_CODES = ['AR','SKD','SC','PD'];
+    const ZELLE_ACCOUNT_PLACEHOLDERS = {
+      AR:{qr:'https://i.postimg.cc/3WyQRYtg/ar-test.jpg', label:'AR'},
+      PD:{qr:'https://i.postimg.cc/c6Vyt2zP/pd-test.jpg', label:'PD'},
+      SC:{qr:'https://i.postimg.cc/jLPVHv02/sc-test.jpg', label:'SC'},
+      SKD:{qr:'https://i.postimg.cc/18QkJ6sH/skd-test.jpg', label:'SKD'}
+    };
+    const DEFAULT_ZELLE_ACCOUNT = 'AR';
+
+    function firstAvailableZelleAccount(){
+      return ZELLE_ACCOUNT_CODES.find(code=>getZelleAccountInfo(code)) || null;
+    }
+
+    function getZelleAccountInfo(account){
+      if(!account) return null;
+      const infoFromConfig = (zelleAccountConfig && zelleAccountConfig[account]) ? zelleAccountConfig[account] : null;
+      return infoFromConfig || ZELLE_ACCOUNT_PLACEHOLDERS[account] || null;
+    }
+
+    function renderZelleAccountButtons(){
+      const container = document.getElementById('zelle-account-buttons');
+      if(!container) return;
+      container.innerHTML = '';
+      ZELLE_ACCOUNT_CODES.forEach(account=>{
+        const btn = document.createElement('button');
+        btn.type='button';
+        btn.className='zelle-account-button';
+        btn.setAttribute('data-zelle-account-button', account);
+        btn.onclick = ()=>changeZelleAccount(account);
+        container.appendChild(btn);
+      });
+      updateZelleAccountDisplay();
+    }
+
+    function updateZelleAccountDisplay(){
+      const labelEl = document.getElementById('current-zelle-account');
+      if(labelEl) labelEl.innerText = activeZelleAccount || '—';
+      const detailEl = document.getElementById('current-zelle-account-detail');
+      if(detailEl){
+        const info = getZelleAccountInfo(activeZelleAccount) || {};
+        const parts = [];
+        if(info.label && info.label!==activeZelleAccount) parts.push(info.label);
+        if(info.handle) parts.push(info.handle);
+        if(parts.length){
+          detailEl.innerText = parts.join(' • ');
+          detailEl.style.display='inline';
+        }else{
+          detailEl.innerText='';
+          detailEl.style.display='none';
+        }
+      }
+      updateZelleAccountButtonsState();
+      updateZelleAccountTotalsDisplay();
+    }
+
+    function updateZelleAccountButtonsState(){
+      document.querySelectorAll('[data-zelle-account-button]').forEach(btn=>{
+        const acct = btn.getAttribute('data-zelle-account-button');
+        const info = getZelleAccountInfo(acct) || {};
+        const isActive = acct===activeZelleAccount;
+        const labelText = info.label && info.label!==acct ? info.label : '';
+        const actionText = isActive ? 'Current' : 'Change';
+        btn.innerHTML = `
+          <span class="account-code">${acct}</span>
+          ${labelText ? `<span class="account-label">${labelText}</span>` : ''}
+          <span class="account-action">${actionText}</span>
+        `;
+        btn.classList.toggle('active', isActive);
+        btn.disabled = isActive;
+      });
+    }
+
+    function updateZelleAccountTotalsDisplay(totals){
+      if(totals) latestZelleAccountTotals = totals;
+      const source = latestZelleAccountTotals || {};
+      const container = document.getElementById('zelle-account-totals');
+      if(!container) return;
+      container.innerHTML='';
+      ZELLE_ACCOUNT_CODES.forEach(account=>{
+        const info = getZelleAccountInfo(account) || {};
+        const totalsForAccount = source[account] || { count:0, sum:0 };
+        const count = totalsForAccount.count || 0;
+        const sumRounded = round2(Number(totalsForAccount.sum || 0));
+        const label = info.label && info.label!==account ? `${account} — ${info.label}` : account;
+        const card = document.createElement('div');
+        card.className = 'account-total-card' + (account===activeZelleAccount ? ' active' : '');
+        card.innerHTML = `
+          <strong>${label}</strong>
+          <span>${count} order${count===1?'':'s'}</span>
+          <span>$${sumRounded.toFixed(2)}</span>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function ensureZelleConfigSeeded(){
+      db.ref(zelleConfigPath()).once('value').then(snap=>{
+        if(!snap.exists()){
+          db.ref(zelleConfigPath()).set(ZELLE_ACCOUNT_PLACEHOLDERS).catch(err=>{
+            console.error('Error seeding Zelle config', err);
+          });
+        }
+      }).catch(err=>{
+        console.error('Error checking Zelle config', err);
+      });
+    }
+
+    function persistZelleAccount(nextAccount, shouldLog){
+      if(!nextAccount) return;
+      const prev = activeZelleAccount;
+      activeZelleAccount = nextAccount;
+      updateZelleAccountDisplay();
+      db.ref(zelleCurrentAccountPath()).set(nextAccount);
+      if(shouldLog){
+        db.ref(zelleSwitchLogPath()).push({
+          from: prev || null,
+          to: nextAccount,
+          ts: firebase.database.ServerValue.TIMESTAMP
+        });
+      }
+    }
+
+    function changeZelleAccount(nextAccount){
+      if(!nextAccount || nextAccount===activeZelleAccount) return;
+      persistZelleAccount(nextAccount, true);
+    }
+
+    function loadZelleConfig(){
+      if(zelleConfigRef) zelleConfigRef.off();
+      zelleConfigRef = db.ref(zelleConfigPath());
+      zelleConfigRef.on('value',(snap)=>{
+        zelleAccountConfig = snap.val() || {};
+        renderZelleAccountButtons();
+        const fallback = firstAvailableZelleAccount() || DEFAULT_ZELLE_ACCOUNT;
+        if(!activeZelleAccount && fallback){
+          persistZelleAccount(fallback, false);
+        }else{
+          updateZelleAccountDisplay();
+        }
+      });
+    }
+
+    function refreshZelleCurrentAccountListener(){
+      if(zelleCurrentAccountRef) zelleCurrentAccountRef.off();
+      zelleCurrentAccountRef = db.ref(zelleCurrentAccountPath());
+      zelleCurrentAccountRef.on('value',(snap)=>{
+        const value = snap.val();
+        if(value){
+          activeZelleAccount = value;
+          updateZelleAccountDisplay();
+        }else{
+          const fallback = firstAvailableZelleAccount() || DEFAULT_ZELLE_ACCOUNT;
+          if(fallback) persistZelleAccount(fallback, false);
+          else {
+            activeZelleAccount = null;
+            updateZelleAccountDisplay();
+          }
+        }
+      });
+    }
 
     let zelleRef = null;
+    let zelleSwitchLogRef = null;
 
     function attachZelleListener(){
       if(zelleRef) zelleRef.off();
@@ -895,21 +1185,32 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         tbody.innerHTML='';
         if(zelleOrders.length===0){
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td colspan="5" style="text-align:center;color:#666;">No Zelle orders yet.</td>`;
+          tr.innerHTML = `<td colspan="6" style="text-align:center;color:#666;">No Zelle orders yet.</td>`;
           tbody.appendChild(tr);
+          updateZelleAccountTotalsDisplay({});
           return;
         }
 
         zelleOrders.sort((a,b)=>(a.orderNumber||0)-(b.orderNumber||0));
 
+        const totals = {};
+        ZELLE_ACCOUNT_CODES.forEach(code=>{ totals[code] = { count:0, sum:0 }; });
+
         zelleOrders.forEach(o=>{
           const tr = document.createElement('tr');
           const timeString = new Date(o.timestamp || Date.now()).toLocaleString();
           const status = o.zelleStatus || 'PENDING';
+          const normalizedAccount = ZELLE_ACCOUNT_CODES.includes(o.zelleAccount) ? o.zelleAccount : null;
+          if(normalizedAccount){
+            totals[normalizedAccount].count += 1;
+            totals[normalizedAccount].sum += Number(o.total || 0);
+          }
+          const accountDisplay = normalizedAccount || (o.zelleAccount || '—');
           tr.innerHTML = `
             <td>${timeString}</td>
             <td>${o.orderNumber || ''}</td>
             <td>$${(o.total||'0.00')}</td>
+            <td>${accountDisplay}</td>
             <td>${status}</td>
             <td>
               <button class="btn-small btn-ok" onclick="markZelleStatus('${o.key}','CONFIRMED')">Confirm</button>
@@ -919,6 +1220,29 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           `;
           tbody.appendChild(tr);
         });
+        updateZelleAccountTotalsDisplay(totals);
+      });
+    }
+
+    function attachZelleSwitchLogListener(){
+      if(zelleSwitchLogRef) zelleSwitchLogRef.off();
+      const container = document.getElementById('zelle-switch-log');
+      if(!container) return;
+      zelleSwitchLogRef = db.ref(zelleSwitchLogPath());
+      zelleSwitchLogRef.on('value',(snap)=>{
+        const value = snap.val() || {};
+        const entries = Object.keys(value).map(key=>({ key, ...(value[key]||{}) }));
+        entries.sort((a,b)=>(b.ts||0)-(a.ts||0));
+        if(entries.length===0){
+          container.innerHTML = '<div class="switch-log-empty">No switches yet.</div>';
+          return;
+        }
+        container.innerHTML = entries.map(entry=>{
+          const timeString = entry.ts ? new Date(entry.ts).toLocaleString() : '';
+          const from = entry.from || '—';
+          const to = entry.to || '—';
+          return `<div class="switch-log-entry"><span class="switch-log-time">${timeString}</span><span class="switch-log-arrow">${from} &rarr; ${to}</span></div>`;
+        }).join('');
       });
     }
 
@@ -930,10 +1254,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       db.ref(zellePathDay()).once('value').then(snap=>{
         const orders = snap.val() || {};
         const rows = Object.values(orders).filter(o=>o.method==='Zelle');
-        let csv = "data:text/csv;charset=utf-8,Time,Order #,Total,Status\n";
+        let csv = "data:text/csv;charset=utf-8,Time,Order #,Total,Account,Status\n";
         rows.forEach(o=>{
           const t = new Date(o.timestamp || Date.now()).toLocaleString();
-          csv += `"${t}",${o.orderNumber||''},${o.total||''},${(o.zelleStatus||'PENDING')}\n`;
+          const account = ZELLE_ACCOUNT_CODES.includes(o.zelleAccount) ? o.zelleAccount : (o.zelleAccount || '');
+          csv += `"${t}",${o.orderNumber||''},${o.total||''},${account},${(o.zelleStatus||'PENDING')}\n`;
         });
         const link = document.createElement('a');
         link.setAttribute('href', encodeURI(csv));
@@ -962,7 +1287,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const ref = db.ref(stockPath(code)).push();
       ref.set({
         status: newVal ? 'OOS' : 'RESTOCKED',
-        by: null,
+        code,
+        itemName: item.name,
         ts: firebase.database.ServerValue.TIMESTAMP
       });
 
@@ -974,6 +1300,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const path = stockPathDay();
       db.ref(path).once('value',(snap)=>{
         const node = snap.val() || {};
+        currentMenu().forEach(item=>{ oosMap[item.code] = false; });
         Object.keys(node).forEach(code=>{
           const arr = Object.values(node[code]||{});
           if(arr.length){
@@ -1014,10 +1341,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           Object.keys(entries).forEach(key=>{
             const e = entries[key] || {};
             rows.push({
-              code,
+              code: e.code || code,
               key,
               status: e.status || '',
-              ts: e.ts || 0
+              ts: e.ts || 0,
+              itemName: e.itemName || e.item || ''
             });
           });
         });
@@ -1040,7 +1368,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           tr.innerHTML = `
             <td>${timeString}</td>
             <td>${row.code}</td>
-            <td>${codeNameMap[row.code] || ''}</td>
+            <td>${row.itemName || codeNameMap[row.code] || ''}</td>
             <td>${row.status}</td>
             <td><button class="delete-order-button" onclick="deleteStockEvent('${row.code}','${row.key}')">&times;</button></td>
           `;
@@ -1077,8 +1405,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             const e = entries[key] || {};
             rows.push([
               new Date(e.ts||Date.now()).toLocaleString(),
-              code,
-              codeNameMap[code] || '',
+              e.code || code,
+              e.itemName || e.item || codeNameMap[e.code || code] || '',
               e.status || ''
             ]);
           });
@@ -1131,7 +1459,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         const card = document.createElement('div');
         card.className='item-box';
         if(oosMap[item.code]) card.classList.add('is-oos');
-        card.onclick = ()=>{ if(!oosMap[item.code]) addItem(item.name, item.price, item.ticketSeries); };
+        card.onclick = ()=>{ if(!oosMap[item.code]) addItem(item); };
 
         card.innerHTML = `
           <strong>${item.name} ${oosMap[item.code] ? '<span class="oos-tag">OOS</span>' : ''}</strong>
@@ -1151,12 +1479,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     }
 
     function clearOrder(){
-      total=0; tickets100=0; tickets200=0; tickets300=0; tickets400=0;
+      total=0;
       orderList=[]; updateOrderSummary();
-      document.getElementById('ticket-100-count').innerText='0';
-      document.getElementById('ticket-200-count').innerText='0';
-      document.getElementById('ticket-300-count').innerText='0';
-      document.getElementById('ticket-400-count').innerText='0';
+      syncTicketCounters();
       isTotalOverwritten=false;
       db.ref('currentOrder').remove();
     }
@@ -1195,7 +1520,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         if(zelleView){
           zelleView.style.display='block';
           document.getElementById('zelle-tab-button').classList.add('active');
+          updateZelleAccountDisplay();
           attachZelleListener();
+          attachZelleSwitchLogListener();
         }
       }else if(tab==='Stock Log'){
         if(stockLogView){
@@ -1228,6 +1555,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const zeSat = document.getElementById('ze-sat'); if(zeSat) zeSat.classList.toggle('active', DAY==='SAT');
       const zeSun = document.getElementById('ze-sun'); if(zeSun) zeSun.classList.toggle('active', DAY==='SUN');
 
+      latestZelleAccountTotals = {};
+      updateZelleAccountTotalsDisplay({});
+      refreshZelleCurrentAccountListener();
+
       // Immediately rebuild the item grid for the new day
       initializeMenuItems();
 
@@ -1241,6 +1572,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       }
       if(document.getElementById('zelle-confirmations') && document.getElementById('zelle-confirmations').style.display==='block'){
         attachZelleListener();
+        attachZelleSwitchLogListener();
       }
       if(document.getElementById('analytics').style.display==='block'){ generateAnalytics(); }
       if(document.getElementById('stock-log') && document.getElementById('stock-log').style.display==='block'){ loadStockLogFromFirebase(); }
@@ -1266,7 +1598,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       }else if(where==='ze'){
         document.getElementById('ze-sat').classList.toggle('active', DAY==='SAT');
         document.getElementById('ze-sun').classList.toggle('active', DAY==='SUN');
+        latestZelleAccountTotals = {};
+        updateZelleAccountTotalsDisplay({});
+        refreshZelleCurrentAccountListener();
         attachZelleListener();
+        attachZelleSwitchLogListener();
       }
 
       // Sync top bar buttons
@@ -1399,7 +1735,12 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
        ========================== */
     function initApp(){
       initializeMenuItems();
+      syncTicketCounters();
       setMode('POS');
+      ensureZelleConfigSeeded();
+      renderZelleAccountButtons();
+      loadZelleConfig();
+      refreshZelleCurrentAccountListener();
       loadOOSMap();
       loadOrdersFromFirebase();
     }
