@@ -280,7 +280,7 @@
     }
     .switch-log-delete:hover{background:rgba(184,16,13,.1)}
     .switch-log-empty{font-size:12px;color:#666;padding:6px 0}
-    
+
     /* Analytics */
     .analytics{display:none;padding:20px}
     .analytics-summary{display:flex;justify-content:center;margin-bottom:20px}
@@ -440,11 +440,6 @@
         <div id="zelle-switch-log" class="switch-log-list"></div>
       </div>
     </div>
-    <div id="zelle-account-totals" class="zelle-account-totals"></div>
-    <div class="zelle-switch-log-container">
-      <h3>Switch Log</h3>
-      <div id="zelle-switch-log" class="zelle-switch-log"></div>
-    </div>
     <div style="overflow-x:auto; margin-top:10px;">
       <table>
         <thead>
@@ -544,6 +539,17 @@
         <label for="edit-price-input" class="modal-label">Price</label>
         <input type="number" id="edit-price-input" step="0.01" min="0" style="width:100%;padding:10px;font-size:18px;">
       </div>
+      <div style="margin:16px 0 0;text-align:left">
+        <label for="edit-ticket-color-select" class="modal-label">Ticket Color</label>
+        <select id="edit-ticket-color-select" style="width:100%;padding:10px;font-size:16px;border-radius:8px;border:1px solid #d1d5db;">
+          <option value="na">N/A</option>
+          <option value="purple">Purple</option>
+          <option value="red">Red</option>
+          <option value="green">Green</option>
+          <option value="blue">Blue</option>
+        </select>
+      </div>
+
       <div class="modal-actions">
         <button type="button" class="modal-button secondary" onclick="closeEditPriceModal()">Cancel</button>
         <button type="button" class="modal-button primary" onclick="savePriceOverride()">Save</button>
@@ -596,8 +602,8 @@
       link: null
     };
 
-    // Menu price overrides
-    let priceOverrides = {};
+    // Menu overrides (price + ticket color)
+    let menuOverrides = {};
     let menuOverridesRef = null;
     let currentPriceEdit = null;
     let lastFocusBeforePriceModal = null;
@@ -710,28 +716,89 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function refreshMenuOverridesListener(){
       if(menuOverridesRef){ menuOverridesRef.off(); }
-      priceOverrides = {};
+      menuOverrides = {};
       menuOverridesRef = db.ref(menuOverridesPath());
       menuOverridesRef.on('value', snapshot=>{
         const node = snapshot.val() || {};
         const next = {};
         Object.keys(node).forEach(code=>{
-          const raw = parseFloat(node[code]?.price);
-          if(!isNaN(raw)) next[code] = raw;
+          const entry = node[code] || {};
+          const override = {};
+          if(Object.prototype.hasOwnProperty.call(entry,'price')){
+            const raw = parseFloat(entry.price);
+            if(!isNaN(raw)) override.price = raw;
+          }
+          if(Object.prototype.hasOwnProperty.call(entry,'ticketColor')){
+            override.ticketColor = normalizeTicketColorValue(entry.ticketColor);
+          }
+          if(Object.keys(override).length){
+            next[code] = override;
+          }
         });
-        priceOverrides = next;
+        menuOverrides = next;
         initializeMenuItems();
       });
     }
 
-    function hasPriceOverride(code){ return Object.prototype.hasOwnProperty.call(priceOverrides, code); }
+    function normalizeTicketColorValue(value){
+      const raw = value === undefined || value === null ? '' : String(value).trim().toLowerCase();
+      if(raw === '' || raw === 'na' || raw === 'n/a' || raw === 'none') return 'na';
+      if(raw === 'purple' || raw === 'red' || raw === 'green' || raw === 'blue') return raw;
+      return 'na';
+    }
+
+    function ticketColorValueToLabel(value){
+      switch(value){
+        case 'purple': return 'Purple';
+        case 'red': return 'Red';
+        case 'green': return 'Green';
+        case 'blue': return 'Blue';
+        default: return null;
+      }
+    }
+
+    function getMenuOverride(code){
+      if(!code) return null;
+      return Object.prototype.hasOwnProperty.call(menuOverrides, code) ? menuOverrides[code] : null;
+    }
+
+    function hasMenuOverride(code){
+      const override = getMenuOverride(code);
+      if(!override) return false;
+      return override.price !== undefined || override.ticketColor !== undefined;
+    }
+
+    function getOverrideTicketColorValue(code){
+      const override = getMenuOverride(code);
+      return override && override.ticketColor !== undefined ? override.ticketColor : null;
+    }
+
+    function getItemDefaultTicketColorValue(item){
+      if(!item || !item.ticketColor) return 'na';
+      return normalizeTicketColorValue(item.ticketColor);
+    }
+
+    function getEffectiveTicketColorValue(item){
+      if(!item) return 'na';
+      const code = item.code;
+      const overrideValue = code ? getOverrideTicketColorValue(code) : null;
+      if(overrideValue && overrideValue !== 'na') return overrideValue;
+      if(overrideValue === 'na') return 'na';
+      return getItemDefaultTicketColorValue(item);
+    }
+
+    function getEffectiveTicketColorLabel(item){
+      const value = getEffectiveTicketColorValue(item);
+      return ticketColorValueToLabel(value);
+    }
 
     function getEffectivePriceFor(item){
       if(!item) return 0;
       const fallback = parseFloat(item.price) || 0;
-      const code = item.code;
-      if(code && hasPriceOverride(code)){
-        return parseFloat(priceOverrides[code]) || fallback;
+      const override = item.code ? getMenuOverride(item.code) : null;
+      if(override && override.price !== undefined){
+        const raw = parseFloat(override.price);
+        if(!isNaN(raw)) return raw;
       }
       return fallback;
     }
@@ -1818,14 +1885,19 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       grid.innerHTML = '';
       currentMenu().forEach(item=>{
         const effectivePrice = getEffectivePriceFor(item);
+        const effectiveTicketColorLabel = getEffectiveTicketColorLabel(item);
         const card = document.createElement('div');
         card.className='item-box';
         if(oosMap[item.code]) card.classList.add('is-oos');
         card.onclick = ()=>{
           if(!oosMap[item.code]){
-            addItem(Object.assign({}, item, { price:getEffectivePriceFor(item) }));
+            addItem(Object.assign({}, item, {
+              price: effectivePrice,
+              ticketColor: effectiveTicketColorLabel
+            }));
           }
         };
+
         card.innerHTML = `
           <strong>${item.name} ${oosMap[item.code] ? '<span class="oos-tag">OOS</span>' : ''}</strong>
           <span class="price">$${effectivePrice.toFixed(2)}</span>
@@ -1887,13 +1959,21 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const title = document.getElementById('edit-price-title');
       const input = document.getElementById('edit-price-input');
       const resetBtn = document.getElementById('reset-price-button');
+      const ticketSelect = document.getElementById('edit-ticket-color-select');
       if(title) title.innerText = `Edit Price — ${item.name}`;
       if(input){
         const price = getEffectivePriceFor(item);
         input.value = price.toFixed(2);
       }
+      if(ticketSelect){
+        let ticketValue = getOverrideTicketColorValue(item.code);
+        if(ticketValue === null){
+          ticketValue = getItemDefaultTicketColorValue(item);
+        }
+        ticketSelect.value = ticketValue || 'na';
+      }
       if(resetBtn){
-        resetBtn.style.display = hasPriceOverride(item.code) ? 'inline-block' : 'none';
+        resetBtn.style.display = hasMenuOverride(item.code) ? 'inline-block' : 'none';
       }
       lastFocusBeforePriceModal = document.activeElement;
       if(modal){
@@ -1915,6 +1995,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       currentPriceEdit = null;
       const input = document.getElementById('edit-price-input');
       if(input) input.value = '';
+      const ticketSelect = document.getElementById('edit-ticket-color-select');
+      if(ticketSelect) ticketSelect.value = 'na';
       if(lastFocusBeforePriceModal && typeof lastFocusBeforePriceModal.focus === 'function'){
         lastFocusBeforePriceModal.focus();
       }
@@ -1931,13 +2013,23 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         return;
       }
       const code = currentPriceEdit.code;
-      db.ref(menuOverrideItemPath(code)).update({ price: round2(value) })
+      const ticketSelect = document.getElementById('edit-ticket-color-select');
+      const ticketColorValue = ticketSelect ? normalizeTicketColorValue(ticketSelect.value) : 'na';
+      const payload = {
+        price: round2(value),
+        ticketColor: ticketColorValue || 'na'
+      };
+      db.ref(menuOverrideItemPath(code)).update(payload)
         .then(()=>{
-          showPriceToast('Price updated.');
+          showPriceToast('Item updated.');
           closeEditPriceModal();
+          updateOrderSummary();
+          syncTicketCounters();
         })
-        .catch(()=>{
-          alert('Unable to update price. Please try again.');
+        .catch(err=>{
+          console.error('Unable to update item override', err);
+          const message = err && err.message ? err.message : 'Please try again.';
+          alert('Unable to Update Item: ' + message);
         });
     }
 
@@ -1946,11 +2038,15 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const code = currentPriceEdit.code;
       db.ref(menuOverrideItemPath(code)).remove()
         .then(()=>{
-          showPriceToast('Price reset to default.');
+          showPriceToast('Item reset to default.');
           closeEditPriceModal();
+          updateOrderSummary();
+          syncTicketCounters();
         })
-        .catch(()=>{
-          alert('Unable to reset price. Please try again.');
+        .catch(err=>{
+          console.error('Unable to reset item override', err);
+          const message = err && err.message ? err.message : 'Please try again.';
+          alert('Unable to reset item: ' + message);
         });
     }
 
