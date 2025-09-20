@@ -151,22 +151,30 @@
       background-size:cover;background-position:center;
     }
     .logo{width:260px;margin-bottom:10px;z-index:2;position:relative}
-    .qr-container{
-      background:rgba(255,255,255,.9);padding:20px;border-radius:16px;box-shadow:0 4px 10px rgba(0,0,0,.1);text-align:center;z-index:2
+    .display-container{
+      display:none;grid-template-columns:1.1fr 0.9fr;gap:24px;max-width:1280px;margin:auto;padding:24px;width:100%;z-index:2
     }
-    .display-payment-method{
-      font-size:28px;margin-bottom:6px;color:#333;font-weight:bold;
-      display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;text-align:center
+    .display-left{
+      background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 160px);overflow:auto
     }
-    .display-payment-method img{height:60px}
+    .display-right{
+      background:#fff;border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;box-shadow:0 4px 12px rgba(0,0,0,.06);max-height:calc(100vh - 160px);overflow:auto
+    }
+    .display-order-header{font-size:24px;font-weight:700;color:var(--brand)}
+    .display-order-items{display:flex;flex-direction:column;gap:12px}
+    .display-order-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+    .display-order-info{display:flex;flex-direction:column;gap:4px}
+    .display-order-name{font-size:18px;font-weight:600;color:#222}
+    .display-order-meta{font-size:14px;color:#666}
+    .display-order-line-total{font-size:18px;font-weight:700;color:#222}
+    .display-left-total-row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:16px;border-top:1px solid #e5e5e5;font-size:20px;font-weight:700;color:var(--brand)}
+    .display-left-empty{font-size:18px;color:#555;text-align:center;padding:40px 0}
+    .display-total{font-size:clamp(36px,6vw,64px);font-weight:800;color:var(--brand)}
+    .display-memo{font-size:clamp(16px,2.6vw,24px);color:#333}
+    .display-qr{max-width:360px;width:100%;height:auto}
+    .display-right-logo{width:240px;max-width:100%;height:auto}
+    .qr-missing{font-size:20px;color:var(--danger);font-weight:bold;text-align:center}
     .display-zelle-logo{height:64px;object-fit:contain}
-    .display-account-label{font-size:22px;font-weight:600;color:#333}
-    .memo-number-display{font-size:72px;font-weight:700;color:var(--brand);margin-top:8px;display:none}
-    .display-qr-image-holder{margin-top:12px;display:flex;justify-content:center}
-    .display-qr-image-holder img{max-width:260px;width:100%;height:auto;object-fit:contain}
-    .qr-missing{font-size:20px;color:var(--danger);font-weight:bold}
-    #total-price{font-size:64px;margin:12px 0 0;color:var(--brand);font-weight:bold}
-    .zelle-instructions{font-size:18px;margin-top:8px;color:#333;line-height:1.4;text-align:center}
     .quote-container{
       position:absolute;bottom:20px;width:80%;text-align:center;background:rgba(255,255,255,.72);
       padding:10px;border-radius:10px;font-family:'Noto Sans Bengali',sans-serif;font-size:22px;color:#333;animation:fadeInOut 10s infinite
@@ -308,11 +316,9 @@
   <!-- Display Section (for Display Mode) -->
   <div class="qr-section">
     <img src="https://assets.cdn.filesafe.space/slWdpqUTRhMfisMySSJ0/media/66f7050f5b684e16ab132d41.jpeg" alt="Company Logo" class="logo">
-    <div class="qr-container">
-      <div class="display-payment-method" id="display-payment-method"></div>
-      <p style="font-size: 48px; color: #b8100d; font-weight: bold;">$<span id="total-price">0</span></p>
-      <div id="memo-number-display" class="memo-number-display"></div>
-      <div class="zelle-instructions" id="zelle-instructions" style="display:none"></div>
+    <div class="display-container" id="display-container">
+      <div class="display-left" id="display-order-list"></div>
+      <div class="display-right" id="display-payment-panel"></div>
     </div>
     <div class="quote-container" id="quote-container"></div>
   </div>
@@ -508,7 +514,6 @@
     };
     const TICKET_COLOR_KEYS = Object.keys(TICKET_COLOR_META);
 
-
     // Zelle account state
     let activeZelleAccount = null;
     let zelleAccountConfig = {};
@@ -638,12 +643,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         document.querySelector('.bottom-tabs').style.display='flex';
         document.querySelector('.qr-section').style.display='none';
         if(currentOrderRef){ currentOrderRef.off(); currentOrderRef=null; }
-        document.getElementById('display-payment-method').innerHTML='';
-        document.getElementById('total-price').innerText='';
-        const zDisplayInfo = document.getElementById('zelle-instructions');
-        if(zDisplayInfo){ zDisplayInfo.style.display='none'; zDisplayInfo.innerHTML=''; }
-        const memoEl = document.getElementById('memo-number-display');
-        if(memoEl){ memoEl.style.display='none'; memoEl.innerText=''; }
+        resetDisplayPanels();
         clearInterval(quoteInterval);
       }else{
         document.body.classList.add('display-mode');
@@ -653,63 +653,160 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         document.querySelector('.bottom-tabs').style.display='none';
         document.querySelector('.qr-section').style.display='flex';
         updateZelleAccountDisplay();
+        resetDisplayPanels();
 
         currentOrderRef = firebase.database().ref('currentOrder');
         currentOrderRef.on('value',(snapshot)=>{
-          const data = snapshot.val();
-          const display = document.getElementById('display-payment-method');
-          const zInst = document.getElementById('zelle-instructions');
-          const memoEl = document.getElementById('memo-number-display');
-          const totalEl = document.getElementById('total-price');
-          const quoteEl = document.getElementById('quote-container');
-
-          display.innerHTML = '';
-          if(zInst){ zInst.style.display='none'; zInst.innerHTML=''; }
-          if(memoEl){ memoEl.style.display='none'; memoEl.innerText=''; }
-
-          if(data && data.total && data.paymentMethod){
-            if(totalEl) totalEl.innerText = data.total;
-            if(quoteEl) quoteEl.style.display='none';
-
-            if(data.paymentMethod==='Zelle'){
-              const accountCode = data.zelleAccount || activeZelleAccount;
-              const info = getZelleAccountInfo(accountCode) || {};
-              const logo = document.createElement('img');
-              logo.src = 'https://i.postimg.cc/v4407Z6z/Zelle-payment-service-Logo-wine-1.png';
-              logo.alt = 'Zelle logo';
-              logo.className = 'display-zelle-logo';
-              display.appendChild(logo);
-
-              const accountLabel = document.createElement('div');
-              accountLabel.className = 'display-account-label';
-              accountLabel.textContent = accountCode ? `Account: ${accountCode}` : 'Account not set';
-              display.appendChild(accountLabel);
-
-              if(memoEl && data.orderNumber){
-                memoEl.innerText = data.orderNumber;
-                memoEl.style.display='block';
-              }
-
-              if(zInst){
-                const qrUrl = info.qr || '';
-                zInst.style.display='block';
-                if(qrUrl){
-                  zInst.innerHTML = `<div class="display-qr-image-holder"><img src="${qrUrl}" alt="${accountCode || 'Zelle'} QR"></div>`;
-                }else{
-                  zInst.innerHTML = `<div class="display-qr-image-holder"><div class="qr-missing">QR not set</div></div>`;
-                }
-              }
-            }else{
-              const lbl = document.createElement('span');
-              lbl.textContent = data.paymentMethod==='Cash' ? 'CASH' : data.paymentMethod.toUpperCase();
-              display.appendChild(lbl);
-            }
-          }else{
-            if(totalEl) totalEl.innerText='';
-            if(quoteEl) quoteEl.style.display='block';
-          }
+          renderDisplayState(snapshot.val());
         });
         rotateQuotes();
+      }
+    }
+
+    function resetDisplayPanels(){
+      const container = document.getElementById('display-container');
+      const left = document.getElementById('display-order-list');
+      const right = document.getElementById('display-payment-panel');
+      if(left) left.innerHTML='';
+      if(right){
+        right.innerHTML='';
+        right.style.display='none';
+      }
+      if(container) container.style.display='none';
+      const quoteEl = document.getElementById('quote-container');
+      if(quoteEl) quoteEl.style.display='block';
+    }
+
+    function renderDisplayState(data){
+      const container = document.getElementById('display-container');
+      const left = document.getElementById('display-order-list');
+      const right = document.getElementById('display-payment-panel');
+      const quoteEl = document.getElementById('quote-container');
+      if(!container || !left || !right) return;
+
+      const formatMoney = (value)=>{
+        const num = Number(value);
+        return Number.isFinite(num) ? num.toFixed(2) : '0.00';
+      };
+
+      const items = Array.isArray(data && data.items) ? data.items : [];
+      const totalValue = formatMoney(data && data.total);
+      const hasItems = items.length>0;
+      const paymentMethod = data && data.paymentMethod;
+      const showRight = paymentMethod==='Zelle' || paymentMethod==='Cash';
+      const shouldShow = hasItems || showRight;
+
+      if(!shouldShow){
+        if(container) container.style.display='none';
+        if(left) left.innerHTML='';
+        if(right){
+          right.innerHTML='';
+          right.style.display='none';
+        }
+        if(quoteEl) quoteEl.style.display='block';
+        return;
+      }
+
+      container.style.display='grid';
+      if(quoteEl) quoteEl.style.display='none';
+
+      left.innerHTML='';
+      if(hasItems){
+        const header = document.createElement('div');
+        header.className='display-order-header';
+        header.textContent='Current Order';
+        left.appendChild(header);
+
+        const list = document.createElement('div');
+        list.className='display-order-items';
+        items.forEach(item=>{
+          const qty = Number(item.quantity) || 0;
+          const price = Number(item.price) || 0;
+          const row = document.createElement('div');
+          row.className='display-order-row';
+
+          const info = document.createElement('div');
+          info.className='display-order-info';
+          const name = document.createElement('div');
+          name.className='display-order-name';
+          name.textContent = item.name || '';
+          const meta = document.createElement('div');
+          meta.className='display-order-meta';
+          meta.textContent = `${qty} × $${formatMoney(price)}`;
+          info.appendChild(name);
+          info.appendChild(meta);
+
+          const lineTotal = document.createElement('div');
+          lineTotal.className='display-order-line-total';
+          lineTotal.textContent = `$${formatMoney(qty * price)}`;
+
+          row.appendChild(info);
+          row.appendChild(lineTotal);
+          list.appendChild(row);
+        });
+        left.appendChild(list);
+
+        const totalRow = document.createElement('div');
+        totalRow.className='display-left-total-row';
+        totalRow.innerHTML = `<span>Total</span><span>$${totalValue}</span>`;
+        left.appendChild(totalRow);
+      }else{
+        const empty = document.createElement('div');
+        empty.className='display-left-empty';
+        empty.textContent = 'No items yet.';
+        left.appendChild(empty);
+      }
+
+      if(showRight){
+        right.style.display='flex';
+        right.innerHTML='';
+        if(paymentMethod==='Zelle'){
+          const logo = document.createElement('img');
+          logo.src = 'https://i.postimg.cc/v4407Z6z/Zelle-payment-service-Logo-wine-1.png';
+          logo.alt = 'Zelle logo';
+          logo.className='display-zelle-logo';
+          right.appendChild(logo);
+
+          const totalEl = document.createElement('div');
+          totalEl.className='display-total';
+          totalEl.textContent = `$${totalValue}`;
+          right.appendChild(totalEl);
+
+          const memo = document.createElement('div');
+          memo.className='display-memo';
+          memo.textContent = `Memo: ${data && data.orderNumber ? data.orderNumber : '—'}`;
+          right.appendChild(memo);
+
+          const accountCode = (data && data.zelleAccount) || activeZelleAccount;
+          const info = getZelleAccountInfo(accountCode) || {};
+          const qrUrl = info.qr;
+          if(qrUrl){
+            const qr = document.createElement('img');
+            qr.src = qrUrl;
+            qr.alt = 'Zelle QR';
+            qr.className='display-qr';
+            right.appendChild(qr);
+          }else{
+            const missing = document.createElement('div');
+            missing.className='qr-missing';
+            missing.textContent = 'QR not set';
+            right.appendChild(missing);
+          }
+        }else if(paymentMethod==='Cash'){
+          const logo = document.createElement('img');
+          logo.src = 'https://assets.cdn.filesafe.space/slWdpqUTRhMfisMySSJ0/media/66f7050f5b684e16ab132d41.jpeg';
+          logo.alt = 'Company Logo';
+          logo.className='logo display-right-logo';
+          right.appendChild(logo);
+
+          const totalEl = document.createElement('div');
+          totalEl.className='display-total';
+          totalEl.textContent = `$${totalValue}`;
+          right.appendChild(totalEl);
+        }
+      }else{
+        right.innerHTML='';
+        right.style.display='none';
       }
     }
 
@@ -784,6 +881,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         listEl.appendChild(row);
       });
       totalEl.innerText = total.toFixed(2);
+      syncCurrentOrderBroadcast();
     }
 
     function syncTicketCounters(){
@@ -801,6 +899,25 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       });
     }
 
+    function buildCurrentOrderItemsSnapshot(){
+      return orderList.map(item=>({
+        code:item.code,
+        name:item.name,
+        price:item.price,
+        ticketColor:item.ticketColor || null,
+        quantity:item.quantity
+      }));
+    }
+
+    function syncCurrentOrderBroadcast(){
+      if(!db) return;
+      const payload = {
+        items: buildCurrentOrderItemsSnapshot(),
+        total: total.toFixed(2)
+      };
+      db.ref('currentOrder').update(payload);
+    }
+
     /* ==========================
        Payment Flow (Cash / Zelle)
        ========================== */
@@ -813,13 +930,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       }
 
       orderNumber = Number(orderNumber)+1; // keep original per-day sequence
-      const orderItemsSnapshot = orderList.map(item=>({
-        name:item.name,
-        code:item.code,
-        price:item.price,
-        ticketColor:item.ticketColor || null,
-        quantity:item.quantity
-      }));
+      const orderItemsSnapshot = buildCurrentOrderItemsSnapshot();
       const orderDetails = {
         orderNumber,
         items: orderItemsSnapshot,
@@ -838,7 +949,12 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       saveOrderToFirebase(orderDetails);
 
       // Update Display device
-      const currentOrderPayload = { total: total.toFixed(2), paymentMethod: method, orderNumber };
+      const currentOrderPayload = {
+        items: orderItemsSnapshot,
+        total: total.toFixed(2),
+        paymentMethod: method,
+        orderNumber
+      };
       if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
       db.ref('currentOrder').set(currentOrderPayload);
 
