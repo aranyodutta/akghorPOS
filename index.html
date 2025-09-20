@@ -252,14 +252,35 @@
       flex-direction:column;gap:4px;min-width:140px
     }
     .account-total-card.active{border-color:var(--brand);box-shadow:0 0 0 2px rgba(184,16,13,.15)}
-    .zelle-switch-log-container{margin-top:16px}
-    .zelle-switch-log-container h3{margin:0 0 6px;font-size:16px;color:#333}
-    .zelle-switch-log{display:flex;flex-direction:column;gap:6px}
-    .switch-log-entry{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #ddd;border-radius:6px;padding:6px 10px;font-size:12px;color:#333}
-    .switch-log-time{font-weight:bold}
-    .switch-log-arrow{color:#555}
-    .switch-log-empty{font-size:12px;color:#666}
-
+    .zelle-top-layout{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;margin-top:16px}
+    .zelle-left-stack{flex:1 1 460px;min-width:320px;display:flex;flex-direction:column;gap:12px}
+    .switch-log-card{
+      flex:0 0 260px;max-width:320px;background:#fff;border:1px solid rgba(184,16,13,.25);
+      border-radius:12px;padding:14px;box-shadow:0 6px 16px rgba(0,0,0,.05)
+    }
+    .switch-log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .switch-log-header h3{margin:0;font-size:15px;color:#b0100d}
+    .switch-log-clear{
+      background:transparent;border:none;color:#b0100d;font-size:12px;font-weight:600;cursor:pointer;
+      padding:4px 6px;border-radius:6px
+    }
+    .switch-log-clear:hover{background:rgba(184,16,13,.1)}
+    .switch-log-list{display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto}
+    .switch-log-row{
+      display:grid;grid-template-columns:1fr 1.1fr auto;gap:8px;align-items:center;font-size:12px;
+      padding:6px 8px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,.06);
+      box-shadow:0 1px 2px rgba(0,0,0,.05)
+    }
+    .switch-log-row:hover{background:rgba(184,16,13,.06)}
+    .switch-log-time{color:#4b5563;font-weight:600}
+    .switch-log-arrow{text-align:right;color:#b0100d;font-weight:600}
+    .switch-log-delete{
+      background:transparent;border:none;color:#b0100d;font-size:14px;cursor:pointer;line-height:1;padding:2px 4px;
+      border-radius:50%
+    }
+    .switch-log-delete:hover{background:rgba(184,16,13,.1)}
+    .switch-log-empty{font-size:12px;color:#666;padding:6px 0}
+    
     /* Analytics */
     .analytics{display:none;padding:20px}
     .analytics-summary{display:flex;justify-content:center;margin-bottom:20px}
@@ -396,16 +417,28 @@
         <button id="ze-sun" onclick="switchDaySubtab('SUN','ze')">Sunday</button>
       </div>
     </div>
-    <div class="zelle-account-control">
-      <div class="current-account-row">
-        <strong>Current Account:</strong>
-        <span id="current-zelle-account">—</span>
-        <span id="current-zelle-account-detail" class="current-account-detail" style="display:none"></span>
+    <div class="zelle-top-layout">
+      <div class="zelle-left-stack">
+        <div class="zelle-account-control">
+          <div class="current-account-row">
+            <strong>Current Account:</strong>
+            <span id="current-zelle-account">—</span>
+            <span id="current-zelle-account-detail" class="current-account-detail" style="display:none"></span>
+          </div>
+          <div id="zelle-account-buttons" class="zelle-account-buttons"></div>
+        </div>
+        <div class="controls-row" style="margin-top:12px">
+          <button onclick="downloadZelleCSV()">Download CSV</button>
+        </div>
+        <div id="zelle-account-totals" class="zelle-account-totals"></div>
       </div>
-      <div id="zelle-account-buttons" class="zelle-account-buttons"></div>
-    </div>
-    <div class="controls-row" style="margin-top:12px">
-      <button onclick="downloadZelleCSV()">Download CSV</button>
+      <div class="switch-log-card">
+        <div class="switch-log-header">
+          <h3>Switch Log</h3>
+          <button type="button" id="switch-log-clear-button" class="switch-log-clear" onclick="clearZelleSwitchLog()" style="display:none">Clear log</button>
+        </div>
+        <div id="zelle-switch-log" class="switch-log-list"></div>
+      </div>
     </div>
     <div id="zelle-account-totals" class="zelle-account-totals"></div>
     <div class="zelle-switch-log-container">
@@ -1511,23 +1544,66 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function attachZelleSwitchLogListener(){
       if(zelleSwitchLogRef) zelleSwitchLogRef.off();
-      const container = document.getElementById('zelle-switch-log');
-      if(!container) return;
+      const listEl = document.getElementById('zelle-switch-log');
+      const clearBtn = document.getElementById('switch-log-clear-button');
+      if(clearBtn) clearBtn.style.display='none';
+      if(listEl) listEl.innerHTML = '<div class="switch-log-empty">No switches yet.</div>';
+      if(!listEl) return;
       zelleSwitchLogRef = db.ref(zelleSwitchLogPath());
       zelleSwitchLogRef.on('value',(snap)=>{
+        const list = document.getElementById('zelle-switch-log');
+        const clear = document.getElementById('switch-log-clear-button');
+        if(!list) return;
         const value = snap.val() || {};
         const entries = Object.keys(value).map(key=>({ key, ...(value[key]||{}) }));
         entries.sort((a,b)=>(b.ts||0)-(a.ts||0));
+        list.innerHTML='';
         if(entries.length===0){
-          container.innerHTML = '<div class="switch-log-empty">No switches yet.</div>';
+          list.innerHTML = '<div class="switch-log-empty">No switches yet.</div>';
+          if(clear) clear.style.display='none';
           return;
         }
-        container.innerHTML = entries.map(entry=>{
-          const timeString = entry.ts ? new Date(entry.ts).toLocaleString() : '';
+        if(clear) clear.style.display='inline-flex';
+        entries.forEach(entry=>{
+          const row = document.createElement('div');
+          row.className = 'switch-log-row';
+          const timeSpan = document.createElement('span');
+          timeSpan.className = 'switch-log-time';
+          timeSpan.textContent = entry.ts ? new Date(entry.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+          const arrowSpan = document.createElement('span');
+          arrowSpan.className = 'switch-log-arrow';
           const from = entry.from || '—';
           const to = entry.to || '—';
-          return `<div class="switch-log-entry"><span class="switch-log-time">${timeString}</span><span class="switch-log-arrow">${from} &rarr; ${to}</span></div>`;
-        }).join('');
+          arrowSpan.textContent = `${from} → ${to}`;
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'switch-log-delete';
+          delBtn.textContent = '×';
+          delBtn.addEventListener('click',(evt)=>{
+            evt.stopPropagation();
+            deleteZelleSwitchLogEntry(entry.key);
+          });
+          row.appendChild(timeSpan);
+          row.appendChild(arrowSpan);
+          row.appendChild(delBtn);
+          list.appendChild(row);
+        });
+      });
+    }
+
+    function deleteZelleSwitchLogEntry(id){
+      if(!id) return;
+      db.ref(`${zelleSwitchLogPath()}/${id}`).remove().catch(err=>{
+        console.error('Error deleting switch log entry', err);
+        alert('Unable to delete log entry: ' + err.message);
+      });
+    }
+
+    function clearZelleSwitchLog(){
+      if(!confirm('Clear the entire switch log for this day?')) return;
+      db.ref(zelleSwitchLogPath()).remove().catch(err=>{
+        console.error('Error clearing switch log', err);
+        alert('Unable to clear switch log: ' + err.message);
       });
     }
 
@@ -1967,7 +2043,6 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const zeSun = document.getElementById('ze-sun'); if(zeSun) zeSun.classList.toggle('active', DAY==='SUN');
 
       refreshMenuOverridesListener();
-
 
       latestZelleAccountTotals = {};
       updateZelleAccountTotalsDisplay({});
