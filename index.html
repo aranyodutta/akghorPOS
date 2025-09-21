@@ -189,7 +189,11 @@
     .display-order-name{font-size:18px;font-weight:600;color:#222}
     .display-order-meta{font-size:14px;color:#666}
     .display-order-line-total{font-size:18px;font-weight:700;color:#222}
-    .display-left-total-row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:16px;border-top:1px solid #e5e5e5;font-size:20px;font-weight:700;color:var(--brand)}
+    .display-left-totals{display:flex;flex-direction:column;gap:8px;margin-top:auto;padding-top:16px;border-top:1px solid #e5e5e5}
+    .display-left-total-row{display:flex;justify-content:space-between;align-items:center;font-size:20px;font-weight:700;color:var(--brand)}
+    .display-left-total-row.subtotal{font-size:18px;font-weight:600;color:#111}
+    .display-left-total-row.fee{font-size:18px;font-weight:600;color:var(--warn)}
+    .display-left-total-row.grand{font-size:24px;font-weight:800;color:var(--brand)}
     .display-left-empty{font-size:18px;color:#555;text-align:center;padding:40px 0}
     .display-total{font-size:clamp(36px,6vw,64px);font-weight:800;color:var(--brand)}
     .display-memo{font-size:clamp(16px,2.6vw,24px);color:#333}
@@ -247,6 +251,14 @@
     .zelle-account-button .account-label{font-size:12px;color:#555;font-weight:500}
     .zelle-account-button .account-action{font-size:12px;font-weight:bold;color:inherit}
     .zelle-account-totals{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .zelle-fee-card{background:#fff;border:1px solid rgba(184,16,13,.25);border-radius:12px;padding:14px;box-shadow:0 6px 16px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:12px}
+    .zelle-fee-card h3{margin:0;font-size:15px;color:#b0100d}
+    .zelle-fee-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .zelle-fee-toggle{display:flex;align-items:center;gap:8px;font-weight:600;color:#333}
+    .zelle-fee-toggle input[type="checkbox"]{width:20px;height:20px}
+    .zelle-fee-amount-input{width:120px;padding:8px;border-radius:8px;border:1px solid #d1d5db;font-size:14px}
+    .zelle-fee-save{align-self:flex-start;padding:8px 14px;border:none;border-radius:6px;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
+    .zelle-fee-save:disabled{opacity:.6;cursor:default}
     .account-total-card{
       background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 14px;display:flex;
       flex-direction:column;gap:4px;min-width:140px
@@ -455,6 +467,20 @@
           </div>
           <div id="zelle-account-buttons" class="zelle-account-buttons"></div>
         </div>
+        <div class="zelle-fee-card" aria-labelledby="zelle-fee-heading">
+          <h3 id="zelle-fee-heading">Zelle Fee</h3>
+          <div class="zelle-fee-row">
+            <label class="zelle-fee-toggle" for="zelle-fee-toggle">
+              <input type="checkbox" id="zelle-fee-toggle" onchange="handleZelleFeeToggleChange()" />
+              Enable processing fee
+            </label>
+          </div>
+          <div class="zelle-fee-row">
+            <label for="zelle-fee-amount" style="font-weight:600;color:#333">Fee amount ($)</label>
+            <input type="number" id="zelle-fee-amount" class="zelle-fee-amount-input" min="0" max="20" step="0.50" />
+          </div>
+          <button type="button" class="zelle-fee-save" onclick="saveZelleFeeSettings()">Save</button>
+        </div>
         <div class="controls-row" style="margin-top:12px">
           <button onclick="downloadZelleCSV()">Download CSV</button>
         </div>
@@ -661,6 +687,8 @@
     let zelleAccountConfig = {};
     let zelleConfigRef = null;
     let zelleCurrentAccountRef = null;
+    let zelleFeeConfig = { enabled:false, amountCents:0 };
+    let zelleFeeRef = null;
     let latestZelleAccountTotals = {};
 
     // App state
@@ -995,8 +1023,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
       const items = Array.isArray(data && data.items) ? data.items : [];
       const totalValue = formatMoney(data && data.total);
+      const subtotalValue = formatMoney((data && data.subtotal!==undefined) ? data.subtotal : (data && data.total));
+      const rawFeeCents = Number(data && data.zelleFeeCents);
+      const feeCents = Number.isFinite(rawFeeCents) ? rawFeeCents : 0;
+      const feeValue = (feeCents/100).toFixed(2);
       const hasItems = items.length>0;
       const paymentMethod = data && data.paymentMethod;
+      const feeEnabled = Boolean(data && data.zelleFeeEnabled);
+      const shouldShowFee = paymentMethod==='Zelle' && feeEnabled;
       const showRight = paymentMethod==='Zelle' || paymentMethod==='Cash';
       const displayName = data && typeof data.name === 'string' ? data.name.trim() : '';
       const orderNumberValue = Number(data && data.orderNumber);
@@ -1077,10 +1111,26 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         });
         left.appendChild(list);
 
+        const totalsContainer = document.createElement('div');
+        totalsContainer.className='display-left-totals';
+        if(shouldShowFee){
+          const subtotalRow = document.createElement('div');
+          subtotalRow.className='display-left-total-row subtotal';
+          subtotalRow.innerHTML = `<span>Subtotal</span><span>$${subtotalValue}</span>`;
+          totalsContainer.appendChild(subtotalRow);
+
+          const feeRow = document.createElement('div');
+          feeRow.className='display-left-total-row fee';
+          feeRow.innerHTML = `<span>Processing fee</span><span>$${feeValue}</span>`;
+          totalsContainer.appendChild(feeRow);
+        }
         const totalRow = document.createElement('div');
-        totalRow.className='display-left-total-row';
-        totalRow.innerHTML = `<span>Total</span><span>$${totalValue}</span>`;
-        left.appendChild(totalRow);
+        totalRow.className='display-left-total-row grand';
+        const totalLabel = shouldShowFee ? 'Grand Total' : 'Total';
+        const totalAmount = shouldShowFee ? totalValue : subtotalValue;
+        totalRow.innerHTML = `<span>${totalLabel}</span><span>$${totalAmount}</span>`;
+        totalsContainer.appendChild(totalRow);
+        left.appendChild(totalsContainer);
       }else{
         const empty = document.createElement('div');
         empty.className='display-left-empty';
@@ -1281,14 +1331,19 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function syncCurrentOrderBroadcast(){
       if(!db) return;
+      const subtotalString = round2(total).toFixed(2);
       const payload = {
         items: buildCurrentOrderItemsSnapshot(),
-        total: total.toFixed(2),
+        total: subtotalString,
+        subtotal: subtotalString,
         nextOrderNumber: getNextOrderNumber(),
         orderNumber: null,
         paymentMethod: null,
         zelleAccount: null
       };
+      const feeSnapshot = getZelleFeeSnapshot();
+      payload.zelleFeeEnabled = feeSnapshot.enabled;
+      payload.zelleFeeCents = feeSnapshot.enabled ? feeSnapshot.amountCents : 0;
       payload.name = currentCustomerName ? currentCustomerName : null;
       db.ref('currentOrder').update(payload);
     }
@@ -1382,10 +1437,19 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
       orderNumber = Number(orderNumber)+1; // keep original per-day sequence
       const orderItemsSnapshot = buildCurrentOrderItemsSnapshot();
+      const feeSnapshot = getZelleFeeSnapshot();
+      const subtotalValueNumber = round2(total);
+      const baseTotalCents = Math.max(0, Math.round(subtotalValueNumber * 100));
+      const shouldApplyFee = method==='Zelle' && feeSnapshot.enabled;
+      const appliedFeeCents = shouldApplyFee ? feeSnapshot.amountCents : 0;
+      const finalTotalCents = baseTotalCents + appliedFeeCents;
+      const finalTotalValue = (finalTotalCents/100).toFixed(2);
+      const subtotalString = subtotalValueNumber.toFixed(2);
+
       const orderDetails = {
         orderNumber,
         items: orderItemsSnapshot,
-        total: total.toFixed(2),
+        total: finalTotalValue,
         method,
         passFee: false, // columns remain in Order Log; always false here
         fee: '0.00',    // not used for Zelle/Cash; keeps CSV shape intact
@@ -1394,6 +1458,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         day: DAY
       };
       orderDetails.name = currentCustomerName || null;
+      orderDetails.subtotal = subtotalString;
+      orderDetails.zelleFeeEnabled = shouldApplyFee;
+      orderDetails.zelleFeeCents = appliedFeeCents;
       if(method==='Zelle'){
         orderDetails.zelleStatus = 'PENDING';
         orderDetails.zelleAccount = activeZelleAccount;
@@ -1403,11 +1470,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       // Update Display device
       const currentOrderPayload = {
         items: orderItemsSnapshot,
-        total: total.toFixed(2),
+        total: finalTotalValue,
+        subtotal: subtotalString,
         paymentMethod: method,
         orderNumber,
         nextOrderNumber: getNextOrderNumber(),
-        name: currentCustomerName || null
+        name: currentCustomerName || null,
+        zelleFeeEnabled: shouldApplyFee,
+        zelleFeeCents: appliedFeeCents
       };
       if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
       db.ref('currentOrder').set(currentOrderPayload);
@@ -1598,6 +1668,88 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function zelleControlPath(){ return `zelle/${SEASON}/${DAY}`; }
     function zelleConfigPath(){ return `zelle/${SEASON}/config/accounts`; }
     function zelleCurrentAccountPath(){ return `${zelleControlPath()}/currentAccount`; }
+    function zelleFeeConfigPath(){ return `${zelleControlPath()}/config/fee`; }
+
+    function defaultZelleFeeConfig(){ return { enabled:false, amountCents:0 }; }
+
+    function sanitizeZelleFeeConfig(raw){
+      const base = defaultZelleFeeConfig();
+      if(raw && typeof raw === 'object'){
+        base.enabled = Boolean(raw.enabled);
+        const amt = Number(raw.amountCents);
+        if(Number.isFinite(amt) && amt>=0){
+          const normalized = Math.round(amt);
+          base.amountCents = Math.min(2000, Math.max(0, normalized));
+        }
+      }
+      return base;
+    }
+
+    function applyZelleFeeConfig(raw){
+      zelleFeeConfig = sanitizeZelleFeeConfig(raw);
+      updateZelleFeeForm(zelleFeeConfig);
+    }
+
+    function getZelleFeeSnapshot(){
+      return sanitizeZelleFeeConfig(zelleFeeConfig);
+    }
+
+    function updateZelleFeeForm(config){
+      const toggle = document.getElementById('zelle-fee-toggle');
+      const amount = document.getElementById('zelle-fee-amount');
+      if(toggle) toggle.checked = Boolean(config && config.enabled);
+      if(amount){
+        const dollars = Number(config && config.amountCents ? config.amountCents : 0)/100;
+        amount.value = dollars.toFixed(2);
+      }
+      handleZelleFeeToggleChange();
+    }
+
+    function handleZelleFeeToggleChange(){
+      const toggle = document.getElementById('zelle-fee-toggle');
+      const amount = document.getElementById('zelle-fee-amount');
+      if(!toggle || !amount) return;
+      amount.disabled = !toggle.checked;
+    }
+
+    function refreshZelleFeeListener(){
+      if(!db) return;
+      if(zelleFeeRef) zelleFeeRef.off();
+      zelleFeeRef = db.ref(zelleFeeConfigPath());
+      applyZelleFeeConfig(null);
+      zelleFeeRef.on('value', snapshot=>{
+        applyZelleFeeConfig(snapshot.val());
+      }, error=>{
+        console.error('Unable to load Zelle fee config', error);
+        applyZelleFeeConfig(null);
+        showPriceToast("Couldn't load Zelle fee; using $0.00");
+      });
+    }
+
+    function saveZelleFeeSettings(){
+      const toggle = document.getElementById('zelle-fee-toggle');
+      const amountInput = document.getElementById('zelle-fee-amount');
+      if(!toggle || !amountInput) return;
+      const enabled = Boolean(toggle.checked);
+      let amountValue = parseFloat(amountInput.value);
+      if(isNaN(amountValue)) amountValue = 0;
+      amountValue = Math.max(0, Math.min(20, amountValue));
+      let amountCents = Math.round(amountValue * 100);
+      amountCents = Math.max(0, Math.min(2000, amountCents));
+      amountValue = amountCents/100;
+      amountInput.value = amountValue.toFixed(2);
+      const payload = { enabled, amountCents };
+      db.ref(zelleFeeConfigPath()).set(payload)
+        .then(()=>{
+          zelleFeeConfig = sanitizeZelleFeeConfig(payload);
+          showPriceToast('Zelle fee saved.');
+        })
+        .catch(err=>{
+          console.error('Unable to save Zelle fee', err);
+          const message = err && err.message ? err.message : 'Please try again.';
+          alert('Unable to save Zelle fee: ' + message);
+        });
+    }
     function zelleSwitchLogPath(){ return `${zelleControlPath()}/switchLog`; }
 
     const ZELLE_ACCOUNT_CODES = ['AR','SKD','SC','PD'];
@@ -2357,6 +2509,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       latestZelleAccountTotals = {};
       updateZelleAccountTotalsDisplay({});
       refreshZelleCurrentAccountListener();
+      refreshZelleFeeListener();
 
       // Immediately rebuild the item grid for the new day
       initializeMenuItems();
@@ -2386,6 +2539,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       orderNumber = 0;
       applyCustomerName('', { skipBroadcast:true });
       refreshOrderMetaUI();
+      refreshZelleCurrentAccountListener();
+      refreshZelleFeeListener();
 
       // Mark the active subtab
       if(where==='ot'){
@@ -2561,6 +2716,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       renderZelleAccountButtons();
       loadZelleConfig();
       refreshZelleCurrentAccountListener();
+      refreshZelleFeeListener();
       loadOOSMap();
       loadOrdersFromFirebase();
     }
