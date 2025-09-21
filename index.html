@@ -1554,6 +1554,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         currentMenu().forEach(i=>qty[i.code]='');
         if(o.items){ o.items.forEach(it=>{ const c = it.code || itemCodeMap[it.name]; if(c) qty[c]=it.quantity; }); }
         const nameValue = o.name ? String(o.name).replace(/"/g,'""') : '';
+
         const row = [
           o.orderNumber ?? '',
           `"${timeString}"`,
