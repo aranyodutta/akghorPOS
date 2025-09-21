@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>AK Ghor POS System — 2025</title>
 
   <!-- Firebase SDK v8 (compatible with your current project) -->
@@ -345,6 +346,31 @@
     .display-order-number{font-size:clamp(30px,5vw,52px);font-weight:800;color:var(--brand);text-align:center}
     .display-order-number-inline{font-size:clamp(20px,3.4vw,32px);text-align:left}
     .customer-name-input{width:100%;padding:10px;font-size:18px;border-radius:8px;border:1px solid #d1d5db}
+    
+    /* Mobile tap fixes: prevent passive layers from blocking clicks */
+    #debug-console,
+    .overlay, .backdrop, .modal-backdrop, .screen-blocker, .toast, .banner {
+      pointer-events: none !important;
+    }
+    /* Allow only active overlays to capture taps */
+    .overlay.active,
+    .backdrop.active,
+    .modal-backdrop.active,
+    .screen-blocker.active {
+      pointer-events: auto !important;
+    }
+
+    /* Ensure Display section never blocks POS unless Display Mode is active */
+    .qr-section { pointer-events: none; }
+    .display-mode .qr-section { pointer-events: auto; }
+
+    /* Make sure main UI sits above low z-index layers */
+    .main, .container, .pos { position: relative; z-index: 30; }
+    #debug-console { z-index: 10; }
+
+    /* Mobile ergonomics */
+    html, body { height: 100%; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+    button, .tab-button, .payment-button, .next-button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   </style>
 </head>
 <body>
@@ -387,10 +413,10 @@
         <span class="edit-total-icon" title="Edit Total" onclick="openEditTotalModal()">&#9998;</span>
       </div>
       <div class="payment-buttons">
-        <button class="payment-button" onclick="processPayment('Cash')">Cash</button>
-        <button class="payment-button" onclick="processPayment('Zelle')">Zelle</button>
+        <button class="payment-button" id="btn-pay-cash" onclick="processPayment('Cash')">Cash</button>
+        <button class="payment-button" id="btn-pay-zelle" onclick="processPayment('Zelle')">Zelle</button>
       </div>
-      <button class="next-button" onclick="clearOrder()">Next Customer</button>
+      <button class="next-button" id="btn-next-customer" onclick="clearOrder()">Next Customer</button>
     </div>
   </div>
 
@@ -410,8 +436,8 @@
 
   <!-- Mode Switch -->
   <div style="padding:10px 20px;display:flex;gap:10px;align-items:center;">
-    <button onclick="setMode('POS')">POS Mode (iPad/Computer)</button>
-    <button onclick="setMode('Display')">Display Mode (Phone)</button>
+    <button id="btn-pos-mode" onclick="setMode('POS')">POS Mode (iPad/Computer)</button>
+    <button id="btn-display-mode" onclick="setMode('Display')">Display Mode (Phone)</button>
   </div>
 
   <!-- Order Tracking -->
@@ -2736,6 +2762,52 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     }
 
     function round2(x){ return Math.round((x + Number.EPSILON) * 100)/100; }
+  </script>
+
+  <script>
+  (function(){
+    try {
+      const params = new URLSearchParams(location.search);
+      const forceDisplay = params.get('display') === '1' || location.hash === '#display';
+      if (forceDisplay && typeof setMode === 'function') {
+        // Ensure DOM is ready before toggling
+        window.addEventListener('load', function(){ setMode('Display'); });
+      }
+    } catch (e) {}
+  })();
+  </script>
+
+  <script>
+  /* Guarantee handlers fire on iOS even if an ancestor consumed touch events */
+  function bindTap(el, handler) {
+    if (!el) return;
+    el.addEventListener('click', handler);
+    el.addEventListener('touchend', function(e){
+      try { e.preventDefault(); } catch(_) {}
+      handler(e);
+    }, { passive: false });
+  }
+
+  window.addEventListener('DOMContentLoaded', function(){
+    // Reuse existing inline onclick logic by calling the element's onclick if present
+    function reuseOnclick(ev){
+      const el = ev.currentTarget;
+      if (typeof el.onclick === 'function') {
+        // Call the existing onclick so feature logic remains unchanged
+        el.onclick.call(el, ev);
+      }
+    }
+
+    bindTap(document.getElementById('btn-pay-cash'), reuseOnclick);
+    bindTap(document.getElementById('btn-pay-zelle'), reuseOnclick);
+    bindTap(document.getElementById('btn-next-customer'), reuseOnclick);
+    bindTap(document.getElementById('btn-pos-mode'), reuseOnclick);
+    bindTap(document.getElementById('btn-display-mode'), reuseOnclick);
+
+    // Also bind footer tabs if present (IDs already exist in code)
+    ['pos-tab-button','order-tracking-tab-button','zelle-tab-button','stock-tab-button','analytics-tab-button']
+      .forEach(id => bindTap(document.getElementById(id), reuseOnclick));
+  });
   </script>
 </body>
 </html>
