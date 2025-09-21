@@ -312,6 +312,27 @@
       border:none;background:#eee;border-radius:14px;padding:4px 8px;cursor:pointer;font-weight:bold
     }
     .pill button.active{background:var(--brand);color:#fff}
+    .name-button{
+      padding:8px 12px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;
+      background:rgba(255,255,255,.2);color:#fff;transition:background .2s ease,transform .2s ease
+    }
+    .name-button:hover{background:rgba(255,255,255,.3);transform:translateY(-1px)}
+    .name-button:focus{outline:2px solid #fff;outline-offset:2px}
+    .order-summary-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+    .order-number-display{
+      font-size:20px;font-weight:700;color:var(--brand);margin-bottom:14px;padding:8px 12px;border-radius:10px;
+      background:#fff;border:1px solid rgba(184,16,13,.2);display:inline-flex;gap:6px;align-items:center
+    }
+    .display-name-banner{
+      display:none;position:relative;margin-bottom:16px;padding:10px 20px;border-radius:12px;
+      background:rgba(255,255,255,.9);color:#111;font-size:clamp(20px,3vw,34px);font-weight:700;
+      box-shadow:0 10px 24px rgba(0,0,0,.12);backdrop-filter:blur(4px);z-index:3
+    }
+    .display-name-banner.active{display:inline-flex;animation:displayNameEnter .35s ease forwards}
+    @keyframes displayNameEnter{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
+    .display-order-number{font-size:clamp(30px,5vw,52px);font-weight:800;color:var(--brand);text-align:center}
+    .display-order-number-inline{font-size:clamp(20px,3.4vw,32px);text-align:left}
+    .customer-name-input{width:100%;padding:10px;font-size:18px;border-radius:8px;border:1px solid #d1d5db}
   </style>
 </head>
 <body>
@@ -329,6 +350,8 @@
       <span class="oos-tag">2025</span>
     </div>
 
+    <button id="customer-name-button" class="name-button" type="button" onclick="openCustomerNameModal()">Name</button>
+
     <div class="ticket-section">
       <div class="ticket"><div class="ticket-label ticket-purple">Purple</div><span class="ticket-count" id="ticket-purple-count">0</span></div>
       <div class="ticket"><div class="ticket-label ticket-red">Red</div><span class="ticket-count" id="ticket-red-count">0</span></div>
@@ -342,8 +365,11 @@
     <div class="item-grid" id="item-grid"></div>
 
     <div class="order-summary">
-      <h2>Order Summary</h2>
+      <div class="order-summary-header">
+        <h2 id="current-order-heading">Current Order</h2>
+      </div>
       <div id="order-list"></div>
+      <div id="current-order-number-display" class="order-number-display">Order #<span id="current-order-number">1</span></div>
       <div class="total-amount">
         $<span id="total-price-summary">0.00</span>
         <span class="edit-total-icon" title="Edit Total" onclick="openEditTotalModal()">&#9998;</span>
@@ -359,6 +385,7 @@
   <!-- Display Section (for Display Mode) -->
   <div class="qr-section">
     <img src="https://assets.cdn.filesafe.space/slWdpqUTRhMfisMySSJ0/media/66f7050f5b684e16ab132d41.jpeg" alt="Company Logo" class="logo">
+    <div class="display-name-banner" id="display-name-banner"></div>
     <div class="display-container" id="display-container">
       <div class="display-left" id="display-order-list"></div>
       <div class="display-right" id="display-payment-panel"></div>
@@ -394,6 +421,7 @@
           <tr>
             <th>Order #</th>
             <th>Time</th>
+            <th>Name</th>
             <!-- Item Codes will be auto headers from menuItems -->
             <th id="th-dynamic-start" colspan="1"></th>
             <th>Total</th>
@@ -549,12 +577,27 @@
           <option value="blue">Blue</option>
         </select>
       </div>
-
       <div class="modal-actions">
         <button type="button" class="modal-button secondary" onclick="closeEditPriceModal()">Cancel</button>
         <button type="button" class="modal-button primary" onclick="savePriceOverride()">Save</button>
       </div>
       <button type="button" id="reset-price-button" class="modal-reset" onclick="resetPriceOverride()">Reset to default</button>
+    </div>
+  </div>
+
+  <!-- Customer Name Modal -->
+  <div id="customer-name-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="customer-name-title">
+    <div class="modal-content" role="document">
+      <button class="close-modal-button" onclick="closeCustomerNameModal()" aria-label="Close customer name dialog">&times;</button>
+      <h2 id="customer-name-title">Customer Name</h2>
+      <div style="margin:18px 0 0;text-align:left">
+        <label for="customer-name-input" class="modal-label">Name</label>
+        <input type="text" id="customer-name-input" class="customer-name-input" placeholder="Enter name" maxlength="64">
+      </div>
+      <div class="modal-actions" style="margin-top:20px">
+        <button type="button" class="modal-button secondary" onclick="skipCustomerName()">Skip</button>
+        <button type="button" class="modal-button primary" onclick="saveCustomerName()">Save</button>
+      </div>
     </div>
   </div>
 
@@ -608,6 +651,10 @@
     let currentPriceEdit = null;
     let lastFocusBeforePriceModal = null;
     let priceToastTimeout = null;
+    let currentCustomerName = '';
+    let customerNameModalEl = null;
+    let lastFocusBeforeNameModal = null;
+    let displayNameRef = null;
 
     // Zelle account state
     let activeZelleAccount = null;
@@ -867,6 +914,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(container) container.style.display='none';
       const quoteEl = document.getElementById('quote-container');
       if(quoteEl) quoteEl.style.display='block';
+      const nameBanner = document.getElementById('display-name-banner');
+      if(nameBanner){
+        nameBanner.classList.remove('active');
+        nameBanner.textContent='';
+      }
     }
 
     function buildBrandBadge(options={}){
@@ -933,6 +985,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const left = document.getElementById('display-order-list');
       const right = document.getElementById('display-payment-panel');
       const quoteEl = document.getElementById('quote-container');
+      const displayNameBanner = document.getElementById('display-name-banner');
       if(!container || !left || !right) return;
 
       const formatMoney = (value)=>{
@@ -945,15 +998,24 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const hasItems = items.length>0;
       const paymentMethod = data && data.paymentMethod;
       const showRight = paymentMethod==='Zelle' || paymentMethod==='Cash';
-      const shouldShow = hasItems || showRight;
+      const displayName = data && typeof data.name === 'string' ? data.name.trim() : '';
+      const orderNumberValue = Number(data && data.orderNumber);
+      const nextOrderNumberValue = Number(data && data.nextOrderNumber);
+      const hasOrderNumber = Number.isFinite(orderNumberValue) && orderNumberValue > 0;
+      const hasNextOrderNumber = Number.isFinite(nextOrderNumberValue) && nextOrderNumberValue > 0;
+      const effectiveOrderNumber = hasOrderNumber ? orderNumberValue : (hasNextOrderNumber ? nextOrderNumberValue : null);
+      const shouldShow = hasItems || showRight || Boolean(displayName);
+
+      if(displayNameBanner){
+        displayNameBanner.classList.remove('active');
+        displayNameBanner.textContent='';
+      }
 
       if(!shouldShow){
-        if(container) container.style.display='none';
-        if(left) left.innerHTML='';
-        if(right){
-          right.innerHTML='';
-          right.style.display='none';
-        }
+        container.style.display='none';
+        left.innerHTML='';
+        right.innerHTML='';
+        right.style.display='none';
         if(quoteEl) quoteEl.style.display='block';
         return;
       }
@@ -961,13 +1023,31 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       container.style.display='grid';
       if(quoteEl) quoteEl.style.display='none';
 
-      left.innerHTML='';
-      if(hasItems){
-        const header = document.createElement('div');
-        header.className='display-order-header';
-        header.textContent='Current Order';
-        left.appendChild(header);
+      if(displayNameBanner){
+        if(displayName){
+          displayNameBanner.textContent = displayName;
+          displayNameBanner.classList.remove('active');
+          void displayNameBanner.offsetWidth;
+          displayNameBanner.classList.add('active');
+        }else{
+          displayNameBanner.classList.remove('active');
+        }
+      }
 
+      left.innerHTML='';
+      const header = document.createElement('div');
+      header.className='display-order-header';
+      header.textContent='Current Order';
+      left.appendChild(header);
+
+      if(effectiveOrderNumber){
+        const orderNumberInline = document.createElement('div');
+        orderNumberInline.className='display-order-number display-order-number-inline';
+        orderNumberInline.textContent = `Order #${effectiveOrderNumber}`;
+        left.appendChild(orderNumberInline);
+      }
+
+      if(hasItems){
         const list = document.createElement('div');
         list.className='display-order-items';
         items.forEach(item=>{
@@ -1018,6 +1098,13 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           logo.className='display-zelle-logo';
           right.appendChild(logo);
 
+          if(effectiveOrderNumber){
+            const orderNumberEl = document.createElement('div');
+            orderNumberEl.className='display-order-number';
+            orderNumberEl.textContent = `Order #${effectiveOrderNumber}`;
+            right.appendChild(orderNumberEl);
+          }
+
           const totalEl = document.createElement('div');
           totalEl.className='display-total';
           totalEl.textContent = `$${totalValue}`;
@@ -1025,7 +1112,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
           const memo = document.createElement('div');
           memo.className='display-memo';
-          memo.textContent = `Memo: ${data && data.orderNumber ? data.orderNumber : '—'}`;
+          memo.textContent = `Memo: ${hasOrderNumber ? orderNumberValue : '—'}`;
           right.appendChild(memo);
 
           const accountCode = (data && data.zelleAccount) || activeZelleAccount;
@@ -1053,6 +1140,13 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           logo.alt = 'Company Logo';
           logo.className='logo display-right-logo';
           right.appendChild(logo);
+
+          if(effectiveOrderNumber){
+            const orderNumberEl = document.createElement('div');
+            orderNumberEl.className='display-order-number';
+            orderNumberEl.textContent = `Order #${effectiveOrderNumber}`;
+            right.appendChild(orderNumberEl);
+          }
 
           const totalEl = document.createElement('div');
           totalEl.className='display-total';
@@ -1137,6 +1231,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       });
       totalEl.innerText = total.toFixed(2);
       syncCurrentOrderBroadcast();
+      refreshOrderMetaUI();
     }
 
     function syncTicketCounters(){
@@ -1154,6 +1249,26 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       });
     }
 
+    function getNextOrderNumber(){
+      const base = Number(orderNumber);
+      return Number.isFinite(base) ? base + 1 : 1;
+    }
+
+    function updateCurrentOrderHeading(){
+      const heading = document.getElementById('current-order-heading');
+      if(heading){
+        heading.textContent = currentCustomerName ? `${currentCustomerName} — Order` : 'Current Order';
+      }
+    }
+
+    function refreshOrderMetaUI(){
+      updateCurrentOrderHeading();
+      const numberEl = document.getElementById('current-order-number');
+      if(numberEl){
+        numberEl.textContent = getNextOrderNumber();
+      }
+    }
+
     function buildCurrentOrderItemsSnapshot(){
       return orderList.map(item=>({
         code:item.code,
@@ -1168,9 +1283,90 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(!db) return;
       const payload = {
         items: buildCurrentOrderItemsSnapshot(),
-        total: total.toFixed(2)
+        total: total.toFixed(2),
+        nextOrderNumber: getNextOrderNumber(),
+        orderNumber: null,
+        paymentMethod: null,
+        zelleAccount: null
       };
+      payload.name = currentCustomerName ? currentCustomerName : null;
       db.ref('currentOrder').update(payload);
+    }
+
+    function displayCurrentNamePath(){ return `display/${SEASON}/${DAY}/current/name`; }
+
+    function applyCustomerName(name, options={}){
+      const normalized = typeof name === 'string' ? name.trim() : '';
+      currentCustomerName = normalized;
+      updateCurrentOrderHeading();
+      if(!options.skipBroadcast){
+        syncCurrentOrderBroadcast();
+      }
+      if(options.skipRemote) return;
+      const ref = db.ref(displayCurrentNamePath());
+      if(normalized){
+        ref.set(normalized);
+      }else{
+        ref.remove();
+      }
+    }
+
+    function openCustomerNameModal(){
+      if(!customerNameModalEl){ customerNameModalEl = document.getElementById('customer-name-modal'); }
+      const modal = customerNameModalEl;
+      if(!modal) return;
+      lastFocusBeforeNameModal = document.activeElement;
+      modal.style.display='block';
+      const input = document.getElementById('customer-name-input');
+      if(input){
+        input.value = currentCustomerName;
+        setTimeout(()=>input.focus(),0);
+      }
+      modal.addEventListener('keydown', handleCustomerNameModalKeydown);
+    }
+
+    function closeCustomerNameModal(){
+      if(!customerNameModalEl){ customerNameModalEl = document.getElementById('customer-name-modal'); }
+      const modal = customerNameModalEl;
+      if(!modal) return;
+      modal.style.display='none';
+      modal.removeEventListener('keydown', handleCustomerNameModalKeydown);
+      const input = document.getElementById('customer-name-input');
+      if(input) input.blur();
+      if(lastFocusBeforeNameModal && typeof lastFocusBeforeNameModal.focus === 'function'){
+        lastFocusBeforeNameModal.focus();
+      }
+      lastFocusBeforeNameModal = null;
+    }
+
+    function handleCustomerNameModalKeydown(event){
+      if(event.key === 'Escape'){
+        event.preventDefault();
+        closeCustomerNameModal();
+      }else if(event.key === 'Enter'){
+        event.preventDefault();
+        saveCustomerName();
+      }
+    }
+
+    function saveCustomerName(){
+      const input = document.getElementById('customer-name-input');
+      if(!input) return;
+      applyCustomerName(input.value);
+      closeCustomerNameModal();
+    }
+
+    function skipCustomerName(){
+      closeCustomerNameModal();
+    }
+
+    function refreshDisplayNameListener(){
+      if(displayNameRef){ displayNameRef.off(); }
+      displayNameRef = db.ref(displayCurrentNamePath());
+      displayNameRef.on('value', snapshot=>{
+        const remoteName = snapshot.val();
+        applyCustomerName(remoteName || '', { skipRemote:true });
+      });
     }
 
     /* ==========================
@@ -1197,6 +1393,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         overwritten: isTotalOverwritten,
         day: DAY
       };
+      orderDetails.name = currentCustomerName || null;
       if(method==='Zelle'){
         orderDetails.zelleStatus = 'PENDING';
         orderDetails.zelleAccount = activeZelleAccount;
@@ -1208,12 +1405,15 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         items: orderItemsSnapshot,
         total: total.toFixed(2),
         paymentMethod: method,
-        orderNumber
+        orderNumber,
+        nextOrderNumber: getNextOrderNumber(),
+        name: currentCustomerName || null
       };
       if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
       db.ref('currentOrder').set(currentOrderPayload);
 
       // Operator still presses "Next Customer" when ready (manual step kept)
+      refreshOrderMetaUI();
     }
 
     /* ==========================
@@ -1258,6 +1458,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             .map(o=>Number(o.orderNumber))
             .filter(n=>!isNaN(n));
           orderNumber = remainingNumbers.length ? Math.max(...remainingNumbers) : 0;
+          refreshOrderMetaUI();
         }).catch(err=>{
           console.error('Error deleting order:', err);
           alert('An error occurred while deleting the order.');
@@ -1286,6 +1487,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         }else{
           orderNumber = 0;
         }
+        refreshOrderMetaUI();
       });
     }
 
@@ -1296,6 +1498,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       theadRow.innerHTML = `
         <th>Order #</th>
         <th>Time</th>
+        <th>Name</th>
         ${codes.map(c=>`<th>${c}</th>`).join('')}
         <th>Total</th>
         <th>Payment Method</th>
@@ -1325,9 +1528,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       }
 
       const codes = currentMenu().map(i=>i.code);
+      const displayName = escapeHTML(order && order.name ? order.name : '');
       tr.innerHTML = `
         <td>${order.orderNumber ?? ''}</td>
         <td>${timeString}</td>
+        <td>${displayName}</td>
         ${codes.map(c=>`<td>${itemQuantities[c] ?? ''}</td>`).join('')}
         <td>$${(order.total ?? '0.00')}</td>
         <td>${order.method ?? ''}</td>
@@ -1342,15 +1547,18 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function downloadCSV(){
       let csv = "data:text/csv;charset=utf-8,";
       const codes = currentMenu().map(i=>i.code);
-      csv += "Order #,Time," + codes.join(',') + ",Total,Payment Method,Pass Fee,Fee,Overwritten\n";
+      csv += "Order #,Time,Name," + codes.join(',') + ",Total,Payment Method,Pass Fee,Fee,Overwritten\n";
       Object.values(orderHistory).forEach(o=>{
         const timeString = new Date(o.timestamp || Date.now()).toLocaleString();
         const qty = {};
         currentMenu().forEach(i=>qty[i.code]='');
         if(o.items){ o.items.forEach(it=>{ const c = it.code || itemCodeMap[it.name]; if(c) qty[c]=it.quantity; }); }
+        const nameValue = o.name ? String(o.name).replace(/"/g,'""') : '';
+
         const row = [
           o.orderNumber ?? '',
           `"${timeString}"`,
+          `"${nameValue}"`,
           ...codes.map(c=>qty[c] ?? ''),
           o.total ?? '',
           o.method ?? '',
@@ -1375,6 +1583,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           orderHistory = {};
           orderNumber = 0;
           document.getElementById('order-log').innerHTML='';
+          refreshOrderMetaUI();
         }).catch(err=>{
           console.error('Error clearing orders:', err);
           alert('An error occurred while clearing orders.');
@@ -2066,6 +2275,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       orderList=[]; updateOrderSummary();
       syncTicketCounters();
       isTotalOverwritten=false;
+      applyCustomerName('', { skipBroadcast:true });
       db.ref('currentOrder').remove();
     }
 
@@ -2139,6 +2349,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const zeSun = document.getElementById('ze-sun'); if(zeSun) zeSun.classList.toggle('active', DAY==='SUN');
 
       refreshMenuOverridesListener();
+      refreshDisplayNameListener();
+      orderNumber = 0;
+      applyCustomerName('', { skipBroadcast:true });
+      refreshOrderMetaUI();
 
       latestZelleAccountTotals = {};
       updateZelleAccountTotalsDisplay({});
@@ -2168,6 +2382,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       DAY = next;
 
       refreshMenuOverridesListener();
+      refreshDisplayNameListener();
+      orderNumber = 0;
+      applyCustomerName('', { skipBroadcast:true });
+      refreshOrderMetaUI();
 
       // Mark the active subtab
       if(where==='ot'){
@@ -2326,10 +2544,18 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         if(event.target === editPriceModalEl) closeEditPriceModal();
       });
     }
+    customerNameModalEl = document.getElementById('customer-name-modal');
+    if(customerNameModalEl){
+      customerNameModalEl.addEventListener('click', event=>{
+        if(event.target === customerNameModalEl) closeCustomerNameModal();
+      });
+    }
     function initApp(){
       refreshMenuOverridesListener();
+      refreshDisplayNameListener();
       initializeMenuItems();
       syncTicketCounters();
+      refreshOrderMetaUI();
       setMode('POS');
       ensureZelleConfigSeeded();
       renderZelleAccountButtons();
@@ -2343,6 +2569,16 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     /* ==========================
        Utilities
        ========================== */
+    function escapeHTML(value){
+      if(value === null || value === undefined) return '';
+      return String(value)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#39;');
+    }
+
     function round2(x){ return Math.round((x + Number.EPSILON) * 100)/100; }
   </script>
 </body>
