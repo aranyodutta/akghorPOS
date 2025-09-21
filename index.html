@@ -100,11 +100,18 @@
     }
     .edit-total-icon{cursor:pointer;font-size:18px;color:#333}
 
-    .payment-buttons{display:flex;gap:10px;margin-top:18px}
+    .payment-buttons{display:flex;gap:10px;margin-top:18px;align-items:center}
+    .zelle-payment-actions{display:flex;align-items:center;gap:6px;flex:1}
     .payment-button{
       flex:1;padding:14px;background:var(--brand);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:18px
     }
     .payment-button:hover{background:var(--brand-dark)}
+    .payment-edit-fee{
+      background:none;border:none;padding:0;color:var(--brand);font-size:13px;font-weight:600;cursor:pointer;
+      text-decoration:underline;align-self:center
+    }
+    .payment-edit-fee:hover,.payment-edit-fee:focus{color:var(--brand-dark);text-decoration:none}
+    .payment-edit-fee.active{color:#0f172a}
     .next-button{
       margin-top:14px;padding:14px;background:#333;color:#fff;cursor:pointer;border:none;border-radius:6px;
       text-align:center;width:100%;font-size:18px;font-weight:bold
@@ -197,6 +204,9 @@
     .display-right-logo{width:240px;max-width:100%;height:auto}
     .qr-missing{font-size:20px;color:var(--danger);font-weight:bold;text-align:center}
     .display-zelle-logo{height:64px;object-fit:contain}
+    .display-fee-line{display:flex;justify-content:space-between;width:100%;font-size:clamp(16px,2.6vw,24px);color:#4b5563;font-weight:600;margin-top:8px}
+    .display-fee-line span:last-child{font-variant-numeric:tabular-nums}
+    .display-left-fee-row{display:flex;justify-content:space-between;margin-top:4px;font-size:clamp(14px,2.3vw,20px);color:#4b5563;font-weight:600}
     .quote-container{
       position:absolute;bottom:20px;width:80%;text-align:center;background:rgba(255,255,255,.72);
       padding:10px;border-radius:10px;font-family:'Noto Sans Bengali',sans-serif;font-size:22px;color:#333;animation:fadeInOut 10s infinite
@@ -252,6 +262,57 @@
       flex-direction:column;gap:4px;min-width:140px
     }
     .account-total-card.active{border-color:var(--brand);box-shadow:0 0 0 2px rgba(184,16,13,.15)}
+    .zelle-fee-card{
+      background:#fff;border:1px solid rgba(184,16,13,.2);border-radius:12px;padding:14px 16px;
+      display:flex;flex-direction:column;gap:12px;max-width:320px;box-shadow:0 4px 10px rgba(0,0,0,.04)
+    }
+    .zelle-fee-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .zelle-fee-title{display:flex;flex-direction:column;gap:2px;font-size:14px;color:#111}
+    .zelle-fee-subtitle{font-size:12px;color:#6b7280;font-weight:400}
+    .zelle-fee-toggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:#374151}
+    .zelle-fee-toggle input{
+      appearance:none;width:36px;height:20px;border-radius:999px;background:#d1d5db;position:relative;transition:background .2s ease;
+      outline:none;border:none
+    }
+    .zelle-fee-toggle input::after{
+      content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:999px;background:#fff;
+      transition:transform .2s ease
+    }
+    .zelle-fee-toggle input:checked{background:var(--brand)}
+    .zelle-fee-toggle input:checked::after{transform:translateX(16px)}
+    .zelle-fee-toggle span{font-size:12px}
+    .zelle-fee-body{display:flex;flex-direction:column;gap:6px}
+    .zelle-fee-body label{font-size:12px;font-weight:600;color:#374151;text-align:left}
+    .zelle-fee-body input{
+      padding:8px 10px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;max-width:120px
+    }
+    .zelle-fee-body input:disabled{background:#f3f4f6;color:#9ca3af;cursor:not-allowed}
+    .zelle-auto-card{gap:10px}
+    .zelle-auto-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .zelle-auto-title{display:flex;flex-direction:column;gap:2px;font-size:14px;color:#111}
+    .zelle-auto-subtitle{font-size:12px;color:#6b7280;font-weight:400}
+    .zelle-auto-toggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:#374151}
+    .zelle-auto-toggle input{
+      appearance:none;width:36px;height:20px;border-radius:999px;background:#d1d5db;position:relative;transition:background .2s ease;
+      outline:none;border:none
+    }
+    .zelle-auto-toggle input::after{
+      content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:999px;background:#fff;
+      transition:transform .2s ease
+    }
+    .zelle-auto-toggle input:checked{background:var(--brand)}
+    .zelle-auto-toggle input:checked::after{transform:translateX(16px)}
+    .zelle-auto-toggle span{font-size:12px}
+    .zelle-auto-body{display:flex;flex-direction:column;gap:8px}
+    .zelle-auto-label{font-size:12px;font-weight:600;color:#374151}
+    .zelle-auto-choices{display:flex;flex-wrap:wrap;gap:6px}
+    .zelle-auto-option{
+      border:1px solid var(--brand);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--brand);
+      background:#fff;cursor:pointer;transition:background .2s,color .2s
+    }
+    .zelle-auto-option.active{background:var(--brand);color:#fff}
+    .zelle-auto-option:disabled{opacity:.5;cursor:not-allowed}
+    .zelle-auto-warning{font-size:12px;color:#b0100d;font-weight:600}
     .zelle-top-layout{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;margin-top:16px}
     .zelle-left-stack{flex:1 1 460px;min-width:320px;display:flex;flex-direction:column;gap:12px}
     .switch-log-card{
@@ -267,13 +328,15 @@
     .switch-log-clear:hover{background:rgba(184,16,13,.1)}
     .switch-log-list{display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto}
     .switch-log-row{
-      display:grid;grid-template-columns:1fr 1.1fr auto;gap:8px;align-items:center;font-size:12px;
+      display:grid;grid-template-columns:0.9fr 1fr 0.9fr auto;gap:8px;align-items:center;font-size:12px;
       padding:6px 8px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,.06);
       box-shadow:0 1px 2px rgba(0,0,0,.05)
     }
     .switch-log-row:hover{background:rgba(184,16,13,.06)}
     .switch-log-time{color:#4b5563;font-weight:600}
     .switch-log-arrow{text-align:right;color:#b0100d;font-weight:600}
+    .switch-log-info{font-size:11px;color:#4b5563;font-weight:600;text-transform:uppercase}
+
     .switch-log-delete{
       background:transparent;border:none;color:#b0100d;font-size:14px;cursor:pointer;line-height:1;padding:2px 4px;
       border-radius:50%
@@ -376,7 +439,10 @@
       </div>
       <div class="payment-buttons">
         <button class="payment-button" onclick="processPayment('Cash')">Cash</button>
-        <button class="payment-button" onclick="processPayment('Zelle')">Zelle</button>
+        <div class="zelle-payment-actions">
+          <button class="payment-button" onclick="processPayment('Zelle')">Zelle</button>
+          <button type="button" class="payment-edit-fee" onclick="openZelleFeeOverrideModal(event)">Edit fee</button>
+        </div>
       </div>
       <button class="next-button" onclick="clearOrder()">Next Customer</button>
     </div>
@@ -459,6 +525,40 @@
           <button onclick="downloadZelleCSV()">Download CSV</button>
         </div>
         <div id="zelle-account-totals" class="zelle-account-totals"></div>
+        <div id="zelle-fee-card" class="zelle-fee-card">
+          <div class="zelle-fee-header">
+            <div class="zelle-fee-title">
+              <strong>Zelle Fee</strong>
+              <span class="zelle-fee-subtitle">Flat processing fee per order</span>
+            </div>
+            <label class="zelle-fee-toggle">
+              <input type="checkbox" id="zelle-fee-toggle" />
+              <span id="zelle-fee-toggle-label">Off</span>
+            </label>
+          </div>
+          <div class="zelle-fee-body">
+            <label for="zelle-fee-input">Amount ($)</label>
+            <input type="number" id="zelle-fee-input" min="0" step="0.01" />
+          </div>
+        </div>
+        <div id="zelle-auto-card" class="zelle-fee-card zelle-auto-card">
+          <div class="zelle-auto-header">
+            <div class="zelle-auto-title">
+              <strong>Auto Switch</strong>
+              <span class="zelle-auto-subtitle">Rotate accounts by total processed</span>
+            </div>
+            <label class="zelle-auto-toggle">
+              <input type="checkbox" id="zelle-auto-toggle" />
+              <span id="zelle-auto-toggle-label">Off</span>
+            </label>
+          </div>
+          <div class="zelle-auto-body">
+            <span class="zelle-auto-label">Include Accounts</span>
+            <div class="zelle-auto-choices" id="zelle-auto-accounts"></div>
+            <div class="zelle-auto-warning" id="zelle-auto-warning" style="display:none;">Select at least two accounts.</div>
+          </div>
+        </div>
+
       </div>
       <div class="switch-log-card">
         <div class="switch-log-header">
@@ -585,6 +685,23 @@
     </div>
   </div>
 
+  <!-- Zelle Fee Override Modal -->
+  <div id="zelle-fee-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="zelle-fee-title">
+    <div class="modal-content" role="document">
+      <button class="close-modal-button" onclick="closeZelleFeeOverrideModal()" aria-label="Close Zelle fee dialog">&times;</button>
+      <h2 id="zelle-fee-title">Zelle Fee Override</h2>
+      <div style="margin:18px 0 0;text-align:left">
+        <label for="zelle-fee-override-input" class="modal-label">Fee Amount ($)</label>
+        <input type="number" id="zelle-fee-override-input" step="0.01" min="0" style="width:100%;padding:10px;font-size:18px;">
+      </div>
+      <div class="modal-actions" style="margin-top:20px">
+        <button type="button" class="modal-button secondary" onclick="closeZelleFeeOverrideModal()">Cancel</button>
+        <button type="button" class="modal-button primary" onclick="saveZelleFeeOverride()">Save</button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Customer Name Modal -->
   <div id="customer-name-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="customer-name-title">
     <div class="modal-content" role="document">
@@ -662,6 +779,16 @@
     let zelleConfigRef = null;
     let zelleCurrentAccountRef = null;
     let latestZelleAccountTotals = {};
+    let zelleFeeConfigRef = null;
+    let zelleFeeConfig = { enabled:false, amountCents:0 };
+    let zelleFeeOverrideSet = false;
+    let zelleFeeOverrideCents = 0;
+    let zelleFeeModalEl = null;
+    let lastFocusBeforeZelleFeeModal = null;
+    let zelleAutoConfigRef = null;
+    let zelleAutoConfig = { enabled:false, enabledAccounts:[], cursorIndex:0, stepIndex:0, progressCents:0 };
+    let zelleAutoProgressCents = 0;
+
 
     // App state
     let total = 0;
@@ -883,6 +1010,12 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         if(currentOrderRef){ currentOrderRef.off(); currentOrderRef=null; }
         resetDisplayPanels();
         clearInterval(quoteInterval);
+        initializeZelleFeeCard();
+        attachZelleFeeConfigListener();
+        clearZelleFeeOverride({ skipInputReset:true });
+        ensureZelleAutoConfigSeeded();
+        initializeZelleAutoControls();
+        attachZelleAutoConfigListener();
       }else{
         document.body.classList.add('display-mode');
         document.querySelector('.item-grid').style.display='none';
@@ -995,6 +1128,12 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
       const items = Array.isArray(data && data.items) ? data.items : [];
       const totalValue = formatMoney(data && data.total);
+      const subtotalValue = formatMoney((data && data.subtotal !== undefined) ? data.subtotal : (data && data.total));
+      const zelleFeeCentsRaw = Number(data && data.zelleFeeCents);
+      const zelleFeeCents = Number.isFinite(zelleFeeCentsRaw) ? Math.max(0, Math.round(zelleFeeCentsRaw)) : 0;
+      const zelleFeeApplied = Boolean(data && data.zelleFeeApplied) && zelleFeeCents > 0;
+      const zelleFeeValue = formatMoney(zelleFeeCents/100);
+
       const hasItems = items.length>0;
       const paymentMethod = data && data.paymentMethod;
       const showRight = paymentMethod==='Zelle' || paymentMethod==='Cash';
@@ -1079,8 +1218,16 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
         const totalRow = document.createElement('div');
         totalRow.className='display-left-total-row';
-        totalRow.innerHTML = `<span>Total</span><span>$${totalValue}</span>`;
+        const leftLabel = (paymentMethod==='Zelle' && zelleFeeApplied) ? 'Subtotal' : 'Total';
+        totalRow.innerHTML = `<span>${leftLabel}</span><span>$${subtotalValue}</span>`;
         left.appendChild(totalRow);
+        if(paymentMethod==='Zelle' && zelleFeeApplied){
+          const feeRow = document.createElement('div');
+          feeRow.className='display-left-fee-row';
+          feeRow.innerHTML = `<span>Processing Fee</span><span>$${zelleFeeValue}</span>`;
+          left.appendChild(feeRow);
+        }
+
       }else{
         const empty = document.createElement('div');
         empty.className='display-left-empty';
@@ -1108,6 +1255,13 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           const totalEl = document.createElement('div');
           totalEl.className='display-total';
           totalEl.textContent = `$${totalValue}`;
+          if(zelleFeeApplied){
+            const feeRow = document.createElement('div');
+            feeRow.className='display-fee-line';
+            feeRow.innerHTML = `<span>Processing Fee</span><span>$${zelleFeeValue}</span>`;
+            right.appendChild(feeRow);
+          }
+
           right.appendChild(totalEl);
 
           const memo = document.createElement('div');
@@ -1261,6 +1415,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       }
     }
 
+
     function refreshOrderMetaUI(){
       updateCurrentOrderHeading();
       const numberEl = document.getElementById('current-order-number');
@@ -1281,13 +1436,18 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function syncCurrentOrderBroadcast(){
       if(!db) return;
+      const subtotalString = total.toFixed(2);
       const payload = {
         items: buildCurrentOrderItemsSnapshot(),
-        total: total.toFixed(2),
+        subtotal: subtotalString,
+        total: subtotalString,
         nextOrderNumber: getNextOrderNumber(),
         orderNumber: null,
         paymentMethod: null,
-        zelleAccount: null
+        zelleAccount: null,
+        zelleFeeApplied: false,
+        zelleFeeCents: 0
+
       };
       payload.name = currentCustomerName ? currentCustomerName : null;
       db.ref('currentOrder').update(payload);
@@ -1380,12 +1540,18 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         return;
       }
 
+      const processedAccount = method==='Zelle' ? activeZelleAccount : null;
       orderNumber = Number(orderNumber)+1; // keep original per-day sequence
       const orderItemsSnapshot = buildCurrentOrderItemsSnapshot();
+      const baseTotal = round2(total);
+      let finalTotal = baseTotal;
+      let zelleFeeCents = 0;
+      let zelleFeeApplied = false;
       const orderDetails = {
         orderNumber,
         items: orderItemsSnapshot,
-        total: total.toFixed(2),
+        subtotal: baseTotal.toFixed(2),
+        total: baseTotal.toFixed(2),
         method,
         passFee: false, // columns remain in Order Log; always false here
         fee: '0.00',    // not used for Zelle/Cash; keeps CSV shape intact
@@ -1397,20 +1563,44 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(method==='Zelle'){
         orderDetails.zelleStatus = 'PENDING';
         orderDetails.zelleAccount = activeZelleAccount;
+        zelleFeeCents = getEffectiveZelleFeeCents();
+        if(zelleFeeCents>0){
+          finalTotal = round2(baseTotal + (zelleFeeCents/100));
+          zelleFeeApplied = true;
+        }
+        orderDetails.zelleFeeApplied = zelleFeeApplied;
+        orderDetails.zelleFeeCents = zelleFeeCents;
       }
+      orderDetails.total = finalTotal.toFixed(2);
+
       saveOrderToFirebase(orderDetails);
 
       // Update Display device
       const currentOrderPayload = {
         items: orderItemsSnapshot,
-        total: total.toFixed(2),
+        subtotal: baseTotal.toFixed(2),
+        total: finalTotal.toFixed(2),
+
         paymentMethod: method,
         orderNumber,
         nextOrderNumber: getNextOrderNumber(),
         name: currentCustomerName || null
       };
-      if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
+      if(method==='Zelle'){
+        currentOrderPayload.zelleAccount = activeZelleAccount;
+        currentOrderPayload.zelleFeeApplied = zelleFeeApplied;
+        currentOrderPayload.zelleFeeCents = zelleFeeCents;
+      }else{
+        currentOrderPayload.zelleFeeApplied = false;
+        currentOrderPayload.zelleFeeCents = 0;
+      }
       db.ref('currentOrder').set(currentOrderPayload);
+      if(method==='Zelle'){
+        const orderTotalCents = normalizeCents(finalTotal * 100);
+        handleAutoSwitchAfterOrder(processedAccount, orderTotalCents);
+      }
+      clearZelleFeeOverride({ skipInputReset:true });
+
 
       // Operator still presses "Next Customer" when ready (manual step kept)
       refreshOrderMetaUI();
@@ -1599,6 +1789,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function zelleConfigPath(){ return `zelle/${SEASON}/config/accounts`; }
     function zelleCurrentAccountPath(){ return `${zelleControlPath()}/currentAccount`; }
     function zelleSwitchLogPath(){ return `${zelleControlPath()}/switchLog`; }
+    function zelleFeeConfigPath(){ return `${zelleControlPath()}/config/fee`; }
+
 
     const ZELLE_ACCOUNT_CODES = ['AR','SKD','SC','PD'];
     const ZELLE_ACCOUNT_PLACEHOLDERS = {
@@ -1608,6 +1800,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       SKD:{qr:'https://i.postimg.cc/18QkJ6sH/skd-test.jpg', label:'SKD'}
     };
     const DEFAULT_ZELLE_ACCOUNT = 'AR';
+    const ZELLE_AUTO_THRESHOLDS = [10000,10000,10000,10000,20000,20000,20000,20000];
+    const ZELLE_AUTO_MIN_ACCOUNTS = 2;
+
 
     function firstAvailableZelleAccount(){
       return ZELLE_ACCOUNT_CODES.find(code=>getZelleAccountInfo(code)) || null;
@@ -1695,6 +1890,421 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       });
     }
 
+    function initializeZelleFeeCard(){
+      const toggle = document.getElementById('zelle-fee-toggle');
+      if(toggle){ toggle.addEventListener('change', handleZelleFeeToggleChange); }
+      const input = document.getElementById('zelle-fee-input');
+      if(input){
+        input.addEventListener('change', handleZelleFeeInputChange);
+        input.addEventListener('blur', handleZelleFeeInputBlur);
+      }
+      updateZelleFeeCardUI();
+      refreshZelleFeeOverrideHint();
+    }
+
+    function attachZelleFeeConfigListener(){
+      if(zelleFeeConfigRef) zelleFeeConfigRef.off();
+      zelleFeeConfigRef = db.ref(zelleFeeConfigPath());
+      zelleFeeConfigRef.on('value',(snap)=>{
+        const value = snap.val() || {};
+        const enabled = Boolean(value.enabled);
+        let cents = 0;
+        if(value.amountCents !== undefined){
+          cents = normalizeCents(value.amountCents);
+        }else if(value.amount !== undefined){
+          cents = normalizeCents(parseFloat(value.amount) * 100);
+        }
+        zelleFeeConfig = { enabled, amountCents: cents };
+        updateZelleFeeCardUI();
+        refreshZelleFeeOverrideHint();
+      });
+    }
+
+    function updateZelleFeeCardUI(){
+      const toggle = document.getElementById('zelle-fee-toggle');
+      const label = document.getElementById('zelle-fee-toggle-label');
+      const input = document.getElementById('zelle-fee-input');
+      const enabled = Boolean(zelleFeeConfig && zelleFeeConfig.enabled);
+      const cents = getConfiguredZelleFeeCents();
+      if(toggle){ toggle.checked = enabled; }
+      if(label){ label.textContent = enabled ? 'On' : 'Off'; }
+      if(input){
+        input.value = formatCentsToDollars(cents);
+        input.disabled = !enabled;
+      }
+    }
+
+    function handleZelleFeeToggleChange(event){
+      const enabled = Boolean(event.target && event.target.checked);
+      const previous = { ...(zelleFeeConfig || { enabled:false, amountCents:0 }) };
+      zelleFeeConfig = { ...previous, enabled };
+      updateZelleFeeCardUI();
+      persistZelleFeeConfigPatch({ enabled }).catch(()=>{
+        zelleFeeConfig = previous;
+        updateZelleFeeCardUI();
+      });
+    }
+
+    function handleZelleFeeInputChange(event){
+      const cents = parseDollarsToCents(event.target && event.target.value);
+      const previous = { ...(zelleFeeConfig || { enabled:false, amountCents:0 }) };
+      if(event && event.target){ event.target.value = formatCentsToDollars(cents); }
+      zelleFeeConfig = { ...previous, amountCents: cents };
+      updateZelleFeeCardUI();
+      persistZelleFeeConfigPatch({ amountCents: cents }).catch(()=>{
+        zelleFeeConfig = previous;
+        updateZelleFeeCardUI();
+      });
+    }
+
+    function handleZelleFeeInputBlur(event){
+      if(!event || !event.target) return;
+      const cents = parseDollarsToCents(event.target.value);
+      event.target.value = formatCentsToDollars(cents);
+    }
+
+    function persistZelleFeeConfigPatch(patch){
+      return db.ref(zelleFeeConfigPath()).update(patch).catch(err=>{
+        console.error('Error updating Zelle fee config', err);
+        const message = err && err.message ? err.message : 'Please try again.';
+        alert('Unable to update Zelle fee: ' + message);
+        throw err;
+      });
+    }
+
+    function getConfiguredZelleFeeCents(){
+      const cents = zelleFeeConfig && zelleFeeConfig.amountCents !== undefined ? zelleFeeConfig.amountCents : 0;
+      return normalizeCents(cents);
+    }
+
+    function getEffectiveZelleFeeCents(){
+      if(zelleFeeOverrideSet){
+        return normalizeCents(zelleFeeOverrideCents);
+      }
+      if(!zelleFeeConfig || !zelleFeeConfig.enabled) return 0;
+      return getConfiguredZelleFeeCents();
+    }
+
+    function refreshZelleFeeOverrideHint(){
+      const link = document.querySelector('.payment-edit-fee');
+      if(!link) return;
+      const hasOverride = Boolean(zelleFeeOverrideSet);
+      link.classList.toggle('active', hasOverride);
+      if(hasOverride){
+        link.setAttribute('title', `Fee override: $${formatCentsToDollars(zelleFeeOverrideCents)}`);
+      }else{
+        link.removeAttribute('title');
+      }
+    }
+
+    function openZelleFeeOverrideModal(event){
+      if(event){ event.preventDefault(); }
+      if(!zelleFeeModalEl){ zelleFeeModalEl = document.getElementById('zelle-fee-modal'); }
+      const modal = zelleFeeModalEl;
+      if(!modal) return;
+      lastFocusBeforeZelleFeeModal = event && event.currentTarget ? event.currentTarget : document.activeElement;
+      modal.style.display='block';
+      const input = document.getElementById('zelle-fee-override-input');
+      const cents = zelleFeeOverrideSet ? normalizeCents(zelleFeeOverrideCents) : getConfiguredZelleFeeCents();
+      if(input){
+        input.value = formatCentsToDollars(cents);
+        setTimeout(()=>{ input.focus(); input.select(); }, 0);
+      }
+      modal.addEventListener('keydown', handleZelleFeeOverrideKeydown);
+    }
+
+    function closeZelleFeeOverrideModal(){
+      if(!zelleFeeModalEl){ zelleFeeModalEl = document.getElementById('zelle-fee-modal'); }
+      const modal = zelleFeeModalEl;
+      if(!modal) return;
+      modal.style.display='none';
+      modal.removeEventListener('keydown', handleZelleFeeOverrideKeydown);
+      if(lastFocusBeforeZelleFeeModal && typeof lastFocusBeforeZelleFeeModal.focus === 'function'){
+        lastFocusBeforeZelleFeeModal.focus();
+      }
+      lastFocusBeforeZelleFeeModal = null;
+    }
+
+    function handleZelleFeeOverrideKeydown(event){
+      if(event.key === 'Escape'){
+        event.preventDefault();
+        closeZelleFeeOverrideModal();
+      }else if(event.key === 'Enter'){
+        if(event.target && event.target.tagName === 'INPUT'){
+          event.preventDefault();
+          saveZelleFeeOverride();
+        }
+      }
+    }
+
+    function saveZelleFeeOverride(){
+      const input = document.getElementById('zelle-fee-override-input');
+      if(!input) return;
+      const cents = parseDollarsToCents(input.value);
+      zelleFeeOverrideCents = cents;
+      zelleFeeOverrideSet = true;
+      refreshZelleFeeOverrideHint();
+      closeZelleFeeOverrideModal();
+    }
+
+    function ensureZelleAutoConfigSeeded(){
+      db.ref(zelleAutoConfigPath()).once('value').then(snap=>{
+        if(!snap.exists()){
+          const seed = {
+            enabled:false,
+            enabledAccounts: ZELLE_ACCOUNT_CODES.slice(0),
+            cursorIndex:0,
+            stepIndex:0,
+            progressCents:0
+          };
+          db.ref(zelleAutoConfigPath()).set(seed).catch(err=>{
+            console.error('Error seeding Zelle auto config', err);
+          });
+        }
+      }).catch(err=>{
+        console.error('Error checking Zelle auto config', err);
+      });
+    }
+
+    function initializeZelleAutoControls(){
+      const toggle = document.getElementById('zelle-auto-toggle');
+      if(toggle){ toggle.addEventListener('change', handleZelleAutoToggleChange); }
+      renderZelleAutoAccountOptions();
+      updateZelleAutoUI();
+    }
+
+    function renderZelleAutoAccountOptions(){
+      const container = document.getElementById('zelle-auto-accounts');
+      if(!container) return;
+      container.innerHTML='';
+      ZELLE_ACCOUNT_CODES.forEach(code=>{
+        const btn = document.createElement('button');
+        btn.type='button';
+        btn.className='zelle-auto-option';
+        btn.setAttribute('data-zelle-auto-code', code);
+        btn.textContent = code;
+        btn.addEventListener('click', ()=>toggleZelleAutoAccount(code));
+        container.appendChild(btn);
+      });
+      updateZelleAutoAccountButtons();
+    }
+
+    function updateZelleAutoAccountButtons(){
+      const selected = new Set(getAutoEnabledAccounts());
+      document.querySelectorAll('[data-zelle-auto-code]').forEach(btn=>{
+        const code = btn.getAttribute('data-zelle-auto-code');
+        btn.classList.toggle('active', selected.has(code));
+      });
+    }
+
+    function updateZelleAutoUI(){
+      const toggle = document.getElementById('zelle-auto-toggle');
+      const label = document.getElementById('zelle-auto-toggle-label');
+      const enabled = Boolean(zelleAutoConfig && zelleAutoConfig.enabled);
+      if(toggle) toggle.checked = enabled;
+      if(label) label.textContent = enabled ? 'On' : 'Off';
+      updateZelleAutoAccountButtons();
+      const warning = document.getElementById('zelle-auto-warning');
+      if(warning){
+        warning.style.display = getAutoEnabledAccounts().length < ZELLE_AUTO_MIN_ACCOUNTS ? 'block' : 'none';
+      }
+    }
+
+    function handleZelleAutoToggleChange(event){
+      const enabled = Boolean(event && event.target && event.target.checked);
+      const previous = { ...(zelleAutoConfig || {}) };
+      zelleAutoConfig = { ...previous, enabled };
+      if(enabled){
+        ensureAutoCursorMatchesActive();
+      }else{
+        zelleAutoProgressCents = 0;
+        if(zelleAutoConfig) zelleAutoConfig.progressCents = 0;
+      }
+      updateZelleAutoUI();
+      const patch = {
+        enabled,
+        cursorIndex: zelleAutoConfig.cursorIndex || 0,
+        stepIndex: zelleAutoConfig.stepIndex || 0,
+        progressCents: enabled ? zelleAutoProgressCents : 0
+      };
+      persistZelleAutoConfigPatch(patch).catch(()=>{
+        zelleAutoConfig = previous;
+        zelleAutoProgressCents = normalizeCents(previous && previous.progressCents !== undefined ? previous.progressCents : 0);
+        updateZelleAutoUI();
+      });
+    }
+
+    function toggleZelleAutoAccount(code){
+      if(!code) return;
+      const accounts = getAutoEnabledAccounts();
+      const has = accounts.includes(code);
+      let nextAccounts;
+      if(has){
+        if(accounts.length <= ZELLE_AUTO_MIN_ACCOUNTS){
+          const warning = document.getElementById('zelle-auto-warning');
+          if(warning) warning.style.display='block';
+          return;
+        }
+        nextAccounts = accounts.filter(c=>c!==code);
+      }else{
+        nextAccounts = orderAutoAccounts([...accounts, code]);
+      }
+      const previous = { ...(zelleAutoConfig || {}) };
+      zelleAutoConfig = { ...previous, enabledAccounts: nextAccounts };
+      ensureAutoCursorMatchesActive();
+      updateZelleAutoUI();
+      const patch = {
+        enabledAccounts: nextAccounts,
+        cursorIndex: zelleAutoConfig.cursorIndex,
+        progressCents: zelleAutoProgressCents
+      };
+      persistZelleAutoConfigPatch(patch).catch(()=>{
+        zelleAutoConfig = previous;
+        zelleAutoProgressCents = normalizeCents(previous && previous.progressCents !== undefined ? previous.progressCents : 0);
+        updateZelleAutoUI();
+      });
+    }
+
+    function orderAutoAccounts(list){
+      const ordered = [];
+      ZELLE_ACCOUNT_CODES.forEach(code=>{
+        if(list.includes(code) && !ordered.includes(code)) ordered.push(code);
+      });
+      return ordered;
+    }
+
+    function getAutoEnabledAccounts(){
+      if(!zelleAutoConfig || !Array.isArray(zelleAutoConfig.enabledAccounts) || zelleAutoConfig.enabledAccounts.length===0){
+        return ZELLE_ACCOUNT_CODES.slice(0);
+      }
+      const ordered = orderAutoAccounts(zelleAutoConfig.enabledAccounts);
+      if(ordered.length < ZELLE_AUTO_MIN_ACCOUNTS){
+        return ZELLE_ACCOUNT_CODES.slice(0);
+      }
+      return ordered;
+    }
+
+    function ensureAutoCursorMatchesActive(){
+      const accounts = getAutoEnabledAccounts();
+      if(accounts.length === 0){
+        zelleAutoConfig.cursorIndex = 0;
+        return;
+      }
+      const active = activeZelleAccount;
+      let index = accounts.indexOf(active);
+      if(index === -1) index = 0;
+      zelleAutoConfig.cursorIndex = index;
+    }
+
+    function persistZelleAutoConfigPatch(patch){
+      return db.ref(zelleAutoConfigPath()).update(patch).catch(err=>{
+        console.error('Error updating Zelle auto config', err);
+        const message = err && err.message ? err.message : 'Please try again.';
+        alert('Unable to update auto-switch settings: ' + message);
+        throw err;
+      });
+    }
+
+    function normalizeAutoConfig(raw){
+      const enabled = Boolean(raw && raw.enabled);
+      let accounts = Array.isArray(raw && raw.enabledAccounts) ? orderAutoAccounts(raw.enabledAccounts) : ZELLE_ACCOUNT_CODES.slice(0);
+      if(accounts.length < ZELLE_AUTO_MIN_ACCOUNTS){
+        accounts = ZELLE_ACCOUNT_CODES.slice(0);
+      }
+      let cursorIndex = Number(raw && raw.cursorIndex);
+      if(!Number.isInteger(cursorIndex) || cursorIndex < 0) cursorIndex = 0;
+      let stepIndex = Number(raw && raw.stepIndex);
+      if(!Number.isInteger(stepIndex) || stepIndex < 0) stepIndex = 0;
+      stepIndex = stepIndex % ZELLE_AUTO_THRESHOLDS.length;
+      if(cursorIndex >= accounts.length) cursorIndex = 0;
+      const progressCents = normalizeCents(raw && raw.progressCents);
+      return { enabled, enabledAccounts: accounts, cursorIndex, stepIndex, progressCents };
+    }
+
+    function attachZelleAutoConfigListener(){
+      if(zelleAutoConfigRef) zelleAutoConfigRef.off();
+      zelleAutoConfigRef = db.ref(zelleAutoConfigPath());
+      zelleAutoConfigRef.on('value',(snap)=>{
+        const value = snap.val();
+        if(value){
+          zelleAutoConfig = normalizeAutoConfig(value);
+        }else{
+          zelleAutoConfig = normalizeAutoConfig(null);
+        }
+        zelleAutoProgressCents = normalizeCents(zelleAutoConfig && zelleAutoConfig.progressCents);
+        ensureAutoCursorMatchesActive();
+        updateZelleAutoUI();
+      });
+    }
+
+    function onManualZelleAccountChange(nextAccount){
+      if(!zelleAutoConfig) return;
+      const accounts = getAutoEnabledAccounts();
+      const index = accounts.indexOf(nextAccount);
+      zelleAutoConfig.cursorIndex = index === -1 ? 0 : index;
+      zelleAutoProgressCents = 0;
+      zelleAutoConfig.progressCents = 0;
+      const patch = {
+        cursorIndex: zelleAutoConfig.cursorIndex,
+        progressCents: 0
+      };
+      persistZelleAutoConfigPatch(patch).catch(()=>{});
+      updateZelleAutoUI();
+    }
+
+    function handleAutoSwitchAfterOrder(processedAccount, orderTotalCents){
+      if(!zelleAutoConfig || !zelleAutoConfig.enabled) return;
+      const accounts = getAutoEnabledAccounts();
+      if(accounts.length < ZELLE_AUTO_MIN_ACCOUNTS) return;
+      if(!processedAccount){
+        ensureAutoCursorMatchesActive();
+        return;
+      }
+      let currentIndex = accounts.indexOf(processedAccount);
+      if(currentIndex === -1){
+        ensureAutoCursorMatchesActive();
+        zelleAutoProgressCents = 0;
+        if(zelleAutoConfig) zelleAutoConfig.progressCents = 0;
+        const fallbackAccount = accounts[0];
+        persistZelleAutoConfigPatch({ cursorIndex: zelleAutoConfig.cursorIndex, progressCents: 0 }).catch(()=>{});
+        if(fallbackAccount && fallbackAccount !== activeZelleAccount){
+          persistZelleAccount(fallbackAccount, true, { reason:'auto' });
+          onManualZelleAccountChange(fallbackAccount);
+        }
+        return;
+      }
+      zelleAutoConfig.cursorIndex = currentIndex;
+      zelleAutoProgressCents = normalizeCents(zelleAutoProgressCents + orderTotalCents);
+      const threshold = ZELLE_AUTO_THRESHOLDS[zelleAutoConfig.stepIndex % ZELLE_AUTO_THRESHOLDS.length];
+      if(zelleAutoProgressCents >= threshold){
+        const nextIndex = (currentIndex + 1) % accounts.length;
+        const nextAccount = accounts[nextIndex];
+        const nextStep = (zelleAutoConfig.stepIndex + 1) % ZELLE_AUTO_THRESHOLDS.length;
+        zelleAutoConfig.cursorIndex = nextIndex;
+        zelleAutoConfig.stepIndex = nextStep;
+        zelleAutoProgressCents = 0;
+        zelleAutoConfig.progressCents = 0;
+        persistZelleAutoConfigPatch({
+          cursorIndex: nextIndex,
+          stepIndex: nextStep,
+          progressCents: 0
+        }).catch(()=>{});
+        if(nextAccount && nextAccount !== activeZelleAccount){
+          persistZelleAccount(nextAccount, true, { reason:'auto', at: (threshold/100).toFixed(2) });
+        }
+      }else{
+        if(zelleAutoConfig){
+          zelleAutoConfig.progressCents = zelleAutoProgressCents;
+        }
+        persistZelleAutoConfigPatch({
+          cursorIndex: zelleAutoConfig.cursorIndex,
+          progressCents: zelleAutoProgressCents
+        }).catch(()=>{});
+      }
+      updateZelleAutoUI();
+    }
+
+
     function ensureZelleConfigSeeded(){
       db.ref(zelleConfigPath()).once('value').then(snap=>{
         if(!snap.exists()){
@@ -1707,24 +2317,31 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       });
     }
 
-    function persistZelleAccount(nextAccount, shouldLog){
+    function persistZelleAccount(nextAccount, shouldLog, logOptions={}){
+
       if(!nextAccount) return;
       const prev = activeZelleAccount;
       activeZelleAccount = nextAccount;
       updateZelleAccountDisplay();
       db.ref(zelleCurrentAccountPath()).set(nextAccount);
       if(shouldLog){
-        db.ref(zelleSwitchLogPath()).push({
+        const entry = {
           from: prev || null,
           to: nextAccount,
           ts: firebase.database.ServerValue.TIMESTAMP
-        });
+        };
+        if(logOptions && logOptions.reason) entry.reason = logOptions.reason;
+        if(logOptions && logOptions.at !== undefined) entry.at = logOptions.at;
+        db.ref(zelleSwitchLogPath()).push(entry);
+
       }
     }
 
     function changeZelleAccount(nextAccount){
       if(!nextAccount || nextAccount===activeZelleAccount) return;
-      persistZelleAccount(nextAccount, true);
+      persistZelleAccount(nextAccount, true, { reason:'manual' });
+      onManualZelleAccountChange(nextAccount);
+
     }
 
     function loadZelleConfig(){
@@ -1736,6 +2353,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         const fallback = firstAvailableZelleAccount() || DEFAULT_ZELLE_ACCOUNT;
         if(!activeZelleAccount && fallback){
           persistZelleAccount(fallback, false);
+          onManualZelleAccountChange(fallback);
+
         }else{
           updateZelleAccountDisplay();
         }
@@ -1752,8 +2371,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           updateZelleAccountDisplay();
         }else{
           const fallback = firstAvailableZelleAccount() || DEFAULT_ZELLE_ACCOUNT;
-          if(fallback) persistZelleAccount(fallback, false);
-          else {
+          if(fallback){
+            persistZelleAccount(fallback, false);
+            onManualZelleAccountChange(fallback);
+          }else {
+
             activeZelleAccount = null;
             updateZelleAccountDisplay();
           }
@@ -1840,7 +2462,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           return;
         }
         if(clear) clear.style.display='inline-flex';
-        entries.forEach(entry=>{
+        const limited = entries.slice(0,10);
+        limited.forEach(entry=>{
+
           const row = document.createElement('div');
           row.className = 'switch-log-row';
           const timeSpan = document.createElement('span');
@@ -1851,6 +2475,17 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           const from = entry.from || '—';
           const to = entry.to || '—';
           arrowSpan.textContent = `${from} → ${to}`;
+          const infoSpan = document.createElement('span');
+          infoSpan.className = 'switch-log-info';
+          const reason = (entry.reason || 'manual').toString().toUpperCase();
+          let atText = '';
+          if(entry.at !== undefined && entry.at !== null){
+            const numeric = Number(entry.at);
+            if(Number.isFinite(numeric)) atText = `$${numeric.toFixed(2)}`;
+            else atText = String(entry.at);
+          }
+          infoSpan.textContent = atText ? `${reason} • ${atText}` : reason;
+
           const delBtn = document.createElement('button');
           delBtn.type = 'button';
           delBtn.className = 'switch-log-delete';
@@ -1861,6 +2496,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           });
           row.appendChild(timeSpan);
           row.appendChild(arrowSpan);
+          row.appendChild(infoSpan);
           row.appendChild(delBtn);
           list.appendChild(row);
         });
@@ -2271,6 +2907,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     }
 
     function clearOrder(){
+      clearZelleFeeOverride();
+
       total=0;
       orderList=[]; updateOrderSummary();
       syncTicketCounters();
@@ -2353,6 +2991,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       orderNumber = 0;
       applyCustomerName('', { skipBroadcast:true });
       refreshOrderMetaUI();
+      clearZelleFeeOverride({ skipInputReset:true });
+      attachZelleFeeConfigListener();
+      ensureZelleAutoConfigSeeded();
+      attachZelleAutoConfigListener();
+      zelleAutoProgressCents = 0;
+      if(zelleAutoConfig) zelleAutoConfig.progressCents = 0;
+      updateZelleAutoUI();
+
 
       latestZelleAccountTotals = {};
       updateZelleAccountTotalsDisplay({});
@@ -2386,6 +3032,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       orderNumber = 0;
       applyCustomerName('', { skipBroadcast:true });
       refreshOrderMetaUI();
+      clearZelleFeeOverride({ skipInputReset:true });
+      attachZelleFeeConfigListener();
+      ensureZelleAutoConfigSeeded();
+      attachZelleAutoConfigListener();
+      zelleAutoProgressCents = 0;
+      if(zelleAutoConfig) zelleAutoConfig.progressCents = 0;
+      updateZelleAutoUI();
+
 
       // Mark the active subtab
       if(where==='ot'){
@@ -2544,6 +3198,13 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         if(event.target === editPriceModalEl) closeEditPriceModal();
       });
     }
+    zelleFeeModalEl = document.getElementById('zelle-fee-modal');
+    if(zelleFeeModalEl){
+      zelleFeeModalEl.addEventListener('click', event=>{
+        if(event.target === zelleFeeModalEl) closeZelleFeeOverrideModal();
+      });
+    }
+
     customerNameModalEl = document.getElementById('customer-name-modal');
     if(customerNameModalEl){
       customerNameModalEl.addEventListener('click', event=>{
@@ -2578,6 +3239,25 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         .replace(/"/g,'&quot;')
         .replace(/'/g,'&#39;');
     }
+
+    function normalizeCents(value){
+      const num = Number(value);
+      if(!Number.isFinite(num) || num <= 0) return 0;
+      return Math.round(num);
+    }
+
+    function parseDollarsToCents(value){
+      if(value === null || value === undefined || value === '') return 0;
+      const num = Number(value);
+      if(!Number.isFinite(num) || num < 0) return 0;
+      return normalizeCents(num * 100);
+    }
+
+    function formatCentsToDollars(cents){
+      const normalized = normalizeCents(cents);
+      return (normalized / 100).toFixed(2);
+    }
+
 
     function round2(x){ return Math.round((x + Number.EPSILON) * 100)/100; }
   </script>
