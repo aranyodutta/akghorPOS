@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AK Ghor POS System — 2025</title>
 
   <!-- Firebase SDK v8 (compatible with your current project) -->
@@ -46,6 +47,7 @@
       color:#fff;
       gap:16px;
       flex-wrap:wrap;
+      position:relative;
     }
     .search{min-width:220px;flex:1 1 260px;max-width:420px}
     .search input{
@@ -76,6 +78,21 @@
     .ticket-label.ticket-green{background:#2f9e44;color:#fff}
     .ticket-label.ticket-blue{background:#1c7ed6;color:#fff}
     .ticket-count{font-size:16px;color:#fff}
+
+    .tap-test-button{
+      position:absolute;
+      top:10px;
+      right:20px;
+      padding:8px 12px;
+      border:none;
+      border-radius:6px;
+      background:#fff;
+      color:var(--brand);
+      font-weight:bold;
+      cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,.2);
+    }
+    .tap-test-button:hover{background:#ffe8e7}
 
     /* Layout */
     .container{display:flex}
@@ -161,11 +178,12 @@
     /* Display Mode */
     .display-mode .top-section, .display-mode .bottom-tabs{display:none}
     .qr-section{
-      background:#f9f9f9;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh
+      background:#f9f9f9;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;pointer-events:none
     }
     .display-mode .qr-section{
       background-image:url('https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/durga_puja_background.jpg');
       background-size:cover;background-position:center;
+      pointer-events:auto;
     }
     .logo{width:260px;margin-bottom:10px;z-index:2;position:relative}
     .display-container{
@@ -189,7 +207,11 @@
     .display-order-name{font-size:18px;font-weight:600;color:#222}
     .display-order-meta{font-size:14px;color:#666}
     .display-order-line-total{font-size:18px;font-weight:700;color:#222}
-    .display-left-total-row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:16px;border-top:1px solid #e5e5e5;font-size:20px;font-weight:700;color:var(--brand)}
+    .display-left-totals{display:flex;flex-direction:column;gap:8px;margin-top:auto;padding-top:16px;border-top:1px solid #e5e5e5}
+    .display-left-total-row{display:flex;justify-content:space-between;align-items:center;font-size:20px;font-weight:700;color:var(--brand)}
+    .display-left-total-row.subtotal{font-size:18px;font-weight:600;color:#111}
+    .display-left-total-row.fee{font-size:18px;font-weight:600;color:var(--warn)}
+    .display-left-total-row.grand{font-size:24px;font-weight:800;color:var(--brand)}
     .display-left-empty{font-size:18px;color:#555;text-align:center;padding:40px 0}
     .display-total{font-size:clamp(36px,6vw,64px);font-weight:800;color:var(--brand)}
     .display-memo{font-size:clamp(16px,2.6vw,24px);color:#333}
@@ -247,6 +269,14 @@
     .zelle-account-button .account-label{font-size:12px;color:#555;font-weight:500}
     .zelle-account-button .account-action{font-size:12px;font-weight:bold;color:inherit}
     .zelle-account-totals{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .zelle-fee-card{background:#fff;border:1px solid rgba(184,16,13,.25);border-radius:12px;padding:14px;box-shadow:0 6px 16px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:12px}
+    .zelle-fee-card h3{margin:0;font-size:15px;color:#b0100d}
+    .zelle-fee-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .zelle-fee-toggle{display:flex;align-items:center;gap:8px;font-weight:600;color:#333}
+    .zelle-fee-toggle input[type="checkbox"]{width:20px;height:20px}
+    .zelle-fee-amount-input{width:120px;padding:8px;border-radius:8px;border:1px solid #d1d5db;font-size:14px}
+    .zelle-fee-save{align-self:flex-start;padding:8px 14px;border:none;border-radius:6px;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
+    .zelle-fee-save:disabled{opacity:.6;cursor:default}
     .account-total-card{
       background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 14px;display:flex;
       flex-direction:column;gap:4px;min-width:140px
@@ -333,6 +363,37 @@
     .display-order-number{font-size:clamp(30px,5vw,52px);font-weight:800;color:var(--brand);text-align:center}
     .display-order-number-inline{font-size:clamp(20px,3.4vw,32px);text-align:left}
     .customer-name-input{width:100%;padding:10px;font-size:18px;border-radius:8px;border:1px solid #d1d5db}
+
+    .debug-console{
+      position:fixed;
+      bottom:16px;
+      right:16px;
+      width:320px;
+      max-height:160px;
+      background:rgba(184,16,13,.92);
+      color:#fff;
+      border-radius:12px;
+      padding:10px;
+      font-family:monospace;
+      font-size:12px;
+      box-shadow:0 6px 20px rgba(0,0,0,.3);
+      z-index:4000;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .debug-console h4{
+      margin:0;
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.02em;
+    }
+    .debug-console-log{
+      overflow:auto;
+      flex:1;
+      padding-right:4px;
+    }
+    .debug-console-log div + div{margin-top:4px}
   </style>
 </head>
 <body>
@@ -358,6 +419,7 @@
       <div class="ticket"><div class="ticket-label ticket-green">Green</div><span class="ticket-count" id="ticket-green-count">0</span></div>
       <div class="ticket"><div class="ticket-label ticket-blue">Blue</div><span class="ticket-count" id="ticket-blue-count">0</span></div>
     </div>
+    <button type="button" class="tap-test-button" onclick="handleTapTest()">Tap test</button>
   </div>
 
   <!-- Main -->
@@ -454,6 +516,20 @@
             <span id="current-zelle-account-detail" class="current-account-detail" style="display:none"></span>
           </div>
           <div id="zelle-account-buttons" class="zelle-account-buttons"></div>
+        </div>
+        <div class="zelle-fee-card" aria-labelledby="zelle-fee-heading">
+          <h3 id="zelle-fee-heading">Zelle Fee</h3>
+          <div class="zelle-fee-row">
+            <label class="zelle-fee-toggle" for="zelle-fee-toggle">
+              <input type="checkbox" id="zelle-fee-toggle" onchange="handleZelleFeeToggleChange()" />
+              Enable processing fee
+            </label>
+          </div>
+          <div class="zelle-fee-row">
+            <label for="zelle-fee-amount" style="font-weight:600;color:#333">Fee amount ($)</label>
+            <input type="number" id="zelle-fee-amount" class="zelle-fee-amount-input" min="0" max="20" step="0.50" />
+          </div>
+          <button type="button" class="zelle-fee-save" onclick="saveZelleFeeSettings()">Save</button>
         </div>
         <div class="controls-row" style="margin-top:12px">
           <button onclick="downloadZelleCSV()">Download CSV</button>
@@ -605,7 +681,65 @@
 
   <!-- (Stripe card modal removed for Zelle/Cash flow) -->
 
+  <div class="debug-console" id="debug-console" role="log" aria-live="polite">
+    <h4>Debug Console</h4>
+    <div id="debug-console-log" class="debug-console-log"></div>
+  </div>
+
   <script>
+    /* ==========================
+       Debug Console Helpers
+       ========================== */
+
+    const debugConsoleLogEl = document.getElementById('debug-console-log');
+
+    function appendDebugLine(message){
+      if(!debugConsoleLogEl) return;
+      const line = document.createElement('div');
+      const stamp = new Date().toLocaleTimeString();
+      line.textContent = `[${stamp}] ${message}`;
+      debugConsoleLogEl.appendChild(line);
+      debugConsoleLogEl.scrollTop = debugConsoleLogEl.scrollHeight;
+    }
+
+    function logDebug(message){
+      appendDebugLine(message);
+      if(window && window.console && console.info){
+        console.info('[POS]', message);
+      }
+    }
+
+    window.addEventListener('error', (event)=>{
+      const location = event.filename ? ` (${event.filename}:${event.lineno || 0})` : '';
+      logDebug(`Error event: ${event.message}${location}`);
+    });
+
+    window.onerror = function(message, source, lineno, colno, error){
+      const details = source ? ` (${source}:${lineno || 0}:${colno || 0})` : '';
+      const extra = error && error.stack ? `\n${error.stack}` : '';
+      logDebug(`onerror: ${message}${details}${extra}`);
+    };
+
+    window.addEventListener('unhandledrejection', (event)=>{
+      const reason = event && event.reason;
+      let message = '';
+      if(reason instanceof Error){
+        message = reason.stack || reason.message;
+      }else{
+        try{
+          message = JSON.stringify(reason);
+        }catch(_){
+          message = String(reason);
+        }
+        if(!message || message === 'undefined'){
+          message = String(reason);
+        }
+      }
+      logDebug(`Unhandled rejection: ${message}`);
+    });
+
+    logDebug('Booting POS script…');
+
     /* ==========================
        CONFIG + GLOBAL STATE
        ========================== */
@@ -621,8 +755,36 @@
       appId: "1:791887148716:web:5c8fb06053dcd6e5799109",
       measurementId: "G-7DE60HHEK8"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    logDebug('Initializing Firebase…');
+    let db = null;
+    try{
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      logDebug('Firebase initialized.');
+    }catch(err){
+      logDebug(`Firebase init failed: ${err && err.message ? err.message : err}`);
+      throw err;
+    }
+
+    if(window.Chart){
+      const version = Chart.version || 'unknown';
+      logDebug(`Chart.js ready (v${version}).`);
+    }else{
+      logDebug('Chart.js not available.');
+    }
+
+    async function safeGet(ref, fallback){
+      try{
+        const p = ref.get();
+        const res = await Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),4000))]);
+        return res.exists() ? res.val() : fallback;
+      }catch(e){
+        const refName = ref && typeof ref.toString === 'function' ? ref.toString() : '[unknown ref]';
+        console.warn('safeGet fallback', refName, e);
+        logDebug(`safeGet fallback: ${refName} (${e && e.message ? e.message : e})`);
+        return fallback;
+      }
+    }
 
     // 2025 Season + Day split
     const SEASON = '2025';
@@ -661,6 +823,8 @@
     let zelleAccountConfig = {};
     let zelleConfigRef = null;
     let zelleCurrentAccountRef = null;
+    let zelleFeeConfig = { enabled:false, amountCents:0 };
+    let zelleFeeRef = null;
     let latestZelleAccountTotals = {};
 
     // App state
@@ -995,8 +1159,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
       const items = Array.isArray(data && data.items) ? data.items : [];
       const totalValue = formatMoney(data && data.total);
+      const subtotalValue = formatMoney((data && data.subtotal!==undefined) ? data.subtotal : (data && data.total));
+      const rawFeeCents = Number(data && data.zelleFeeCents);
+      const feeCents = Number.isFinite(rawFeeCents) ? rawFeeCents : 0;
+      const feeValue = (feeCents/100).toFixed(2);
       const hasItems = items.length>0;
       const paymentMethod = data && data.paymentMethod;
+      const feeEnabled = Boolean(data && data.zelleFeeEnabled);
+      const shouldShowFee = paymentMethod==='Zelle' && feeEnabled;
       const showRight = paymentMethod==='Zelle' || paymentMethod==='Cash';
       const displayName = data && typeof data.name === 'string' ? data.name.trim() : '';
       const orderNumberValue = Number(data && data.orderNumber);
@@ -1077,10 +1247,26 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         });
         left.appendChild(list);
 
+        const totalsContainer = document.createElement('div');
+        totalsContainer.className='display-left-totals';
+        if(shouldShowFee){
+          const subtotalRow = document.createElement('div');
+          subtotalRow.className='display-left-total-row subtotal';
+          subtotalRow.innerHTML = `<span>Subtotal</span><span>$${subtotalValue}</span>`;
+          totalsContainer.appendChild(subtotalRow);
+
+          const feeRow = document.createElement('div');
+          feeRow.className='display-left-total-row fee';
+          feeRow.innerHTML = `<span>Processing fee</span><span>$${feeValue}</span>`;
+          totalsContainer.appendChild(feeRow);
+        }
         const totalRow = document.createElement('div');
-        totalRow.className='display-left-total-row';
-        totalRow.innerHTML = `<span>Total</span><span>$${totalValue}</span>`;
-        left.appendChild(totalRow);
+        totalRow.className='display-left-total-row grand';
+        const totalLabel = shouldShowFee ? 'Grand Total' : 'Total';
+        const totalAmount = shouldShowFee ? totalValue : subtotalValue;
+        totalRow.innerHTML = `<span>${totalLabel}</span><span>$${totalAmount}</span>`;
+        totalsContainer.appendChild(totalRow);
+        left.appendChild(totalsContainer);
       }else{
         const empty = document.createElement('div');
         empty.className='display-left-empty';
@@ -1281,14 +1467,19 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function syncCurrentOrderBroadcast(){
       if(!db) return;
+      const subtotalString = round2(total).toFixed(2);
       const payload = {
         items: buildCurrentOrderItemsSnapshot(),
-        total: total.toFixed(2),
+        total: subtotalString,
+        subtotal: subtotalString,
         nextOrderNumber: getNextOrderNumber(),
         orderNumber: null,
         paymentMethod: null,
         zelleAccount: null
       };
+      const feeSnapshot = getZelleFeeSnapshot();
+      payload.zelleFeeEnabled = feeSnapshot.enabled;
+      payload.zelleFeeCents = feeSnapshot.enabled ? feeSnapshot.amountCents : 0;
       payload.name = currentCustomerName ? currentCustomerName : null;
       db.ref('currentOrder').update(payload);
     }
@@ -1382,10 +1573,19 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
       orderNumber = Number(orderNumber)+1; // keep original per-day sequence
       const orderItemsSnapshot = buildCurrentOrderItemsSnapshot();
+      const feeSnapshot = getZelleFeeSnapshot();
+      const subtotalValueNumber = round2(total);
+      const baseTotalCents = Math.max(0, Math.round(subtotalValueNumber * 100));
+      const shouldApplyFee = method==='Zelle' && feeSnapshot.enabled;
+      const appliedFeeCents = shouldApplyFee ? feeSnapshot.amountCents : 0;
+      const finalTotalCents = baseTotalCents + appliedFeeCents;
+      const finalTotalValue = (finalTotalCents/100).toFixed(2);
+      const subtotalString = subtotalValueNumber.toFixed(2);
+
       const orderDetails = {
         orderNumber,
         items: orderItemsSnapshot,
-        total: total.toFixed(2),
+        total: finalTotalValue,
         method,
         passFee: false, // columns remain in Order Log; always false here
         fee: '0.00',    // not used for Zelle/Cash; keeps CSV shape intact
@@ -1394,6 +1594,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         day: DAY
       };
       orderDetails.name = currentCustomerName || null;
+      orderDetails.subtotal = subtotalString;
+      orderDetails.zelleFeeEnabled = shouldApplyFee;
+      orderDetails.zelleFeeCents = appliedFeeCents;
       if(method==='Zelle'){
         orderDetails.zelleStatus = 'PENDING';
         orderDetails.zelleAccount = activeZelleAccount;
@@ -1403,11 +1606,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       // Update Display device
       const currentOrderPayload = {
         items: orderItemsSnapshot,
-        total: total.toFixed(2),
+        total: finalTotalValue,
+        subtotal: subtotalString,
         paymentMethod: method,
         orderNumber,
         nextOrderNumber: getNextOrderNumber(),
-        name: currentCustomerName || null
+        name: currentCustomerName || null,
+        zelleFeeEnabled: shouldApplyFee,
+        zelleFeeCents: appliedFeeCents
       };
       if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
       db.ref('currentOrder').set(currentOrderPayload);
@@ -1598,6 +1804,88 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function zelleControlPath(){ return `zelle/${SEASON}/${DAY}`; }
     function zelleConfigPath(){ return `zelle/${SEASON}/config/accounts`; }
     function zelleCurrentAccountPath(){ return `${zelleControlPath()}/currentAccount`; }
+    function zelleFeeConfigPath(){ return `${zelleControlPath()}/config/fee`; }
+
+    function defaultZelleFeeConfig(){ return { enabled:false, amountCents:0 }; }
+
+    function sanitizeZelleFeeConfig(raw){
+      const base = defaultZelleFeeConfig();
+      if(raw && typeof raw === 'object'){
+        base.enabled = Boolean(raw.enabled);
+        const amt = Number(raw.amountCents);
+        if(Number.isFinite(amt) && amt>=0){
+          const normalized = Math.round(amt);
+          base.amountCents = Math.min(2000, Math.max(0, normalized));
+        }
+      }
+      return base;
+    }
+
+    function applyZelleFeeConfig(raw){
+      zelleFeeConfig = sanitizeZelleFeeConfig(raw);
+      updateZelleFeeForm(zelleFeeConfig);
+    }
+
+    function getZelleFeeSnapshot(){
+      return sanitizeZelleFeeConfig(zelleFeeConfig);
+    }
+
+    function updateZelleFeeForm(config){
+      const toggle = document.getElementById('zelle-fee-toggle');
+      const amount = document.getElementById('zelle-fee-amount');
+      if(toggle) toggle.checked = Boolean(config && config.enabled);
+      if(amount){
+        const dollars = Number(config && config.amountCents ? config.amountCents : 0)/100;
+        amount.value = dollars.toFixed(2);
+      }
+      handleZelleFeeToggleChange();
+    }
+
+    function handleZelleFeeToggleChange(){
+      const toggle = document.getElementById('zelle-fee-toggle');
+      const amount = document.getElementById('zelle-fee-amount');
+      if(!toggle || !amount) return;
+      amount.disabled = !toggle.checked;
+    }
+
+    function refreshZelleFeeListener(){
+      if(!db) return;
+      if(zelleFeeRef) zelleFeeRef.off();
+      zelleFeeRef = db.ref(zelleFeeConfigPath());
+      applyZelleFeeConfig(null);
+      zelleFeeRef.on('value', snapshot=>{
+        applyZelleFeeConfig(snapshot.val());
+      }, error=>{
+        console.error('Unable to load Zelle fee config', error);
+        applyZelleFeeConfig(null);
+        showPriceToast("Couldn't load Zelle fee; using $0.00");
+      });
+    }
+
+    function saveZelleFeeSettings(){
+      const toggle = document.getElementById('zelle-fee-toggle');
+      const amountInput = document.getElementById('zelle-fee-amount');
+      if(!toggle || !amountInput) return;
+      const enabled = Boolean(toggle.checked);
+      let amountValue = parseFloat(amountInput.value);
+      if(isNaN(amountValue)) amountValue = 0;
+      amountValue = Math.max(0, Math.min(20, amountValue));
+      let amountCents = Math.round(amountValue * 100);
+      amountCents = Math.max(0, Math.min(2000, amountCents));
+      amountValue = amountCents/100;
+      amountInput.value = amountValue.toFixed(2);
+      const payload = { enabled, amountCents };
+      db.ref(zelleFeeConfigPath()).set(payload)
+        .then(()=>{
+          zelleFeeConfig = sanitizeZelleFeeConfig(payload);
+          showPriceToast('Zelle fee saved.');
+        })
+        .catch(err=>{
+          console.error('Unable to save Zelle fee', err);
+          const message = err && err.message ? err.message : 'Please try again.';
+          alert('Unable to save Zelle fee: ' + message);
+        });
+    }
     function zelleSwitchLogPath(){ return `${zelleControlPath()}/switchLog`; }
 
     const ZELLE_ACCOUNT_CODES = ['AR','SKD','SC','PD'];
@@ -1695,16 +1983,20 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       });
     }
 
-    function ensureZelleConfigSeeded(){
-      db.ref(zelleConfigPath()).once('value').then(snap=>{
-        if(!snap.exists()){
-          db.ref(zelleConfigPath()).set(ZELLE_ACCOUNT_PLACEHOLDERS).catch(err=>{
+    async function ensureZelleConfigSeeded(){
+      try{
+        const ref = db.ref(zelleConfigPath());
+        const existing = await safeGet(ref, null);
+        if(!existing){
+          await ref.set(ZELLE_ACCOUNT_PLACEHOLDERS).catch(err=>{
             console.error('Error seeding Zelle config', err);
+            logDebug(`Failed to seed Zelle config: ${err && err.message ? err.message : err}`);
           });
         }
-      }).catch(err=>{
+      }catch(err){
         console.error('Error checking Zelle config', err);
-      });
+        logDebug(`Error checking Zelle config: ${err && err.message ? err.message : err}`);
+      }
     }
 
     function persistZelleAccount(nextAccount, shouldLog){
@@ -1887,23 +2179,21 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       db.ref(`${zellePathDay()}/${orderKey}`).update({ zelleStatus: status, zelleCheckedTs: firebase.database.ServerValue.TIMESTAMP });
     }
 
-    function downloadZelleCSV(){
-      db.ref(zellePathDay()).once('value').then(snap=>{
-        const orders = snap.val() || {};
-        const rows = Object.values(orders).filter(o=>o.method==='Zelle');
-        let csv = "data:text/csv;charset=utf-8,Time,Order #,Total,Account,Status\n";
-        rows.forEach(o=>{
-          const t = new Date(o.timestamp || Date.now()).toLocaleString();
-          const account = ZELLE_ACCOUNT_CODES.includes(o.zelleAccount) ? o.zelleAccount : (o.zelleAccount || '');
-          csv += `"${t}",${o.orderNumber||''},${o.total||''},${account},${(o.zelleStatus||'PENDING')}\n`;
-        });
-        const link = document.createElement('a');
-        link.setAttribute('href', encodeURI(csv));
-        link.setAttribute('download', `zelle_${SEASON}_${DAY}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    async function downloadZelleCSV(){
+      const orders = await safeGet(db.ref(zellePathDay()), {});
+      const rows = Object.values(orders).filter(o=>o.method==='Zelle');
+      let csv = "data:text/csv;charset=utf-8,Time,Order #,Total,Account,Status\n";
+      rows.forEach(o=>{
+        const t = new Date(o.timestamp || Date.now()).toLocaleString();
+        const account = ZELLE_ACCOUNT_CODES.includes(o.zelleAccount) ? o.zelleAccount : (o.zelleAccount || '');
+        csv += `"${t}",${o.orderNumber||''},${o.total||''},${account},${(o.zelleStatus||'PENDING')}\n`;
       });
+      const link = document.createElement('a');
+      link.setAttribute('href', encodeURI(csv));
+      link.setAttribute('download', `zelle_${SEASON}_${DAY}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     /* ==========================
@@ -1933,23 +2223,21 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       initializeMenuItems();
     }
 
-    function loadOOSMap(){
+    async function loadOOSMap(){
       const path = stockPathDay();
-      db.ref(path).once('value',(snap)=>{
-        const node = snap.val() || {};
-        currentMenu().forEach(item=>{ oosMap[item.code] = false; });
-        Object.keys(node).forEach(code=>{
-          const arr = Object.values(node[code]||{});
-          if(arr.length){
-            arr.sort((a,b)=>(a.ts||0)-(b.ts||0));
-            const last = arr[arr.length-1];
-            oosMap[code] = !!(last && last.status === 'OOS');
-          } else {
-            oosMap[code] = false;
-          }
-        });
-        initializeMenuItems();
+      const node = await safeGet(db.ref(path), {});
+      currentMenu().forEach(item=>{ oosMap[item.code] = false; });
+      Object.keys(node).forEach(code=>{
+        const arr = Object.values(node[code]||{});
+        if(arr.length){
+          arr.sort((a,b)=>(a.ts||0)-(b.ts||0));
+          const last = arr[arr.length-1];
+          oosMap[code] = !!(last && last.status === 'OOS');
+        } else {
+          oosMap[code] = false;
+        }
       });
+      initializeMenuItems();
     }
 
     /* ==========================
@@ -2030,39 +2318,37 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       });
     }
 
-    function downloadStockCSV(){
-      db.ref(stockPathDay()).once('value',(snap)=>{
-        const byCode = snap.val() || {};
-        const codeNameMap = mapCodeToName();
-        const rows = [];
+    async function downloadStockCSV(){
+      const byCode = await safeGet(db.ref(stockPathDay()), {});
+      const codeNameMap = mapCodeToName();
+      const rows = [];
 
-        Object.keys(byCode).forEach(code=>{
-          const entries = byCode[code] || {};
-          Object.keys(entries).forEach(key=>{
-            const e = entries[key] || {};
-            rows.push([
-              new Date(e.ts||Date.now()).toLocaleString(),
-              e.code || code,
-              e.itemName || e.item || codeNameMap[e.code || code] || '',
-              e.status || ''
-            ]);
-          });
+      Object.keys(byCode).forEach(code=>{
+        const entries = byCode[code] || {};
+        Object.keys(entries).forEach(key=>{
+          const e = entries[key] || {};
+          rows.push([
+            new Date(e.ts||Date.now()).toLocaleString(),
+            e.code || code,
+            e.itemName || e.item || codeNameMap[e.code || code] || '',
+            e.status || ''
+          ]);
         });
-
-        rows.sort((a,b)=> new Date(b[0]) - new Date(a[0]) );
-
-        let csv = "data:text/csv;charset=utf-8,Time,Code,Item,Status\n";
-        rows.forEach(r=>{
-          csv += r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',') + "\n";
-        });
-
-        const link = document.createElement('a');
-        link.setAttribute('href', encodeURI(csv));
-        link.setAttribute('download', `stock_log_${SEASON}_${DAY}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
       });
+
+      rows.sort((a,b)=> new Date(b[0]) - new Date(a[0]) );
+
+      let csv = "data:text/csv;charset=utf-8,Time,Code,Item,Status\n";
+      rows.forEach(r=>{
+        csv += r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',') + "\n";
+      });
+
+      const link = document.createElement('a');
+      link.setAttribute('href', encodeURI(csv));
+      link.setAttribute('download', `stock_log_${SEASON}_${DAY}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     function clearAllStockLog(){
@@ -2357,6 +2643,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       latestZelleAccountTotals = {};
       updateZelleAccountTotalsDisplay({});
       refreshZelleCurrentAccountListener();
+      refreshZelleFeeListener();
 
       // Immediately rebuild the item grid for the new day
       initializeMenuItems();
@@ -2386,6 +2673,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       orderNumber = 0;
       applyCustomerName('', { skipBroadcast:true });
       refreshOrderMetaUI();
+      refreshZelleCurrentAccountListener();
+      refreshZelleFeeListener();
 
       // Mark the active subtab
       if(where==='ot'){
@@ -2422,20 +2711,18 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     /* ==========================
        Analytics (per-day)
        ========================== */
-    function generateAnalytics(){
-      db.ref(ordersPath()).once('value',(snapshot)=>{
-        const orders = snapshot.val() || {};
-        const list = Object.values(orders);
-        const grand = list.reduce((s,o)=>s + parseFloat(o.total||0), 0);
-        document.getElementById('grand-total-sales').innerText = grand.toFixed(2);
+    async function generateAnalytics(){
+      const orders = await safeGet(db.ref(ordersPath()), {});
+      const list = Object.values(orders);
+      const grand = list.reduce((s,o)=>s + parseFloat(o.total||0), 0);
+      document.getElementById('grand-total-sales').innerText = grand.toFixed(2);
 
-        // Draw charts
-        createSalesOverTimeChart(list);
-        createBestSellingItemsChart(list);
-        createPaymentMethodsChart(list);
-        createOrdersOverTimeChart(list);
-        createHourlySalesChart(list);
-      });
+      // Draw charts
+      createSalesOverTimeChart(list);
+      createBestSellingItemsChart(list);
+      createPaymentMethodsChart(list);
+      createOrdersOverTimeChart(list);
+      createHourlySalesChart(list);
     }
 
     // Reusable chart killer (avoid stacking multiple instances)
@@ -2561,6 +2848,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       renderZelleAccountButtons();
       loadZelleConfig();
       refreshZelleCurrentAccountListener();
+      refreshZelleFeeListener();
       loadOOSMap();
       loadOrdersFromFirebase();
     }
@@ -2569,6 +2857,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     /* ==========================
        Utilities
        ========================== */
+    function handleTapTest(){
+      alert('Tap test');
+      logDebug('Tap test button pressed.');
+    }
+
     function escapeHTML(value){
       if(value === null || value === undefined) return '';
       return String(value)
