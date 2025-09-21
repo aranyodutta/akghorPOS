@@ -289,6 +289,7 @@
     }
     .zelle-fee-body input:disabled{background:#f3f4f6;color:#9ca3af;cursor:not-allowed}
     .zelle-auto-card{gap:10px;max-width:300px;margin-left:auto}
+
     .zelle-auto-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
     .zelle-auto-title{display:flex;flex-direction:column;gap:2px;font-size:14px;color:#111}
     .zelle-auto-subtitle{font-size:12px;color:#6b7280;font-weight:400}
@@ -313,6 +314,7 @@
     }
     .zelle-auto-checkbox input{accent-color:var(--brand)}
     .zelle-auto-checkbox span{font-weight:600}
+
     .zelle-auto-warning{font-size:12px;color:#b0100d;font-weight:600}
     .zelle-top-layout{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;margin-top:16px}
     .zelle-left-stack{flex:1 1 460px;min-width:320px;display:flex;flex-direction:column;gap:12px}
@@ -328,6 +330,7 @@
     }
     .switch-log-clear:hover{background:rgba(184,16,13,.1)}
     .switch-log-list{display:flex;flex-direction:column;gap:4px;max-height:240px;overflow-y:auto}
+
     .switch-log-row{
       display:grid;grid-template-columns:0.9fr 1fr 0.9fr auto;gap:8px;align-items:center;font-size:12px;
       padding:6px 8px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,.06);
@@ -337,6 +340,7 @@
     .switch-log-time{color:#4b5563;font-weight:600}
     .switch-log-arrow{text-align:right;color:#b0100d;font-weight:600}
     .switch-log-info{font-size:11px;color:#4b5563;font-weight:600;text-transform:uppercase}
+
     .switch-log-delete{
       background:transparent;border:none;color:#b0100d;font-size:14px;cursor:pointer;line-height:1;padding:2px 4px;
       border-radius:50%
@@ -554,10 +558,12 @@
           </div>
           <div class="zelle-auto-body">
             <span class="zelle-auto-label">⚙️ Included in cycle</span>
+
             <div class="zelle-auto-choices" id="zelle-auto-accounts"></div>
             <div class="zelle-auto-warning" id="zelle-auto-warning" style="display:none;">Select at least two accounts.</div>
           </div>
         </div>
+
       </div>
       <div class="switch-log-card">
         <div class="switch-log-header">
@@ -699,6 +705,7 @@
       </div>
     </div>
   </div>
+
 
   <!-- Customer Name Modal -->
   <div id="customer-name-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="customer-name-title">
@@ -1130,6 +1137,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const zelleFeeCents = Number.isFinite(zelleFeeCentsRaw) ? Math.max(0, Math.round(zelleFeeCentsRaw)) : 0;
       const zelleFeeApplied = Boolean(data && data.zelleFeeApplied) && zelleFeeCents > 0;
       const zelleFeeValue = formatMoney(zelleFeeCents/100);
+
       const hasItems = items.length>0;
       const paymentMethod = data && data.paymentMethod;
       const showRight = paymentMethod==='Zelle' || paymentMethod==='Cash';
@@ -1223,6 +1231,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           feeRow.innerHTML = `<span>Processing Fee</span><span>$${zelleFeeValue}</span>`;
           left.appendChild(feeRow);
         }
+
       }else{
         const empty = document.createElement('div');
         empty.className='display-left-empty';
@@ -1256,6 +1265,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             feeRow.innerHTML = `<span>Processing Fee</span><span>$${zelleFeeValue}</span>`;
             right.appendChild(feeRow);
           }
+
           right.appendChild(totalEl);
 
           const memo = document.createElement('div');
@@ -1512,6 +1522,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       closeCustomerNameModal();
     }
 
+
     function refreshDisplayNameListener(){
       if(displayNameRef){ displayNameRef.off(); }
       displayNameRef = db.ref(displayCurrentNamePath());
@@ -1535,6 +1546,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             return;
           }
         }
+
       }
 
       const processedAccount = method==='Zelle' ? activeZelleAccount : null;
@@ -1569,6 +1581,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         orderDetails.zelleFeeCents = zelleFeeCents;
       }
       orderDetails.total = finalTotal.toFixed(2);
+
       saveOrderToFirebase(orderDetails);
 
       // Update Display device
@@ -1576,6 +1589,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         items: orderItemsSnapshot,
         subtotal: baseTotal.toFixed(2),
         total: finalTotal.toFixed(2),
+
         paymentMethod: method,
         orderNumber,
         nextOrderNumber: getNextOrderNumber(),
@@ -1595,6 +1609,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         handleAutoSwitchAfterOrder(processedAccount, orderTotalCents);
       }
       clearZelleFeeOverride({ skipInputReset:true });
+
 
       // Operator still presses "Next Customer" when ready (manual step kept)
       refreshOrderMetaUI();
@@ -1738,6 +1753,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         currentMenu().forEach(i=>qty[i.code]='');
         if(o.items){ o.items.forEach(it=>{ const c = it.code || itemCodeMap[it.name]; if(c) qty[c]=it.quantity; }); }
         const nameValue = o.name ? String(o.name).replace(/"/g,'""') : '';
+
         const row = [
           o.orderNumber ?? '',
           `"${timeString}"`,
@@ -1786,6 +1802,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function zelleSwitchLogPath(){ return `${zelleControlPath()}/switchLog`; }
     function zelleFeeConfigPath(){ return `${zelleControlPath()}/config/fee`; }
 
+
     const ZELLE_ACCOUNT_CODES = ['AR','SKD','SC','PD'];
     const ZELLE_ACCOUNT_PLACEHOLDERS = {
       AR:{qr:'https://i.postimg.cc/3WyQRYtg/ar-test.jpg', label:'AR'},
@@ -1796,6 +1813,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     const DEFAULT_ZELLE_ACCOUNT = 'AR';
     const ZELLE_AUTO_THRESHOLDS = [10000,10000,10000,10000,20000,20000,20000,20000];
     const ZELLE_AUTO_MIN_ACCOUNTS = 2;
+
 
     function getZelleAccountInfo(account){
       if(!account) return null;
@@ -1841,12 +1859,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function updateZelleAccountButtonsState(){
       const autoEnabled = Boolean(zelleAutoConfig && zelleAutoConfig.enabled);
+
       document.querySelectorAll('[data-zelle-account-button]').forEach(btn=>{
         const acct = btn.getAttribute('data-zelle-account-button');
         const info = getZelleAccountInfo(acct) || {};
         const isActive = acct===activeZelleAccount;
         const labelText = info.label && info.label!==acct ? info.label : '';
         const actionText = autoEnabled ? 'Auto' : (isActive ? 'Current' : 'Change');
+
         btn.innerHTML = `
           <span class="account-code">${acct}</span>
           ${labelText ? `<span class="account-label">${labelText}</span>` : ''}
@@ -1860,6 +1880,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           btn.classList.remove('disabled');
           btn.disabled = isActive;
         }
+
       });
     }
 
@@ -2055,6 +2076,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             stepIndex:0,
             progressCents:0,
             cycleOrder: ZELLE_ACCOUNT_CODES.slice(0)
+
           };
           db.ref(zelleAutoConfigPath()).set(seed).catch(err=>{
             console.error('Error seeding Zelle auto config', err);
@@ -2090,6 +2112,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         label.appendChild(input);
         label.appendChild(span);
         container.appendChild(label);
+
       });
     }
 
@@ -2100,11 +2123,13 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(toggle) toggle.checked = enabled;
       if(label) label.textContent = enabled ? 'On' : 'Off';
       renderZelleAutoAccountOptions();
+
       const warning = document.getElementById('zelle-auto-warning');
       if(warning){
         warning.style.display = getAutoEnabledAccounts().length < ZELLE_AUTO_MIN_ACCOUNTS ? 'block' : 'none';
       }
       updateZelleAccountButtonsState();
+
     }
 
     function handleZelleAutoToggleChange(event){
@@ -2116,6 +2141,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       }
       zelleAutoProgressCents = 0;
       if(zelleAutoConfig) zelleAutoConfig.progressCents = 0;
+
       updateZelleAutoUI();
       const patch = {
         enabled,
@@ -2206,6 +2232,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       activeZelleAccount = null;
       updateZelleAccountDisplay();
       return null;
+
     }
 
     function ensureAutoCursorMatchesActive(){
@@ -2240,6 +2267,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           include[code] = includeRaw[code] === false ? false : true;
         }
       });
+
       let cursorIndex = Number(raw && raw.cursorIndex);
       if(!Number.isInteger(cursorIndex) || cursorIndex < 0) cursorIndex = 0;
       let stepIndex = Number(raw && raw.stepIndex);
@@ -2249,6 +2277,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(cursorIndex >= accounts.length) cursorIndex = 0;
       const progressCents = normalizeCents(raw && raw.progressCents);
       return { enabled, include, cursorIndex, stepIndex, progressCents, cycleOrder: rawCycle };
+
     }
 
     function attachZelleAutoConfigListener(){
@@ -2265,6 +2294,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         ensureAutoCursorMatchesActive();
         updateZelleAutoUI();
         ensureCurrentAccountFallback();
+
       });
     }
 
@@ -2339,6 +2369,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       db.ref(zelleAccountsConfigPath()).once('value').then(snap=>{
         if(!snap.exists()){
           db.ref(zelleAccountsConfigPath()).set(ZELLE_ACCOUNT_PLACEHOLDERS).catch(err=>{
+
             console.error('Error seeding Zelle config', err);
           });
         }
@@ -2348,6 +2379,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     }
 
     function persistZelleAccount(nextAccount, shouldLog, logOptions={}){
+
       if(!nextAccount) return;
       const prev = activeZelleAccount;
       activeZelleAccount = nextAccount;
@@ -2362,6 +2394,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         if(logOptions && logOptions.reason) entry.reason = logOptions.reason;
         if(logOptions && logOptions.at !== undefined) entry.at = logOptions.at;
         db.ref(zelleSwitchLogPath()).push(entry);
+
       }
     }
 
@@ -2369,6 +2402,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(!nextAccount || nextAccount===activeZelleAccount) return;
       persistZelleAccount(nextAccount, true, { reason:'manual' });
       onManualZelleAccountChange(nextAccount);
+
     }
 
     function loadZelleConfig(){
@@ -2379,6 +2413,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         renderZelleAccountButtons();
         ensureCurrentAccountFallback();
         updateZelleAccountDisplay();
+
       });
     }
 
@@ -2395,6 +2430,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           ensureAutoCursorMatchesActive();
         }else{
           ensureCurrentAccountFallback();
+
         }
       });
     }
@@ -2480,6 +2516,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         if(clear) clear.style.display='inline-flex';
         const limited = entries.slice(0,10);
         limited.forEach(entry=>{
+
           const row = document.createElement('div');
           row.className = 'switch-log-row';
           const timeSpan = document.createElement('span');
@@ -2500,6 +2537,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             else atText = String(entry.at);
           }
           infoSpan.textContent = atText ? `${reason} • ${atText}` : reason;
+
           const delBtn = document.createElement('button');
           delBtn.type = 'button';
           delBtn.className = 'switch-log-delete';
@@ -2922,6 +2960,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function clearOrder(){
       clearZelleFeeOverride();
+
       total=0;
       orderList=[]; updateOrderSummary();
       syncTicketCounters();
@@ -3012,6 +3051,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(zelleAutoConfig) zelleAutoConfig.progressCents = 0;
       updateZelleAutoUI();
 
+
       latestZelleAccountTotals = {};
       updateZelleAccountTotalsDisplay({});
       refreshZelleCurrentAccountListener();
@@ -3051,6 +3091,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       zelleAutoProgressCents = 0;
       if(zelleAutoConfig) zelleAutoConfig.progressCents = 0;
       updateZelleAutoUI();
+
 
       // Mark the active subtab
       if(where==='ot'){
@@ -3215,6 +3256,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         if(event.target === zelleFeeModalEl) closeZelleFeeOverrideModal();
       });
     }
+
     customerNameModalEl = document.getElementById('customer-name-modal');
     if(customerNameModalEl){
       customerNameModalEl.addEventListener('click', event=>{
@@ -3267,6 +3309,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const normalized = normalizeCents(cents);
       return (normalized / 100).toFixed(2);
     }
+
 
     function round2(x){ return Math.round((x + Number.EPSILON) * 100)/100; }
   </script>
