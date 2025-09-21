@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AK Ghor POS System — 2025</title>
 
   <!-- Firebase SDK v8 (compatible with your current project) -->
@@ -47,7 +46,6 @@
       color:#fff;
       gap:16px;
       flex-wrap:wrap;
-      position:relative;
     }
     .search{min-width:220px;flex:1 1 260px;max-width:420px}
     .search input{
@@ -78,21 +76,6 @@
     .ticket-label.ticket-green{background:#2f9e44;color:#fff}
     .ticket-label.ticket-blue{background:#1c7ed6;color:#fff}
     .ticket-count{font-size:16px;color:#fff}
-
-    .tap-test-button{
-      position:absolute;
-      top:10px;
-      right:20px;
-      padding:8px 12px;
-      border:none;
-      border-radius:6px;
-      background:#fff;
-      color:var(--brand);
-      font-weight:bold;
-      cursor:pointer;
-      box-shadow:0 2px 6px rgba(0,0,0,.2);
-    }
-    .tap-test-button:hover{background:#ffe8e7}
 
     /* Layout */
     .container{display:flex}
@@ -178,12 +161,11 @@
     /* Display Mode */
     .display-mode .top-section, .display-mode .bottom-tabs{display:none}
     .qr-section{
-      background:#f9f9f9;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;pointer-events:none
+      background:#f9f9f9;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh
     }
     .display-mode .qr-section{
       background-image:url('https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/durga_puja_background.jpg');
       background-size:cover;background-position:center;
-      pointer-events:auto;
     }
     .logo{width:260px;margin-bottom:10px;z-index:2;position:relative}
     .display-container{
@@ -363,37 +345,6 @@
     .display-order-number{font-size:clamp(30px,5vw,52px);font-weight:800;color:var(--brand);text-align:center}
     .display-order-number-inline{font-size:clamp(20px,3.4vw,32px);text-align:left}
     .customer-name-input{width:100%;padding:10px;font-size:18px;border-radius:8px;border:1px solid #d1d5db}
-
-    .debug-console{
-      position:fixed;
-      bottom:16px;
-      right:16px;
-      width:320px;
-      max-height:160px;
-      background:rgba(184,16,13,.92);
-      color:#fff;
-      border-radius:12px;
-      padding:10px;
-      font-family:monospace;
-      font-size:12px;
-      box-shadow:0 6px 20px rgba(0,0,0,.3);
-      z-index:4000;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .debug-console h4{
-      margin:0;
-      font-size:13px;
-      font-weight:700;
-      letter-spacing:.02em;
-    }
-    .debug-console-log{
-      overflow:auto;
-      flex:1;
-      padding-right:4px;
-    }
-    .debug-console-log div + div{margin-top:4px}
   </style>
 </head>
 <body>
@@ -419,7 +370,6 @@
       <div class="ticket"><div class="ticket-label ticket-green">Green</div><span class="ticket-count" id="ticket-green-count">0</span></div>
       <div class="ticket"><div class="ticket-label ticket-blue">Blue</div><span class="ticket-count" id="ticket-blue-count">0</span></div>
     </div>
-    <button type="button" class="tap-test-button" onclick="handleTapTest()">Tap test</button>
   </div>
 
   <!-- Main -->
@@ -681,65 +631,7 @@
 
   <!-- (Stripe card modal removed for Zelle/Cash flow) -->
 
-  <div class="debug-console" id="debug-console" role="log" aria-live="polite">
-    <h4>Debug Console</h4>
-    <div id="debug-console-log" class="debug-console-log"></div>
-  </div>
-
   <script>
-    /* ==========================
-       Debug Console Helpers
-       ========================== */
-
-    const debugConsoleLogEl = document.getElementById('debug-console-log');
-
-    function appendDebugLine(message){
-      if(!debugConsoleLogEl) return;
-      const line = document.createElement('div');
-      const stamp = new Date().toLocaleTimeString();
-      line.textContent = `[${stamp}] ${message}`;
-      debugConsoleLogEl.appendChild(line);
-      debugConsoleLogEl.scrollTop = debugConsoleLogEl.scrollHeight;
-    }
-
-    function logDebug(message){
-      appendDebugLine(message);
-      if(window && window.console && console.info){
-        console.info('[POS]', message);
-      }
-    }
-
-    window.addEventListener('error', (event)=>{
-      const location = event.filename ? ` (${event.filename}:${event.lineno || 0})` : '';
-      logDebug(`Error event: ${event.message}${location}`);
-    });
-
-    window.onerror = function(message, source, lineno, colno, error){
-      const details = source ? ` (${source}:${lineno || 0}:${colno || 0})` : '';
-      const extra = error && error.stack ? `\n${error.stack}` : '';
-      logDebug(`onerror: ${message}${details}${extra}`);
-    };
-
-    window.addEventListener('unhandledrejection', (event)=>{
-      const reason = event && event.reason;
-      let message = '';
-      if(reason instanceof Error){
-        message = reason.stack || reason.message;
-      }else{
-        try{
-          message = JSON.stringify(reason);
-        }catch(_){
-          message = String(reason);
-        }
-        if(!message || message === 'undefined'){
-          message = String(reason);
-        }
-      }
-      logDebug(`Unhandled rejection: ${message}`);
-    });
-
-    logDebug('Booting POS script…');
-
     /* ==========================
        CONFIG + GLOBAL STATE
        ========================== */
@@ -755,36 +647,8 @@
       appId: "1:791887148716:web:5c8fb06053dcd6e5799109",
       measurementId: "G-7DE60HHEK8"
     };
-    logDebug('Initializing Firebase…');
-    let db = null;
-    try{
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.database();
-      logDebug('Firebase initialized.');
-    }catch(err){
-      logDebug(`Firebase init failed: ${err && err.message ? err.message : err}`);
-      throw err;
-    }
-
-    if(window.Chart){
-      const version = Chart.version || 'unknown';
-      logDebug(`Chart.js ready (v${version}).`);
-    }else{
-      logDebug('Chart.js not available.');
-    }
-
-    async function safeGet(ref, fallback){
-      try{
-        const p = ref.get();
-        const res = await Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),4000))]);
-        return res.exists() ? res.val() : fallback;
-      }catch(e){
-        const refName = ref && typeof ref.toString === 'function' ? ref.toString() : '[unknown ref]';
-        console.warn('safeGet fallback', refName, e);
-        logDebug(`safeGet fallback: ${refName} (${e && e.message ? e.message : e})`);
-        return fallback;
-      }
-    }
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
     // 2025 Season + Day split
     const SEASON = '2025';
@@ -1983,20 +1847,16 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       });
     }
 
-    async function ensureZelleConfigSeeded(){
-      try{
-        const ref = db.ref(zelleConfigPath());
-        const existing = await safeGet(ref, null);
-        if(!existing){
-          await ref.set(ZELLE_ACCOUNT_PLACEHOLDERS).catch(err=>{
+    function ensureZelleConfigSeeded(){
+      db.ref(zelleConfigPath()).once('value').then(snap=>{
+        if(!snap.exists()){
+          db.ref(zelleConfigPath()).set(ZELLE_ACCOUNT_PLACEHOLDERS).catch(err=>{
             console.error('Error seeding Zelle config', err);
-            logDebug(`Failed to seed Zelle config: ${err && err.message ? err.message : err}`);
           });
         }
-      }catch(err){
+      }).catch(err=>{
         console.error('Error checking Zelle config', err);
-        logDebug(`Error checking Zelle config: ${err && err.message ? err.message : err}`);
-      }
+      });
     }
 
     function persistZelleAccount(nextAccount, shouldLog){
@@ -2179,21 +2039,23 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       db.ref(`${zellePathDay()}/${orderKey}`).update({ zelleStatus: status, zelleCheckedTs: firebase.database.ServerValue.TIMESTAMP });
     }
 
-    async function downloadZelleCSV(){
-      const orders = await safeGet(db.ref(zellePathDay()), {});
-      const rows = Object.values(orders).filter(o=>o.method==='Zelle');
-      let csv = "data:text/csv;charset=utf-8,Time,Order #,Total,Account,Status\n";
-      rows.forEach(o=>{
-        const t = new Date(o.timestamp || Date.now()).toLocaleString();
-        const account = ZELLE_ACCOUNT_CODES.includes(o.zelleAccount) ? o.zelleAccount : (o.zelleAccount || '');
-        csv += `"${t}",${o.orderNumber||''},${o.total||''},${account},${(o.zelleStatus||'PENDING')}\n`;
+    function downloadZelleCSV(){
+      db.ref(zellePathDay()).once('value').then(snap=>{
+        const orders = snap.val() || {};
+        const rows = Object.values(orders).filter(o=>o.method==='Zelle');
+        let csv = "data:text/csv;charset=utf-8,Time,Order #,Total,Account,Status\n";
+        rows.forEach(o=>{
+          const t = new Date(o.timestamp || Date.now()).toLocaleString();
+          const account = ZELLE_ACCOUNT_CODES.includes(o.zelleAccount) ? o.zelleAccount : (o.zelleAccount || '');
+          csv += `"${t}",${o.orderNumber||''},${o.total||''},${account},${(o.zelleStatus||'PENDING')}\n`;
+        });
+        const link = document.createElement('a');
+        link.setAttribute('href', encodeURI(csv));
+        link.setAttribute('download', `zelle_${SEASON}_${DAY}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       });
-      const link = document.createElement('a');
-      link.setAttribute('href', encodeURI(csv));
-      link.setAttribute('download', `zelle_${SEASON}_${DAY}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
     }
 
     /* ==========================
@@ -2223,21 +2085,23 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       initializeMenuItems();
     }
 
-    async function loadOOSMap(){
+    function loadOOSMap(){
       const path = stockPathDay();
-      const node = await safeGet(db.ref(path), {});
-      currentMenu().forEach(item=>{ oosMap[item.code] = false; });
-      Object.keys(node).forEach(code=>{
-        const arr = Object.values(node[code]||{});
-        if(arr.length){
-          arr.sort((a,b)=>(a.ts||0)-(b.ts||0));
-          const last = arr[arr.length-1];
-          oosMap[code] = !!(last && last.status === 'OOS');
-        } else {
-          oosMap[code] = false;
-        }
+      db.ref(path).once('value',(snap)=>{
+        const node = snap.val() || {};
+        currentMenu().forEach(item=>{ oosMap[item.code] = false; });
+        Object.keys(node).forEach(code=>{
+          const arr = Object.values(node[code]||{});
+          if(arr.length){
+            arr.sort((a,b)=>(a.ts||0)-(b.ts||0));
+            const last = arr[arr.length-1];
+            oosMap[code] = !!(last && last.status === 'OOS');
+          } else {
+            oosMap[code] = false;
+          }
+        });
+        initializeMenuItems();
       });
-      initializeMenuItems();
     }
 
     /* ==========================
@@ -2318,37 +2182,39 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       });
     }
 
-    async function downloadStockCSV(){
-      const byCode = await safeGet(db.ref(stockPathDay()), {});
-      const codeNameMap = mapCodeToName();
-      const rows = [];
+    function downloadStockCSV(){
+      db.ref(stockPathDay()).once('value',(snap)=>{
+        const byCode = snap.val() || {};
+        const codeNameMap = mapCodeToName();
+        const rows = [];
 
-      Object.keys(byCode).forEach(code=>{
-        const entries = byCode[code] || {};
-        Object.keys(entries).forEach(key=>{
-          const e = entries[key] || {};
-          rows.push([
-            new Date(e.ts||Date.now()).toLocaleString(),
-            e.code || code,
-            e.itemName || e.item || codeNameMap[e.code || code] || '',
-            e.status || ''
-          ]);
+        Object.keys(byCode).forEach(code=>{
+          const entries = byCode[code] || {};
+          Object.keys(entries).forEach(key=>{
+            const e = entries[key] || {};
+            rows.push([
+              new Date(e.ts||Date.now()).toLocaleString(),
+              e.code || code,
+              e.itemName || e.item || codeNameMap[e.code || code] || '',
+              e.status || ''
+            ]);
+          });
         });
+
+        rows.sort((a,b)=> new Date(b[0]) - new Date(a[0]) );
+
+        let csv = "data:text/csv;charset=utf-8,Time,Code,Item,Status\n";
+        rows.forEach(r=>{
+          csv += r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',') + "\n";
+        });
+
+        const link = document.createElement('a');
+        link.setAttribute('href', encodeURI(csv));
+        link.setAttribute('download', `stock_log_${SEASON}_${DAY}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       });
-
-      rows.sort((a,b)=> new Date(b[0]) - new Date(a[0]) );
-
-      let csv = "data:text/csv;charset=utf-8,Time,Code,Item,Status\n";
-      rows.forEach(r=>{
-        csv += r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',') + "\n";
-      });
-
-      const link = document.createElement('a');
-      link.setAttribute('href', encodeURI(csv));
-      link.setAttribute('download', `stock_log_${SEASON}_${DAY}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
     }
 
     function clearAllStockLog(){
@@ -2711,18 +2577,20 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     /* ==========================
        Analytics (per-day)
        ========================== */
-    async function generateAnalytics(){
-      const orders = await safeGet(db.ref(ordersPath()), {});
-      const list = Object.values(orders);
-      const grand = list.reduce((s,o)=>s + parseFloat(o.total||0), 0);
-      document.getElementById('grand-total-sales').innerText = grand.toFixed(2);
+    function generateAnalytics(){
+      db.ref(ordersPath()).once('value',(snapshot)=>{
+        const orders = snapshot.val() || {};
+        const list = Object.values(orders);
+        const grand = list.reduce((s,o)=>s + parseFloat(o.total||0), 0);
+        document.getElementById('grand-total-sales').innerText = grand.toFixed(2);
 
-      // Draw charts
-      createSalesOverTimeChart(list);
-      createBestSellingItemsChart(list);
-      createPaymentMethodsChart(list);
-      createOrdersOverTimeChart(list);
-      createHourlySalesChart(list);
+        // Draw charts
+        createSalesOverTimeChart(list);
+        createBestSellingItemsChart(list);
+        createPaymentMethodsChart(list);
+        createOrdersOverTimeChart(list);
+        createHourlySalesChart(list);
+      });
     }
 
     // Reusable chart killer (avoid stacking multiple instances)
@@ -2857,11 +2725,6 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     /* ==========================
        Utilities
        ========================== */
-    function handleTapTest(){
-      alert('Tap test');
-      logDebug('Tap test button pressed.');
-    }
-
     function escapeHTML(value){
       if(value === null || value === undefined) return '';
       return String(value)
@@ -2876,7 +2739,6 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
   </script>
 </body>
 </html>
-
 
 
 
