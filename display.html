@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <title>AK Ghor POS — Display</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f5f7;
+      --panel: #ffffff;
+      --ink: #1f1f1f;
+      --muted: #6b7280;
+      --accent: #17803d;
+      --offline: #9ca3af;
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      color: var(--ink);
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    .page {
+      display: flex;
+      flex-direction: column;
+      padding: clamp(16px, 3vw, 36px);
+      gap: clamp(16px, 2.5vw, 28px);
+      height: 100%;
+      width: 100%;
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .status-badge {
+      font-size: clamp(0.75rem, 1.2vw, 0.95rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .status-badge.offline {
+      background: var(--offline);
+      color: #ffffff;
+    }
+    .last-update {
+      font-size: clamp(0.8rem, 1.4vw, 1rem);
+      color: var(--muted);
+    }
+    .board-wrapper {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+    .board {
+      display: none;
+      height: 100%;
+      width: 100%;
+      background: transparent;
+    }
+    body.has-order .board {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      height: 100%;
+      width: 100%;
+    }
+    .idle-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 18px;
+      text-align: center;
+      height: 100%;
+      width: 100%;
+      padding: 20px;
+    }
+    body.has-order .idle-state {
+      display: none;
+    }
+    .idle-logo {
+      width: clamp(140px, 18vw, 220px);
+      height: auto;
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+    }
+    .idle-text {
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .panel {
+      background: var(--panel);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 2.6vw, 32px);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .order-column {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .order-title {
+      font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+      margin: 0 0 clamp(4px, 1vw, 10px) 0;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .order-meta {
+      font-size: clamp(1.05rem, 2vw, 1.5rem);
+      font-weight: 500;
+      color: var(--muted);
+      min-height: 1.5em;
+    }
+    .order-items {
+      margin-top: clamp(16px, 2vw, 20px);
+      padding-right: 6px;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(12px, 1.8vw, 16px);
+    }
+    .order-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: clamp(8px, 1vw, 10px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+    }
+    .order-item:last-child {
+      border-bottom: none;
+    }
+    .item-main {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .item-name {
+      font-size: clamp(1.05rem, 2.1vw, 1.45rem);
+      font-weight: 600;
+      margin-bottom: clamp(2px, 0.6vw, 6px);
+      word-break: break-word;
+    }
+    .item-meta {
+      font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+      color: var(--muted);
+    }
+    .item-total {
+      font-size: clamp(1.05rem, 2.1vw, 1.4rem);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .order-empty {
+      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      color: var(--muted);
+      text-align: center;
+      padding: 40px 0;
+    }
+    .order-footer {
+      margin-top: clamp(18px, 2.4vw, 28px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+    }
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 14px;
+    }
+    .totals-row span:last-child {
+      font-weight: 600;
+    }
+    .payment-column {
+      display: flex;
+      flex-direction: column;
+    }
+    .payment-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: clamp(14px, 2.4vw, 26px);
+      flex: 1 1 auto;
+    }
+    .payment-label {
+      font-size: clamp(1rem, 1.9vw, 1.3rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .payment-placeholder {
+      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      color: var(--muted);
+    }
+    .payment-total {
+      font-size: clamp(2.4rem, 5vw, 3.6rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .payment-memo {
+      font-size: clamp(1rem, 1.8vw, 1.25rem);
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .zelle-logo {
+      height: clamp(44px, 8vw, 70px);
+      width: auto;
+      object-fit: contain;
+    }
+    .cash-label {
+      font-size: clamp(2.2rem, 4.4vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+    }
+    .qr-image {
+      width: clamp(220px, 32vw, 320px);
+      max-width: 100%;
+      height: auto;
+      border-radius: 16px;
+      box-shadow: 0 14px 36px rgba(15, 23, 42, 0.16);
+    }
+    .qr-placeholder {
+      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      color: var(--muted);
+    }
+    .powered-by {
+      position: fixed;
+      right: clamp(12px, 2vw, 24px);
+      bottom: clamp(12px, 2vw, 20px);
+      font-size: clamp(0.75rem, 1.4vw, 0.95rem);
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="top-bar">
+      <div class="status-group">
+        <span class="status-badge" id="live-status">LIVE</span>
+        <span class="last-update" id="last-update">Last update: —</span>
+      </div>
+    </div>
+    <div class="board-wrapper">
+      <div class="board" id="board">
+        <section class="panel order-column">
+          <h1 class="order-title">Current Order</h1>
+          <div class="order-meta" id="order-meta"></div>
+          <div class="order-items" id="order-items"></div>
+          <div class="order-footer" id="order-footer"></div>
+        </section>
+        <section class="panel payment-column">
+          <div class="payment-inner" id="payment-inner">
+            <div class="payment-placeholder">Waiting for payment details…</div>
+          </div>
+        </section>
+      </div>
+      <div class="idle-state" id="idle-state">
+        <img class="idle-logo" src="https://assets.cdn.filesafe.space/slWdpqUTRhMfisMySSJ0/media/66f7050f5b684e16ab132d41.jpeg" alt="AK Ghor logo" />
+        <div class="idle-text">Waiting for next order…</div>
+      </div>
+    </div>
+  </div>
+  <div class="powered-by">Powered by Stratford Meridian</div>
+  <script>
+    (function(){
+      const firebaseConfig = {
+        apiKey: "AIzaSyDHoasqENlnp0zSAsz-3HfMkx4tgG-oZhA",
+        authDomain: "akghorpos.firebaseapp.com",
+        databaseURL: "https://akghorpos-default-rtdb.firebaseio.com",
+        projectId: "akghorpos",
+        storageBucket: "akghorpos.appspot.com",
+        messagingSenderId: "791887148716",
+        appId: "1:791887148716:web:5c8fb06053dcd6e5799109",
+        measurementId: "G-7DE60HHEK8"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+
+      const liveStatusEl = document.getElementById('live-status');
+      const lastUpdateEl = document.getElementById('last-update');
+      const orderMetaEl = document.getElementById('order-meta');
+      const orderItemsEl = document.getElementById('order-items');
+      const orderFooterEl = document.getElementById('order-footer');
+      const paymentInnerEl = document.getElementById('payment-inner');
+
+      const SEASON = '2025';
+      const FALLBACK_DAY = 'SAT';
+      const ZELLE_CONFIG_ROOT = `zelle/${SEASON}/config`;
+      const ZELLE_ACCOUNTS_ROOT = `${ZELLE_CONFIG_ROOT}/accounts`;
+      const ZELLE_CURRENT_PATH = `${ZELLE_CONFIG_ROOT}/currentAccount`;
+      const ZELLE_FALLBACK_CURRENT_PATH = `zelle/${SEASON}/${FALLBACK_DAY}/config/currentAccount`;
+      const ZELLE_FEE_PATH = `${ZELLE_CONFIG_ROOT}/fee`;
+
+      let latestOrder = null;
+      let zelleFeeConfig = { enabled: false, amountCents: 0 };
+      let zelleConfigAccount = null;
+      let zelleFallbackAccount = null;
+      let qrAccountCode = null;
+      let qrRef = null;
+      let currentQrUrl = null;
+
+      function readSnapshot(snapshot){
+        return snapshot && typeof snapshot.val === 'function' ? snapshot.val() : null;
+      }
+
+      function safeNumber(value, fallback){
+        const num = Number(value);
+        return Number.isFinite(num) ? num : (fallback !== undefined ? fallback : NaN);
+      }
+
+      function roundCurrency(value){
+        return Math.round((value + Number.EPSILON) * 100) / 100;
+      }
+
+      function formatCurrency(value){
+        const amount = roundCurrency(value || 0);
+        return `$${amount.toFixed(2)}`;
+      }
+
+      function formatQuantity(value){
+        const num = Number(value);
+        if(!Number.isFinite(num)) return '0';
+        if(Math.abs(num - Math.round(num)) < 1e-6){
+          return Math.round(num);
+        }
+        return roundCurrency(num).toFixed(2);
+      }
+
+      function formatTime(date){
+        if(!date) return '—';
+        const pad = n => String(n).padStart(2, '0');
+        return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+
+      function determineZelleAccount(order){
+        if(order && order.paymentMethod === 'Zelle'){
+          if(order.zelleAccount){
+            return order.zelleAccount;
+          }
+        }
+        return zelleConfigAccount || zelleFallbackAccount || null;
+      }
+
+      function updateQrSubscription(){
+        const desired = determineZelleAccount(latestOrder);
+        if(desired === qrAccountCode) return;
+        if(qrRef){
+          qrRef.off();
+          qrRef = null;
+        }
+        qrAccountCode = desired || null;
+        currentQrUrl = null;
+        if(!qrAccountCode) {
+          renderPayment(latestOrder, computeTotals(latestOrder));
+          return;
+        }
+        qrRef = db.ref(`${ZELLE_ACCOUNTS_ROOT}/${qrAccountCode}/qrUrl`);
+        qrRef.on('value', snapshot => {
+          const value = readSnapshot(snapshot);
+          currentQrUrl = typeof value === 'string' && value.trim() ? value.trim() : null;
+          renderPayment(latestOrder, computeTotals(latestOrder));
+        }, () => {
+          currentQrUrl = null;
+          renderPayment(latestOrder, computeTotals(latestOrder));
+        });
+      }
+
+      function computeTotals(order){
+        const result = { subtotal: 0, fee: 0, grandTotal: 0, showFee: false };
+        if(!order){
+          return result;
+        }
+        const items = Array.isArray(order.items) ? order.items : [];
+        const computedSubtotal = items.reduce((sum, item) => {
+          const qty = safeNumber(item && item.quantity, 1);
+          const price = safeNumber(item && item.price, 0);
+          return sum + (qty * price);
+        }, 0);
+        let subtotal = safeNumber(order.subtotal, NaN);
+        if(Number.isNaN(subtotal)){
+          subtotal = computedSubtotal;
+        }
+        subtotal = roundCurrency(subtotal);
+
+        let feeCents = 0;
+        if(order.paymentMethod === 'Zelle'){
+          const orderHasFeeCents = Number.isFinite(Number(order.zelleFeeCents));
+          const globalFeeCents = Number.isFinite(Number(zelleFeeConfig.amountCents)) ? Number(zelleFeeConfig.amountCents) : 0;
+          const globalEnabled = Boolean(zelleFeeConfig.enabled);
+          if(order.zelleFeeApplied === true){
+            if(orderHasFeeCents){
+              feeCents = Number(order.zelleFeeCents);
+            }else if(globalEnabled){
+              feeCents = globalFeeCents;
+            }
+          }else if(order.zelleFeeApplied === false){
+            feeCents = globalEnabled ? globalFeeCents : 0;
+          }else{ // undefined / missing
+            if(orderHasFeeCents){
+              feeCents = Number(order.zelleFeeCents);
+            }else if(globalEnabled){
+              feeCents = globalFeeCents;
+            }
+          }
+        }
+        const fee = roundCurrency((feeCents || 0) / 100);
+        let total = safeNumber(order.total, NaN);
+        if(Number.isNaN(total)){
+          total = subtotal + fee;
+        }
+        total = roundCurrency(total);
+
+        result.subtotal = subtotal;
+        result.fee = fee;
+        result.grandTotal = total;
+        result.showFee = order.paymentMethod === 'Zelle' && fee > 0;
+        return result;
+      }
+
+      function renderOrder(order, totals){
+        if(!order){
+          orderMetaEl.textContent = '';
+          orderItemsEl.innerHTML = '';
+          orderFooterEl.innerHTML = '';
+          return;
+        }
+        const parts = [];
+        if(order.orderNumber !== undefined && order.orderNumber !== null && order.orderNumber !== ''){
+          parts.push(`Order #${order.orderNumber}`);
+        }
+        if(order.name){
+          parts.push(order.name);
+        }
+        orderMetaEl.textContent = parts.join(' — ');
+
+        const items = Array.isArray(order.items) ? order.items : [];
+        if(!items.length){
+          orderItemsEl.innerHTML = '<div class="order-empty">No items in this order.</div>';
+        }else{
+          orderItemsEl.innerHTML = '';
+          items.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'order-item';
+            const itemName = document.createElement('div');
+            itemName.className = 'item-name';
+            itemName.textContent = item && item.name ? item.name : 'Unnamed item';
+            const itemMeta = document.createElement('div');
+            itemMeta.className = 'item-meta';
+            const qty = safeNumber(item && item.quantity, 1);
+            const price = safeNumber(item && item.price, 0);
+            itemMeta.textContent = `${formatQuantity(qty)} × ${formatCurrency(price)}`;
+            const main = document.createElement('div');
+            main.className = 'item-main';
+            main.appendChild(itemName);
+            main.appendChild(itemMeta);
+            const totalEl = document.createElement('div');
+            totalEl.className = 'item-total';
+            totalEl.textContent = formatCurrency(qty * price);
+            row.appendChild(main);
+            row.appendChild(totalEl);
+            orderItemsEl.appendChild(row);
+          });
+        }
+
+        orderFooterEl.innerHTML = '';
+        if(order.paymentMethod === 'Zelle' && totals.showFee){
+          const subtotalRow = document.createElement('div');
+          subtotalRow.className = 'totals-row';
+          subtotalRow.innerHTML = `<span>Subtotal</span><span>${formatCurrency(totals.subtotal)}</span>`;
+          const feeRow = document.createElement('div');
+          feeRow.className = 'totals-row';
+          feeRow.innerHTML = `<span>Processing Fee</span><span>${formatCurrency(totals.fee)}</span>`;
+          const totalRow = document.createElement('div');
+          totalRow.className = 'totals-row';
+          totalRow.innerHTML = `<span>Grand Total</span><span>${formatCurrency(totals.grandTotal)}</span>`;
+          orderFooterEl.appendChild(subtotalRow);
+          orderFooterEl.appendChild(feeRow);
+          orderFooterEl.appendChild(totalRow);
+        }else{
+          const totalRow = document.createElement('div');
+          totalRow.className = 'totals-row';
+          totalRow.innerHTML = `<span>Total</span><span>${formatCurrency(totals.grandTotal)}</span>`;
+          orderFooterEl.appendChild(totalRow);
+        }
+      }
+
+      function renderPayment(order, totals){
+        paymentInnerEl.innerHTML = '';
+        if(!order){
+          const placeholder = document.createElement('div');
+          placeholder.className = 'payment-placeholder';
+          placeholder.textContent = 'Waiting for payment details…';
+          paymentInnerEl.appendChild(placeholder);
+          return;
+        }
+        if(order.paymentMethod === 'Zelle'){
+          const logo = document.createElement('img');
+          logo.className = 'zelle-logo';
+          logo.src = 'https://i.postimg.cc/v4407Z6z/Zelle-payment-service-Logo-wine-1.png';
+          logo.alt = 'Zelle payment logo';
+          paymentInnerEl.appendChild(logo);
+
+          const totalEl = document.createElement('div');
+          totalEl.className = 'payment-total';
+          totalEl.textContent = formatCurrency(totals.grandTotal);
+          paymentInnerEl.appendChild(totalEl);
+
+          if(order.orderNumber !== undefined && order.orderNumber !== null && order.orderNumber !== ''){
+            const memoEl = document.createElement('div');
+            memoEl.className = 'payment-memo';
+            memoEl.textContent = `Memo: ${order.orderNumber}`;
+            paymentInnerEl.appendChild(memoEl);
+          }
+
+          if(currentQrUrl){
+            const qr = document.createElement('img');
+            qr.className = 'qr-image';
+            qr.src = currentQrUrl;
+            qr.alt = 'Zelle QR code';
+            paymentInnerEl.appendChild(qr);
+          }else{
+            const missingQr = document.createElement('div');
+            missingQr.className = 'qr-placeholder';
+            missingQr.textContent = qrAccountCode ? 'QR code not available.' : 'Select a Zelle account to show QR.';
+            paymentInnerEl.appendChild(missingQr);
+          }
+        }else if(order.paymentMethod === 'Cash' || order.paymentMethod === 'CASH'){
+          const label = document.createElement('div');
+          label.className = 'cash-label';
+          label.textContent = 'CASH';
+          paymentInnerEl.appendChild(label);
+
+          const totalEl = document.createElement('div');
+          totalEl.className = 'payment-total';
+          totalEl.textContent = formatCurrency(totals.grandTotal);
+          paymentInnerEl.appendChild(totalEl);
+        }else{
+          const label = document.createElement('div');
+          label.className = 'payment-label';
+          label.textContent = order.paymentMethod ? order.paymentMethod : 'Payment';
+          paymentInnerEl.appendChild(label);
+
+          const totalEl = document.createElement('div');
+          totalEl.className = 'payment-total';
+          totalEl.textContent = formatCurrency(totals.grandTotal);
+          paymentInnerEl.appendChild(totalEl);
+        }
+      }
+
+      function refreshView(){
+        const totals = computeTotals(latestOrder);
+        if(latestOrder){
+          document.body.classList.add('has-order');
+        }else{
+          document.body.classList.remove('has-order');
+        }
+        renderOrder(latestOrder, totals);
+        updateQrSubscription();
+        renderPayment(latestOrder, totals);
+      }
+
+      db.ref('.info/connected').on('value', snapshot => {
+        const connected = snapshot.val() === true;
+        if(connected){
+          liveStatusEl.textContent = 'LIVE';
+          liveStatusEl.classList.remove('offline');
+        }else{
+          liveStatusEl.textContent = 'OFFLINE';
+          liveStatusEl.classList.add('offline');
+        }
+      });
+
+      db.ref('currentOrder').on('value', snapshot => {
+        const value = readSnapshot(snapshot);
+        if(value && typeof value === 'object' && Object.keys(value).length){
+          latestOrder = value;
+        }else{
+          latestOrder = null;
+        }
+        const ts = new Date();
+        lastUpdateEl.textContent = `Last update: ${formatTime(ts)}`;
+        refreshView();
+      });
+
+      db.ref(ZELLE_FEE_PATH).on('value', snapshot => {
+        const value = readSnapshot(snapshot);
+        const next = { enabled: false, amountCents: 0 };
+        if(value && typeof value === 'object'){
+          next.enabled = Boolean(value.enabled);
+          const amt = Number(value.amountCents);
+          if(Number.isFinite(amt) && amt >= 0){
+            next.amountCents = Math.round(amt);
+          }
+        }
+        zelleFeeConfig = next;
+        refreshView();
+      }, () => {});
+
+      db.ref(ZELLE_CURRENT_PATH).on('value', snapshot => {
+        const val = readSnapshot(snapshot);
+        zelleConfigAccount = typeof val === 'string' && val.trim() ? val.trim() : null;
+        refreshView();
+      });
+
+      db.ref(ZELLE_FALLBACK_CURRENT_PATH).on('value', snapshot => {
+        const val = readSnapshot(snapshot);
+        zelleFallbackAccount = typeof val === 'string' && val.trim() ? val.trim() : null;
+        refreshView();
+      });
+
+      refreshView();
+    })();
+  </script>
+</body>
+</html>
