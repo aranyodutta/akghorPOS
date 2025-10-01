@@ -437,6 +437,7 @@
             <!-- Item Codes will be auto headers from menuItems -->
             <th id="th-dynamic-start" colspan="1"></th>
             <th>Total</th>
+            <th>Zelle Phone</th>
             <th>Payment Method</th>
             <th>Pass Fee</th>
             <th>Fee</th>
@@ -627,6 +628,22 @@
     </div>
   </div>
 
+  <!-- Zelle Phone Modal -->
+  <div id="zelle-phone-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="zelle-phone-title">
+    <div class="modal-content" role="document">
+      <button class="close-modal-button" onclick="handleZellePhoneSkip()" aria-label="Close Zelle phone dialog">&times;</button>
+      <h2 id="zelle-phone-title">Enter Zelle phone number</h2>
+      <div style="margin:18px 0 0;text-align:left">
+        <label for="zelle-phone-input" class="modal-label">Phone number</label>
+        <input type="text" id="zelle-phone-input" class="customer-name-input" placeholder="(555) 123-4567" autocomplete="tel">
+      </div>
+      <div class="modal-actions" style="margin-top:20px">
+        <button type="button" class="modal-button primary" onclick="handleZellePhoneSave()">Save</button>
+        <button type="button" class="modal-button secondary" onclick="handleZellePhoneSkip()">Skip</button>
+      </div>
+    </div>
+  </div>
+
   <div id="price-toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- (Stripe card modal removed for Zelle/Cash flow) -->
@@ -680,6 +697,10 @@
     let currentCustomerName = '';
     let customerNameModalEl = null;
     let lastFocusBeforeNameModal = null;
+    let zellePhoneModalEl = null;
+    let zellePhoneInputEl = null;
+    let lastFocusBeforeZelleModal = null;
+    let pendingZellePhoneCallback = null;
     let displayNameRef = null;
 
     // Zelle account state
@@ -1435,55 +1456,149 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         return;
       }
 
-      orderNumber = Number(orderNumber)+1; // keep original per-day sequence
-      const orderItemsSnapshot = buildCurrentOrderItemsSnapshot();
-      const feeSnapshot = getZelleFeeSnapshot();
-      const subtotalValueNumber = round2(total);
-      const baseTotalCents = Math.max(0, Math.round(subtotalValueNumber * 100));
-      const shouldApplyFee = method==='Zelle' && feeSnapshot.enabled;
-      const appliedFeeCents = shouldApplyFee ? feeSnapshot.amountCents : 0;
-      const finalTotalCents = baseTotalCents + appliedFeeCents;
-      const finalTotalValue = (finalTotalCents/100).toFixed(2);
-      const subtotalString = subtotalValueNumber.toFixed(2);
+      const finalizePayment = (zellePhoneValue, zellePhoneDigits)=>{
+        orderNumber = Number(orderNumber)+1; // keep original per-day sequence
+        const orderItemsSnapshot = buildCurrentOrderItemsSnapshot();
+        const feeSnapshot = getZelleFeeSnapshot();
+        const subtotalValueNumber = round2(total);
+        const baseTotalCents = Math.max(0, Math.round(subtotalValueNumber * 100));
+        const shouldApplyFee = method==='Zelle' && feeSnapshot.enabled;
+        const appliedFeeCents = shouldApplyFee ? feeSnapshot.amountCents : 0;
+        const finalTotalCents = baseTotalCents + appliedFeeCents;
+        const finalTotalValue = (finalTotalCents/100).toFixed(2);
+        const subtotalString = subtotalValueNumber.toFixed(2);
 
-      const orderDetails = {
-        orderNumber,
-        items: orderItemsSnapshot,
-        total: finalTotalValue,
-        method,
-        passFee: false, // columns remain in Order Log; always false here
-        fee: '0.00',    // not used for Zelle/Cash; keeps CSV shape intact
-        timestamp: firebase.database.ServerValue.TIMESTAMP,
-        overwritten: isTotalOverwritten,
-        day: DAY
+        const orderDetails = {
+          orderNumber,
+          items: orderItemsSnapshot,
+          total: finalTotalValue,
+          method,
+          passFee: false, // columns remain in Order Log; always false here
+          fee: '0.00',    // not used for Zelle/Cash; keeps CSV shape intact
+          timestamp: firebase.database.ServerValue.TIMESTAMP,
+          overwritten: isTotalOverwritten,
+          day: DAY
+        };
+        orderDetails.name = currentCustomerName || null;
+        orderDetails.subtotal = subtotalString;
+        orderDetails.zelleFeeEnabled = shouldApplyFee;
+        orderDetails.zelleFeeCents = appliedFeeCents;
+        if(method==='Zelle'){
+          orderDetails.zelleStatus = 'PENDING';
+          orderDetails.zelleAccount = activeZelleAccount;
+          orderDetails.zellePhone = typeof zellePhoneValue === 'string' ? zellePhoneValue : '';
+          if(zellePhoneDigits){ orderDetails.zellePhoneDigits = zellePhoneDigits; }
+        }
+        saveOrderToFirebase(orderDetails);
+
+        // Update Display device
+        const currentOrderPayload = {
+          items: orderItemsSnapshot,
+          total: finalTotalValue,
+          subtotal: subtotalString,
+          paymentMethod: method,
+          orderNumber,
+          nextOrderNumber: getNextOrderNumber(),
+          name: currentCustomerName || null,
+          zelleFeeEnabled: shouldApplyFee,
+          zelleFeeCents: appliedFeeCents
+        };
+        if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
+        db.ref('currentOrder').set(currentOrderPayload);
+
+        // Operator still presses "Next Customer" when ready (manual step kept)
+        refreshOrderMetaUI();
       };
-      orderDetails.name = currentCustomerName || null;
-      orderDetails.subtotal = subtotalString;
-      orderDetails.zelleFeeEnabled = shouldApplyFee;
-      orderDetails.zelleFeeCents = appliedFeeCents;
+
       if(method==='Zelle'){
-        orderDetails.zelleStatus = 'PENDING';
-        orderDetails.zelleAccount = activeZelleAccount;
+        openZellePhoneModal(finalizePayment);
+      }else{
+        finalizePayment('', '');
       }
-      saveOrderToFirebase(orderDetails);
+    }
 
-      // Update Display device
-      const currentOrderPayload = {
-        items: orderItemsSnapshot,
-        total: finalTotalValue,
-        subtotal: subtotalString,
-        paymentMethod: method,
-        orderNumber,
-        nextOrderNumber: getNextOrderNumber(),
-        name: currentCustomerName || null,
-        zelleFeeEnabled: shouldApplyFee,
-        zelleFeeCents: appliedFeeCents
-      };
-      if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
-      db.ref('currentOrder').set(currentOrderPayload);
+    function openZellePhoneModal(onComplete){
+      if(typeof onComplete !== 'function'){ onComplete = ()=>{}; }
+      if(!zellePhoneModalEl){ zellePhoneModalEl = document.getElementById('zelle-phone-modal'); }
+      if(!zellePhoneModalEl){
+        onComplete('', '');
+        return;
+      }
+      pendingZellePhoneCallback = onComplete;
+      if(!zellePhoneInputEl){ zellePhoneInputEl = document.getElementById('zelle-phone-input'); }
+      lastFocusBeforeZelleModal = document.activeElement;
+      zellePhoneModalEl.style.display='block';
+      if(zellePhoneInputEl){
+        zellePhoneInputEl.value = '';
+        setTimeout(()=>zellePhoneInputEl.focus(),0);
+      }
+      zellePhoneModalEl.addEventListener('keydown', handleZellePhoneModalKeydown);
+    }
 
-      // Operator still presses "Next Customer" when ready (manual step kept)
-      refreshOrderMetaUI();
+    function closeZellePhoneModal(){
+      if(!zellePhoneModalEl){ zellePhoneModalEl = document.getElementById('zelle-phone-modal'); }
+      const modal = zellePhoneModalEl;
+      if(!modal) return;
+      modal.style.display='none';
+      modal.removeEventListener('keydown', handleZellePhoneModalKeydown);
+      if(!zellePhoneInputEl){ zellePhoneInputEl = document.getElementById('zelle-phone-input'); }
+      if(zellePhoneInputEl) zellePhoneInputEl.blur();
+      if(lastFocusBeforeZelleModal && typeof lastFocusBeforeZelleModal.focus === 'function'){
+        lastFocusBeforeZelleModal.focus();
+      }
+      lastFocusBeforeZelleModal = null;
+    }
+
+    function completeZellePhoneFlow(value, digits){
+      closeZellePhoneModal();
+      const callback = pendingZellePhoneCallback;
+      pendingZellePhoneCallback = null;
+      if(typeof callback === 'function'){
+        callback(value, digits);
+      }
+    }
+
+    function handleZellePhoneSave(){
+      if(!pendingZellePhoneCallback){
+        closeZellePhoneModal();
+        return;
+      }
+      if(!zellePhoneInputEl){ zellePhoneInputEl = document.getElementById('zelle-phone-input'); }
+      const rawValue = zellePhoneInputEl ? zellePhoneInputEl.value : '';
+      const normalized = normalizeZellePhoneInput(rawValue);
+      completeZellePhoneFlow(normalized.value, normalized.digits);
+    }
+
+    function handleZellePhoneSkip(){
+      if(!pendingZellePhoneCallback){
+        closeZellePhoneModal();
+        return;
+      }
+      completeZellePhoneFlow('', '');
+    }
+
+    function handleZellePhoneModalKeydown(event){
+      if(event.key === 'Escape'){
+        event.preventDefault();
+        handleZellePhoneSkip();
+      }else if(event.key === 'Enter'){
+        event.preventDefault();
+        handleZellePhoneSave();
+      }
+    }
+
+    function normalizeZellePhoneInput(rawInput){
+      const raw = (rawInput || '').trim();
+      if(!raw){ return { value:'', digits:'' }; }
+      const digitsOnly = raw.replace(/\D/g,'');
+      if(digitsOnly.length===10){
+        return { value:`+1${digitsOnly}`, digits:digitsOnly };
+      }
+      if(digitsOnly.length===11 && digitsOnly.startsWith('1')){
+        const lastTen = digitsOnly.slice(1);
+        return { value:`+1${lastTen}`, digits:lastTen };
+      }
+      return { value:raw, digits:digitsOnly };
     }
 
     /* ==========================
@@ -1571,6 +1686,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         <th>Name</th>
         ${codes.map(c=>`<th>${c}</th>`).join('')}
         <th>Total</th>
+        <th>Zelle Phone</th>
         <th>Payment Method</th>
         <th>Pass Fee</th>
         <th>Fee</th>
@@ -1599,12 +1715,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
       const codes = currentMenu().map(i=>i.code);
       const displayName = escapeHTML(order && order.name ? order.name : '');
+      const zellePhoneDisplay = order && order.method === 'Zelle' ? escapeHTML(order.zellePhone ?? '') : '';
       tr.innerHTML = `
         <td>${order.orderNumber ?? ''}</td>
         <td>${timeString}</td>
         <td>${displayName}</td>
         ${codes.map(c=>`<td>${itemQuantities[c] ?? ''}</td>`).join('')}
         <td>$${(order.total ?? '0.00')}</td>
+        <td>${zellePhoneDisplay}</td>
         <td>${order.method ?? ''}</td>
         <td>${order.passFee ? 'Yes' : 'No'}</td>
         <td>${order.fee ? ('$'+order.fee) : ''}</td>
@@ -1617,13 +1735,15 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function downloadCSV(){
       let csv = "data:text/csv;charset=utf-8,";
       const codes = currentMenu().map(i=>i.code);
-      csv += "Order #,Time,Name," + codes.join(',') + ",Total,Payment Method,Pass Fee,Fee,Overwritten\n";
+      csv += "Order #,Time,Name," + codes.join(',') + ",Total,Zelle Phone,Payment Method,Pass Fee,Fee,Overwritten\n";
       Object.values(orderHistory).forEach(o=>{
         const timeString = new Date(o.timestamp || Date.now()).toLocaleString();
         const qty = {};
         currentMenu().forEach(i=>qty[i.code]='');
         if(o.items){ o.items.forEach(it=>{ const c = it.code || itemCodeMap[it.name]; if(c) qty[c]=it.quantity; }); }
         const nameValue = o.name ? String(o.name).replace(/"/g,'""') : '';
+        const zellePhoneValue = (o.method === 'Zelle' && o.zellePhone) ? String(o.zellePhone) : '';
+        const zellePhoneCell = zellePhoneValue ? `"${zellePhoneValue.replace(/"/g,'""')}"` : '';
 
         const row = [
           o.orderNumber ?? '',
@@ -1631,6 +1751,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           `"${nameValue}"`,
           ...codes.map(c=>qty[c] ?? ''),
           o.total ?? '',
+          zellePhoneCell,
           o.method ?? '',
           o.passFee ? 'Yes' : 'No',
           o.fee ?? '',
@@ -2703,6 +2824,15 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     if(customerNameModalEl){
       customerNameModalEl.addEventListener('click', event=>{
         if(event.target === customerNameModalEl) closeCustomerNameModal();
+      });
+    }
+    zellePhoneModalEl = document.getElementById('zelle-phone-modal');
+    zellePhoneInputEl = document.getElementById('zelle-phone-input');
+    if(zellePhoneModalEl){
+      zellePhoneModalEl.addEventListener('click', event=>{
+        if(event.target === zellePhoneModalEl){
+          handleZellePhoneSkip();
+        }
       });
     }
     function initApp(){
