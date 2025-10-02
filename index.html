@@ -502,6 +502,8 @@
             <th>Time</th>
             <th>Order #</th>
             <th>Total</th>
+            <th>Customer Name</th>
+            <th>Zelle Phone</th>
             <th>Account</th>
             <th>Status</th>
             <th>Actions</th>
@@ -2052,7 +2054,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         tbody.innerHTML='';
         if(zelleOrders.length===0){
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td colspan="6" style="text-align:center;color:#666;">No Zelle orders yet.</td>`;
+          tr.innerHTML = `<td colspan="8" style="text-align:center;color:#666;">No Zelle orders yet.</td>`;
           tbody.appendChild(tr);
           updateZelleAccountTotalsDisplay({});
           return;
@@ -2077,6 +2079,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             <td>${timeString}</td>
             <td>${o.orderNumber || ''}</td>
             <td>$${(o.total||'0.00')}</td>
+            <td>${o.customerName || ''}</td>
+            <td>${o.zellePhone || ''}</td>
             <td>${accountDisplay}</td>
             <td>${status}</td>
             <td>
@@ -2164,11 +2168,13 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       db.ref(zellePathDay()).once('value').then(snap=>{
         const orders = snap.val() || {};
         const rows = Object.values(orders).filter(o=>o.method==='Zelle');
-        let csv = "data:text/csv;charset=utf-8,Time,Order #,Total,Account,Status\n";
+        let csv = "data:text/csv;charset=utf-8,Time,Order #,Total,Customer Name,Zelle Phone,Account,Status\n";
         rows.forEach(o=>{
           const t = new Date(o.timestamp || Date.now()).toLocaleString();
           const account = ZELLE_ACCOUNT_CODES.includes(o.zelleAccount) ? o.zelleAccount : (o.zelleAccount || '');
-          csv += `"${t}",${o.orderNumber||''},${o.total||''},${account},${(o.zelleStatus||'PENDING')}\n`;
+          const customerName = (o.customerName || '').replace(/"/g, '""');
+          const zellePhone = (o.zellePhone || '').replace(/"/g, '""');
+          csv += `"${t}",${o.orderNumber||''},${o.total||''},"${customerName}","${zellePhone}",${account},${(o.zelleStatus||'PENDING')}\n`;
         });
         const link = document.createElement('a');
         link.setAttribute('href', encodeURI(csv));
