@@ -333,6 +333,7 @@
     .name-button:hover{background:rgba(255,255,255,.3);transform:translateY(-1px)}
     .name-button:focus{outline:2px solid #fff;outline-offset:2px}
     .pos-mode-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
     .pos-indicator{
       padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.35);
       background:rgba(0,0,0,.2);color:#fff;font-weight:700;letter-spacing:.5px;
@@ -351,6 +352,7 @@
     }
     .pos-switcher-select:focus{outline:2px solid rgba(255,255,255,.8);outline-offset:2px}
     .pos-switcher-select option{color:#111;font-weight:600;text-transform:none}
+
     .order-summary-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
     .order-number-display{
       font-size:20px;font-weight:700;color:var(--brand);margin-bottom:14px;padding:8px 12px;border-radius:10px;
@@ -407,6 +409,8 @@
         <option value="POS3">POS3 — Cash</option>
       </select>
     </div>
+
+    <div class="pos-indicator" id="pos-indicator" aria-live="polite">POS1</div>
 
     <div class="ticket-section">
       <div class="ticket"><div class="ticket-label ticket-purple">Purple</div><span class="ticket-count" id="ticket-purple-count">0</span></div>
@@ -741,6 +745,7 @@
     const IS_POS1 = POS_ID === 'POS1';
     const POS_IDS = ['POS1','POS2','POS3'];
     const POS_QUERY_VALUE = { POS1:'1', POS2:'2', POS3:'3' };
+
 
     // 2025 Season + Day split
     const SEASON = '2025';
@@ -2554,6 +2559,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(posSwitcher){
         posSwitcher.value = POS_ID;
       }
+
       const paymentButtons = document.getElementById('payment-buttons');
       const zelleButton = document.getElementById('zelle-payment-button');
       const modeRow = document.getElementById('mode-switch-row');
@@ -2586,6 +2592,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const newUrl = `${window.location.pathname}${suffix}${window.location.hash}`;
       window.location.href = newUrl;
     }
+
 
     function searchItems(){
       const q = (document.getElementById('search-input').value||'').toLowerCase();
