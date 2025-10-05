@@ -101,6 +101,8 @@
     .edit-total-icon{cursor:pointer;font-size:18px;color:#333}
 
     .payment-buttons{display:flex;gap:10px;margin-top:18px}
+    .payment-buttons.cash-only{justify-content:center}
+    .payment-buttons.cash-only .payment-button{flex:1}
     .payment-button{
       flex:1;padding:14px;background:var(--brand);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:18px
     }
@@ -330,11 +332,43 @@
     }
     .name-button:hover{background:rgba(255,255,255,.3);transform:translateY(-1px)}
     .name-button:focus{outline:2px solid #fff;outline-offset:2px}
+    .pos-mode-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .pos-indicator{
+      padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.35);
+      background:rgba(0,0,0,.2);color:#fff;font-weight:700;letter-spacing:.5px;
+      text-transform:uppercase
+    }
+    body[data-pos-id="POS2"] .pos-indicator{background:rgba(13,110,253,.3)}
+    body[data-pos-id="POS3"] .pos-indicator{background:rgba(25,135,84,.3)}
+    .pos-switcher-label{
+      font-size:12px;font-weight:600;color:#fff;letter-spacing:.6px;text-transform:uppercase
+    }
+    .pos-switcher-select{
+      appearance:none;-webkit-appearance:none;-moz-appearance:none;
+      background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.35);
+      border-radius:8px;padding:6px 10px;color:#fff;font-weight:700;
+      text-transform:uppercase;cursor:pointer;min-width:120px
+    }
+    .pos-switcher-select:focus{outline:2px solid rgba(255,255,255,.8);outline-offset:2px}
+    .pos-switcher-select option{color:#111;font-weight:600;text-transform:none}
     .order-summary-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
     .order-number-display{
       font-size:20px;font-weight:700;color:var(--brand);margin-bottom:14px;padding:8px 12px;border-radius:10px;
       background:#fff;border:1px solid rgba(184,16,13,.2);display:inline-flex;gap:6px;align-items:center
     }
+    .pos-chip{
+      padding:4px 10px;border-radius:999px;background:rgba(184,16,13,.1);color:var(--brand);
+      font-size:13px;font-weight:700;text-transform:uppercase
+    }
+    .pos-filter-row{align-items:center;gap:12px;flex-wrap:wrap}
+    .pos-filter-label{font-weight:600;color:#444}
+    .pos-filter-buttons{display:flex;flex-wrap:wrap;gap:8px}
+    .pos-filter-button{
+      padding:6px 12px;border-radius:999px;border:1px solid #ccc;background:#f5f5f5;
+      cursor:pointer;font-weight:600;color:#444;transition:all .15s ease
+    }
+    .pos-filter-button:hover{background:#fff;color:var(--brand);border-color:rgba(184,16,13,.3)}
+    .pos-filter-button.active{background:var(--brand);border-color:var(--brand);color:#fff}
     .display-name-banner{
       display:none;position:relative;margin-bottom:16px;padding:10px 20px;border-radius:12px;
       background:rgba(255,255,255,.9);color:#111;font-size:clamp(20px,3vw,34px);font-weight:700;
@@ -364,6 +398,16 @@
 
     <button id="customer-name-button" class="name-button" type="button" onclick="openCustomerNameModal()">Name</button>
 
+    <div class="pos-mode-controls" role="group" aria-label="POS station selector">
+      <div class="pos-indicator" id="pos-indicator" aria-live="polite">POS1</div>
+      <label for="pos-switcher-select" class="pos-switcher-label">Switch POS</label>
+      <select id="pos-switcher-select" class="pos-switcher-select" onchange="handlePosSwitchChange(event)" aria-label="Switch POS station">
+        <option value="POS1">POS1 — Full</option>
+        <option value="POS2">POS2 — Cash</option>
+        <option value="POS3">POS3 — Cash</option>
+      </select>
+    </div>
+
     <div class="ticket-section">
       <div class="ticket"><div class="ticket-label ticket-purple">Purple</div><span class="ticket-count" id="ticket-purple-count">0</span></div>
       <div class="ticket"><div class="ticket-label ticket-red">Red</div><span class="ticket-count" id="ticket-red-count">0</span></div>
@@ -372,7 +416,7 @@
     </div>
   </div>
   <!-- Mode Switch -->
-  <div style="padding:10px 20px;display:flex;gap:10px;align-items:center;">
+  <div id="mode-switch-row" style="padding:10px 20px;display:flex;gap:10px;align-items:center;">
     <button onclick="setMode('POS')">POS Mode (iPad/Computer)</button>
     <button onclick="setMode('Display')">Display Mode (Phone)</button>
   </div>
@@ -385,14 +429,14 @@
         <h2 id="current-order-heading">Current Order</h2>
       </div>
       <div id="order-list"></div>
-      <div id="current-order-number-display" class="order-number-display">Order #<span id="current-order-number">1</span></div>
+      <div id="current-order-number-display" class="order-number-display"><span class="pos-chip" id="current-pos-chip">POS1</span> Order #<span id="current-order-number">1</span></div>
       <div class="total-amount">
         $<span id="total-price-summary">0.00</span>
         <span class="edit-total-icon" title="Edit Total" onclick="openEditTotalModal()">&#9998;</span>
       </div>
-      <div class="payment-buttons">
-        <button class="payment-button" onclick="processPayment('Cash')">Cash</button>
-        <button class="payment-button" onclick="processPayment('Zelle')">Zelle</button>
+      <div class="payment-buttons" id="payment-buttons">
+        <button class="payment-button" id="cash-payment-button" onclick="processPayment('Cash')">Cash</button>
+        <button class="payment-button" id="zelle-payment-button" onclick="processPayment('Zelle')">Zelle</button>
       </div>
       <button class="next-button" onclick="clearOrder()">Next Customer</button>
     </div>
@@ -423,6 +467,15 @@
         <button id="ot-sun" onclick="switchDaySubtab('SUN','ot')">Sunday</button>
       </div>
     </div>
+    <div class="controls-row pos-filter-row">
+      <div class="pos-filter-label">POS Filter:</div>
+      <div class="pos-filter-buttons">
+        <button id="pos-filter-all" class="pos-filter-button active" onclick="setOrderTrackingFilter('ALL')">All POS</button>
+        <button id="pos-filter-pos1" class="pos-filter-button" onclick="setOrderTrackingFilter('POS1')">POS1</button>
+        <button id="pos-filter-pos2" class="pos-filter-button" onclick="setOrderTrackingFilter('POS2')">POS2</button>
+        <button id="pos-filter-pos3" class="pos-filter-button" onclick="setOrderTrackingFilter('POS3')">POS3</button>
+      </div>
+    </div>
     <div class="controls-row">
       <button id="download-csv" onclick="downloadCSV()">Download CSV</button>
       <button id="clear-orders" onclick="clearAllOrders()">Clear Orders</button>
@@ -432,6 +485,8 @@
         <thead>
           <tr>
             <th>Order #</th>
+            <th>POS</th>
+            <th>POS Order #</th>
             <th>Time</th>
             <th>Name</th>
             <!-- Item Codes will be auto headers from menuItems -->
@@ -501,6 +556,7 @@
           <tr>
             <th>Time</th>
             <th>Order #</th>
+            <th>POS</th>
             <th>Total</th>
             <th>Customer Name</th>
             <th>Zelle Phone</th>
@@ -669,6 +725,23 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    function derivePosId(){
+      try{
+        const params = new URLSearchParams(window.location.search);
+        const raw = params.get('pos');
+        if(raw === '2') return 'POS2';
+        if(raw === '3') return 'POS3';
+      }catch(err){
+        console.warn('Unable to parse POS selector from URL:', err);
+      }
+      return 'POS1';
+    }
+
+    const POS_ID = derivePosId();
+    const IS_POS1 = POS_ID === 'POS1';
+    const POS_IDS = ['POS1','POS2','POS3'];
+    const POS_QUERY_VALUE = { POS1:'1', POS2:'2', POS3:'3' };
+
     // 2025 Season + Day split
     const SEASON = '2025';
     let DAY = 'SAT'; // default; can switch to 'SUN'
@@ -720,6 +793,7 @@
     let orderNumber = 0; // per-day, as in original
     let currentOrderRef = null;
     let orderHistory = {};
+    let orderTrackingFilter = 'ALL';
     let ordersRef = null;
     let isTotalOverwritten = false;
     const oosMap = {}; // code -> boolean (true = OOS)
@@ -799,6 +873,11 @@ const menuItemsSUN = [
 ];
 
 function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
+
+    function normalizePosValue(raw){
+      if(raw === 'POS2' || raw === 'POS3') return raw;
+      return 'POS1';
+    }
 
     // Map name -> code (rebuild when needed)
     const itemCodeMap = {};
@@ -922,6 +1001,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
        Mode: POS vs Display
        ========================== */
     function setMode(mode){
+      if(mode==='Display' && !IS_POS1){
+        alert('Display Mode is only available on POS1.');
+        return;
+      }
       if(mode==='POS'){
         document.body.classList.remove('display-mode');
         document.querySelector('.item-grid').style.display='flex';
@@ -1330,7 +1413,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function updateCurrentOrderHeading(){
       const heading = document.getElementById('current-order-heading');
       if(heading){
-        heading.textContent = currentCustomerName ? `${currentCustomerName} — Order` : 'Current Order';
+        heading.textContent = currentCustomerName ? `${currentCustomerName} — ${POS_ID}` : `Current Order — ${POS_ID}`;
+      }
+      const posChip = document.getElementById('current-pos-chip');
+      if(posChip){
+        posChip.textContent = POS_ID;
       }
     }
 
@@ -1353,7 +1440,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     }
 
     function syncCurrentOrderBroadcast(){
-      if(!db) return;
+      if(!db || !IS_POS1) return;
       const subtotalString = round2(total).toFixed(2);
       const payload = {
         items: buildCurrentOrderItemsSnapshot(),
@@ -1377,10 +1464,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const normalized = typeof name === 'string' ? name.trim() : '';
       currentCustomerName = normalized;
       updateCurrentOrderHeading();
-      if(!options.skipBroadcast){
+      if(!options.skipBroadcast && IS_POS1){
         syncCurrentOrderBroadcast();
       }
-      if(options.skipRemote) return;
+      if(options.skipRemote || !IS_POS1) return;
       const ref = db.ref(displayCurrentNamePath());
       if(normalized){
         ref.set(normalized);
@@ -1453,6 +1540,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function processPayment(method){
       if(orderList.length===0){ alert('Add at least one item.'); return; }
 
+      if(method==='Zelle' && !IS_POS1){
+        alert('Zelle payments can only be recorded on POS1.');
+        return;
+      }
+
       if(method==='Zelle' && !activeZelleAccount){
         alert('Select a Zelle account before recording a Zelle payment.');
         return;
@@ -1494,19 +1586,21 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         saveOrderToFirebase(orderDetails);
 
         // Update Display device
-        const currentOrderPayload = {
-          items: orderItemsSnapshot,
-          total: finalTotalValue,
-          subtotal: subtotalString,
-          paymentMethod: method,
-          orderNumber,
-          nextOrderNumber: getNextOrderNumber(),
-          name: currentCustomerName || null,
-          zelleFeeEnabled: shouldApplyFee,
-          zelleFeeCents: appliedFeeCents
-        };
-        if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
-        db.ref('currentOrder').set(currentOrderPayload);
+        if(IS_POS1){
+          const currentOrderPayload = {
+            items: orderItemsSnapshot,
+            total: finalTotalValue,
+            subtotal: subtotalString,
+            paymentMethod: method,
+            orderNumber,
+            nextOrderNumber: getNextOrderNumber(),
+            name: currentCustomerName || null,
+            zelleFeeEnabled: shouldApplyFee,
+            zelleFeeCents: appliedFeeCents
+          };
+          if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
+          db.ref('currentOrder').set(currentOrderPayload);
+        }
 
         // Operator still presses "Next Customer" when ready (manual step kept)
         refreshOrderMetaUI();
@@ -1627,10 +1721,35 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
        Save / Load Orders
        ========================== */
     function ordersPath(){ return `orders/${SEASON}/${DAY}`; }
+    function posCounterPath(){ return `counters/${SEASON}/${DAY}/${POS_ID}`; }
 
     function saveOrderToFirebase(orderDetails){
-      const ref = db.ref(ordersPath()).push();
-      ref.set(orderDetails);
+      const counterRef = db.ref(posCounterPath());
+      counterRef.transaction(currentValue=>{
+        const currentNumber = Number(currentValue) || 0;
+        return currentNumber + 1;
+      }, (error, committed, snapshot)=>{
+        if(error || !committed){
+          console.error('Unable to increment POS counter', error);
+          alert('Unable to save order. Please try again.');
+          return;
+        }
+        const snapshotValue = snapshot && typeof snapshot.val === 'function' ? snapshot.val() : null;
+        const numericPos = Number(snapshotValue);
+        const posOrderNumber = Number.isFinite(numericPos) && numericPos > 0 ? numericPos : 0;
+        if(posOrderNumber === 0){
+          console.warn('POS counter returned unexpected value:', snapshotValue);
+        }
+        const payload = Object.assign({}, orderDetails, {
+          pos: POS_ID,
+          posOrderNumber: posOrderNumber || null
+        });
+        const ref = db.ref(ordersPath()).push();
+        ref.set(payload).catch(err=>{
+          console.error('Error saving order:', err);
+          alert('An error occurred while saving the order.');
+        });
+      }, false);
     }
 
     function deleteOrder(orderKey){
@@ -1646,6 +1765,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             .filter(n=>!isNaN(n));
           orderNumber = remainingNumbers.length ? Math.max(...remainingNumbers) : 0;
           refreshOrderMetaUI();
+          applyOrderTrackingFilter();
         }).catch(err=>{
           console.error('Error deleting order:', err);
           alert('An error occurred while deleting the order.');
@@ -1675,6 +1795,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           orderNumber = 0;
         }
         refreshOrderMetaUI();
+        applyOrderTrackingFilter();
       });
     }
 
@@ -1684,6 +1805,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const codes = currentMenu().map(i=>i.code);
       theadRow.innerHTML = `
         <th>Order #</th>
+        <th>POS</th>
+        <th>POS Order #</th>
         <th>Time</th>
         <th>Name</th>
         ${codes.map(c=>`<th>${c}</th>`).join('')}
@@ -1718,8 +1841,16 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const codes = currentMenu().map(i=>i.code);
       const displayName = escapeHTML(order && order.name ? order.name : '');
       const zellePhoneDisplay = order && order.method === 'Zelle' ? escapeHTML(order.zellePhone ?? '') : '';
+      const normalizedPos = normalizePosValue(order && order.pos);
+      const posDisplay = escapeHTML(normalizedPos);
+      const hasPosOrderNumber = order && order.posOrderNumber !== undefined && order.posOrderNumber !== null && order.posOrderNumber !== 0;
+      const posOrderNumberValue = hasPosOrderNumber ? order.posOrderNumber : '';
+      const posOrderDisplay = posOrderNumberValue === '' ? '' : escapeHTML(String(posOrderNumberValue));
+      tr.setAttribute('data-pos-id', normalizedPos);
       tr.innerHTML = `
         <td>${order.orderNumber ?? ''}</td>
+        <td>${posDisplay}</td>
+        <td>${posOrderDisplay}</td>
         <td>${timeString}</td>
         <td>${displayName}</td>
         ${codes.map(c=>`<td>${itemQuantities[c] ?? ''}</td>`).join('')}
@@ -1731,13 +1862,13 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         <td><button class="delete-order-button" onclick="deleteOrder('${orderKey}')">&times;</button></td>
       `;
       tbody.appendChild(tr);
-      orderHistory[orderKey] = order;
+      orderHistory[orderKey] = Object.assign({}, order, { pos: normalizedPos });
     }
 
     function downloadCSV(){
       let csv = "data:text/csv;charset=utf-8,";
       const codes = currentMenu().map(i=>i.code);
-      csv += "Order #,Time,Name," + codes.join(',') + ",Total,Zelle Phone,Payment Method,Pass Fee,Fee,Overwritten\n";
+      csv += "Order #,POS,POS Order #,Time,Name," + codes.join(',') + ",Total,Zelle Phone,Payment Method,Pass Fee,Fee,Overwritten\n";
       Object.values(orderHistory).forEach(o=>{
         const timeString = new Date(o.timestamp || Date.now()).toLocaleString();
         const qty = {};
@@ -1746,9 +1877,13 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         const nameValue = o.name ? String(o.name).replace(/"/g,'""') : '';
         const zellePhoneValue = (o.method === 'Zelle' && o.zellePhone) ? String(o.zellePhone) : '';
         const zellePhoneCell = zellePhoneValue ? `"${zellePhoneValue.replace(/"/g,'""')}"` : '';
+        const posValue = normalizePosValue(o.pos);
+        const posOrderValue = (o.posOrderNumber !== undefined && o.posOrderNumber !== null && o.posOrderNumber !== 0) ? String(o.posOrderNumber) : '';
 
         const row = [
           o.orderNumber ?? '',
+          posValue,
+          posOrderValue,
           `"${timeString}"`,
           `"${nameValue}"`,
           ...codes.map(c=>qty[c] ?? ''),
@@ -1767,6 +1902,35 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+
+    function applyOrderTrackingFilter(){
+      const rows = document.querySelectorAll('#order-log tr');
+      rows.forEach(row=>{
+        if(!row) return;
+        const raw = row.getAttribute('data-pos-id');
+        const rowPos = normalizePosValue(raw);
+        const shouldShow = orderTrackingFilter === 'ALL' || orderTrackingFilter === rowPos;
+        row.style.display = shouldShow ? '' : 'none';
+      });
+    }
+
+    function setOrderTrackingFilter(filter){
+      const normalized = (filter === 'ALL' || POS_IDS.includes(filter)) ? filter : 'ALL';
+      orderTrackingFilter = normalized;
+      const map = {
+        'ALL':'pos-filter-all',
+        'POS1':'pos-filter-pos1',
+        'POS2':'pos-filter-pos2',
+        'POS3':'pos-filter-pos3'
+      };
+      Object.entries(map).forEach(([key,id])=>{
+        const btn = document.getElementById(id);
+        if(btn){
+          btn.classList.toggle('active', normalized === key);
+        }
+      });
+      applyOrderTrackingFilter();
     }
 
     function clearAllOrders(){
@@ -2075,9 +2239,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
             totals[normalizedAccount].sum += Number(o.total || 0);
           }
           const accountDisplay = normalizedAccount || (o.zelleAccount || '—');
+          const posDisplay = normalizePosValue(o.pos);
           tr.innerHTML = `
             <td>${timeString}</td>
             <td>${o.orderNumber || ''}</td>
+            <td>${posDisplay}</td>
             <td>$${(o.total||'0.00')}</td>
             <td>${o.customerName || ''}</td>
             <td>${o.zellePhone || ''}</td>
@@ -2168,13 +2334,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       db.ref(zellePathDay()).once('value').then(snap=>{
         const orders = snap.val() || {};
         const rows = Object.values(orders).filter(o=>o.method==='Zelle');
-        let csv = "data:text/csv;charset=utf-8,Time,Order #,Total,Customer Name,Zelle Phone,Account,Status\n";
+        let csv = "data:text/csv;charset=utf-8,Time,Order #,POS,Total,Customer Name,Zelle Phone,Account,Status\n";
         rows.forEach(o=>{
           const t = new Date(o.timestamp || Date.now()).toLocaleString();
           const account = ZELLE_ACCOUNT_CODES.includes(o.zelleAccount) ? o.zelleAccount : (o.zelleAccount || '');
           const customerName = (o.customerName || '').replace(/"/g, '""');
           const zellePhone = (o.zellePhone || '').replace(/"/g, '""');
-          csv += `"${t}",${o.orderNumber||''},${o.total||''},"${customerName}","${zellePhone}",${account},${(o.zelleStatus||'PENDING')}\n`;
+          const posValue = normalizePosValue(o.pos);
+          csv += `"${t}",${o.orderNumber||''},${posValue},${o.total||''},"${customerName}","${zellePhone}",${account},${(o.zelleStatus||'PENDING')}\n`;
         });
         const link = document.createElement('a');
         link.setAttribute('href', encodeURI(csv));
@@ -2196,6 +2363,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     let stockListenerRef = null;
 
     function toggleOOS(item){
+      if(!IS_POS1){
+        alert('Only POS1 can update stock status.');
+        return;
+      }
       const code = item.code;
       const newVal = !oosMap[code];
       oosMap[code] = newVal;
@@ -2299,6 +2470,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     }
 
     function deleteStockEvent(code, key){
+      if(!IS_POS1){
+        alert('Only POS1 can manage the stock log.');
+        return;
+      }
       if(!confirm('Delete this stock entry? This may change the current OOS/RESTOCKED state if it was the latest entry.')) return;
       db.ref(`${stockPathDay()}/${code}/${key}`).remove().then(()=>{
         // No manual refresh needed; live listener will redraw.
@@ -2345,6 +2520,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     }
 
     function clearAllStockLog(){
+      if(!IS_POS1){
+        alert('Only POS1 can manage the stock log.');
+        return;
+      }
       if(!confirm('Clear the entire stock log for this day? This cannot be undone.')) return;
       db.ref(stockPathDay()).remove().then(()=>{
         alert('Stock log cleared for ' + DAY + '.');
@@ -2359,6 +2538,55 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     /* ==========================
        POS UI helpers
        ========================== */
+    function applyPosModeUI(){
+      if(document && document.body){
+        document.body.setAttribute('data-pos-id', POS_ID);
+      }
+      const indicator = document.getElementById('pos-indicator');
+      if(indicator){
+        indicator.textContent = POS_ID;
+      }
+      const posChip = document.getElementById('current-pos-chip');
+      if(posChip){
+        posChip.textContent = POS_ID;
+      }
+      const posSwitcher = document.getElementById('pos-switcher-select');
+      if(posSwitcher){
+        posSwitcher.value = POS_ID;
+      }
+      const paymentButtons = document.getElementById('payment-buttons');
+      const zelleButton = document.getElementById('zelle-payment-button');
+      const modeRow = document.getElementById('mode-switch-row');
+      if(IS_POS1){
+        if(zelleButton) zelleButton.style.display='inline-block';
+        if(paymentButtons) paymentButtons.classList.remove('cash-only');
+        if(modeRow) modeRow.style.display='flex';
+      }else{
+        if(zelleButton) zelleButton.style.display='none';
+        if(paymentButtons) paymentButtons.classList.add('cash-only');
+        if(modeRow) modeRow.style.display='none';
+      }
+      updateCurrentOrderHeading();
+    }
+
+    function handlePosSwitchChange(event){
+      const nextValue = (event && event.target) ? event.target.value : null;
+      if(!nextValue || !POS_IDS.includes(nextValue)){
+        if(event && event.target){ event.target.value = POS_ID; }
+        return;
+      }
+      if(nextValue === POS_ID){
+        return;
+      }
+      const params = new URLSearchParams(window.location.search);
+      const mapped = POS_QUERY_VALUE[nextValue] || '1';
+      params.set('pos', mapped);
+      const newQuery = params.toString();
+      const suffix = newQuery ? `?${newQuery}` : '';
+      const newUrl = `${window.location.pathname}${suffix}${window.location.hash}`;
+      window.location.href = newUrl;
+    }
+
     function searchItems(){
       const q = (document.getElementById('search-input').value||'').toLowerCase();
       document.querySelectorAll('.item-box').forEach(box=>{
@@ -2391,21 +2619,23 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           <span class="price">$${effectivePrice.toFixed(2)}</span>
           <img src="${item.image}" alt="${item.name}">
         `;
-        const actions = document.createElement('div');
-        actions.className='item-actions';
-        const editBtn = document.createElement('button');
-        editBtn.type='button';
-        editBtn.className='edit-price-btn';
-        editBtn.innerHTML='✏️ Edit';
-        editBtn.setAttribute('aria-label', `Edit price for ${item.name}`);
-        editBtn.onclick = (e)=>{ e.stopPropagation(); openEditPriceModal(item); };
-        actions.appendChild(editBtn);
-        const oosBtn = document.createElement('button');
-        oosBtn.className='oos-btn';
-        oosBtn.textContent = oosMap[item.code] ? 'RESTOCK' : 'OOS';
-        oosBtn.onclick = (e)=>{ e.stopPropagation(); toggleOOS(item); };
-        actions.appendChild(oosBtn);
-        card.appendChild(actions);
+        if(IS_POS1){
+          const actions = document.createElement('div');
+          actions.className='item-actions';
+          const editBtn = document.createElement('button');
+          editBtn.type='button';
+          editBtn.className='edit-price-btn';
+          editBtn.innerHTML='✏️ Edit';
+          editBtn.setAttribute('aria-label', `Edit price for ${item.name}`);
+          editBtn.onclick = (e)=>{ e.stopPropagation(); openEditPriceModal(item); };
+          actions.appendChild(editBtn);
+          const oosBtn = document.createElement('button');
+          oosBtn.className='oos-btn';
+          oosBtn.textContent = oosMap[item.code] ? 'RESTOCK' : 'OOS';
+          oosBtn.onclick = (e)=>{ e.stopPropagation(); toggleOOS(item); };
+          actions.appendChild(oosBtn);
+          card.appendChild(actions);
+        }
         grid.appendChild(card);
       });
     }
@@ -2442,6 +2672,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function openEditPriceModal(item){
       if(!item) return;
+      if(!IS_POS1){
+        alert('Only POS1 can edit prices.');
+        return;
+      }
       currentPriceEdit = { code:item.code, name:item.name, defaultPrice:parseFloat(item.price)||0 };
       const modal = document.getElementById('edit-price-modal');
       const title = document.getElementById('edit-price-title');
@@ -2493,6 +2727,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function savePriceOverride(){
       if(!currentPriceEdit) return;
+      if(!IS_POS1){
+        alert('Only POS1 can edit prices.');
+        return;
+      }
       const input = document.getElementById('edit-price-input');
       if(!input) return;
       const value = parseFloat(input.value);
@@ -2523,6 +2761,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function resetPriceOverride(){
       if(!currentPriceEdit) return;
+      if(!IS_POS1){
+        alert('Only POS1 can edit prices.');
+        return;
+      }
       const code = currentPriceEdit.code;
       db.ref(menuOverrideItemPath(code)).remove()
         .then(()=>{
@@ -2555,7 +2797,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       syncTicketCounters();
       isTotalOverwritten=false;
       applyCustomerName('', { skipBroadcast:true });
-      db.ref('currentOrder').remove();
+      if(IS_POS1){
+        db.ref('currentOrder').remove();
+      }
     }
 
     /* ==========================
@@ -2856,6 +3100,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       loadOOSMap();
       loadOrdersFromFirebase();
     }
+    applyPosModeUI();
+    setOrderTrackingFilter(orderTrackingFilter);
     initApp();
 
     /* ==========================
