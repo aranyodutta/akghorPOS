@@ -107,6 +107,44 @@
       flex:1;padding:14px;background:var(--brand);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:18px
     }
     .payment-button:hover{background:var(--brand-dark)}
+    .payment-button:disabled,
+    .payment-button.is-disabled{
+      opacity:.5;
+      cursor:not-allowed;
+      filter:grayscale(.35);
+      background:var(--brand);
+    }
+    .payment-status-row{
+      margin-top:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .payment-status-chip{
+      background:rgba(184,16,13,.12);
+      color:var(--brand);
+      padding:6px 14px;
+      border-radius:999px;
+      font-weight:600;
+      font-size:14px;
+    }
+    .payment-change-link{
+      background:none;
+      border:none;
+      color:var(--brand);
+      font-size:14px;
+      font-weight:600;
+      text-decoration:underline;
+      cursor:pointer;
+      padding:0;
+    }
+    .payment-change-link:disabled{
+      color:#9ca3af;
+      cursor:default;
+      text-decoration:none;
+    }
     .next-button{
       margin-top:14px;padding:14px;background:#333;color:#fff;cursor:pointer;border:none;border-radius:6px;
       text-align:center;width:100%;font-size:18px;font-weight:bold
@@ -144,6 +182,8 @@
     .modal-reset:hover{color:var(--brand-dark)}
     .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(17,24,39,.92);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;box-shadow:0 10px 25px rgba(0,0,0,.18);z-index:2000;opacity:0;pointer-events:none;transition:opacity .2s ease}
     .toast.show{opacity:1}
+    .payment-toast{background:rgba(23,128,61,.92)}
+    .payment-toast.error{background:rgba(184,16,13,.92)}
     .oos-tag{
       font-size:11px;color:#fff;background:#777;border-radius:6px;padding:2px 6px;margin-left:6px
     }
@@ -296,13 +336,35 @@
     .switch-log-empty{font-size:12px;color:#666;padding:6px 0}
 
     /* Analytics */
-    .analytics{display:none;padding:20px}
-    .analytics-summary{display:flex;justify-content:center;margin-bottom:20px}
-    .total-sales{font-size:44px;font-weight:bold;color:var(--brand)}
-    .charts-container{display:flex;flex-wrap:wrap;justify-content:center}
-    .chart-wrapper{width:45%;min-width:320px;margin:18px}
-    .charts-container canvas{max-width:100%;height:auto}
-    @media (max-width:900px){.chart-wrapper{width:100%}}
+    .analytics{display:none;padding:20px;box-sizing:border-box}
+    .analytics-layout{display:flex;flex-direction:column;gap:20px;height:calc(100vh - 160px);min-height:420px;overflow:hidden}
+    .analytics-header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .analytics-panels{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;min-height:0;overflow:hidden}
+    .analytics-panel{background:#fff;border-radius:16px;padding:18px;box-shadow:0 8px 20px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.06);display:flex;flex-direction:column;min-height:0}
+    .analytics-panel h3{margin:0;font-size:18px;color:var(--brand)}
+    .analytics-panel .panel-body{margin-top:14px;flex:1;display:flex;flex-direction:column;min-height:0}
+    .analytics-panel .panel-body.scrollable{overflow:auto}
+    .items-table-wrapper{flex:1;overflow:auto;border:1px solid #e5e7eb;border-radius:12px;background:#fafafa}
+    .items-table{width:100%;border-collapse:collapse;font-size:13px}
+    .items-table thead th{position:sticky;top:0;background:#fff;font-weight:700;text-align:left;padding:10px;border-bottom:1px solid #e5e7eb}
+    .items-table tbody td{padding:10px;border-bottom:1px solid #f0f0f0}
+    .items-table tbody tr:last-child td{border-bottom:none}
+    .analytics-metric-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+    .analytics-metric{background:rgba(184,16,13,.08);border-radius:12px;padding:12px 16px;min-width:140px;display:flex;flex-direction:column;gap:6px}
+    .analytics-metric span{font-size:12px;color:#555;text-transform:uppercase;letter-spacing:.6px}
+    .analytics-metric strong{font-size:20px;color:var(--brand)}
+    .payment-charts{display:flex;gap:16px;flex-wrap:wrap;margin-top:18px}
+    .payment-chart{flex:1 1 200px;min-width:200px;max-width:260px;display:flex;flex-direction:column;align-items:center;gap:8px}
+    .payment-chart canvas{width:100%;height:200px;max-height:220px}
+    .chart-caption{font-size:12px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.6px;text-align:center}
+    .hourly-chart-wrapper{flex:1;min-height:260px}
+    .hourly-chart-wrapper canvas{width:100%;height:100%}
+    @media (max-width:900px){
+      .analytics-layout{height:auto;min-height:0}
+      .analytics-panels{grid-template-columns:1fr}
+      .payment-chart{max-width:100%}
+      .hourly-chart-wrapper{min-height:240px}
+    }
 
     /* Modals */
     .modal{display:none;position:fixed;z-index:1001;left:0;top:0;width:100%;height:100%;overflow:auto;background:rgba(0,0,0,.4)}
@@ -437,6 +499,10 @@
       <div class="total-amount">
         $<span id="total-price-summary">0.00</span>
         <span class="edit-total-icon" title="Edit Total" onclick="openEditTotalModal()">&#9998;</span>
+      </div>
+      <div class="payment-status-row hide" id="payment-status-row">
+        <span class="payment-status-chip" id="payment-status-chip"></span>
+        <button type="button" class="payment-change-link hide" id="payment-change-link"></button>
       </div>
       <div class="payment-buttons" id="payment-buttons">
         <button class="payment-button" id="cash-payment-button" onclick="processPayment('Cash')">Cash</button>
@@ -608,23 +674,66 @@
 
   <!-- Analytics -->
   <div class="analytics" id="analytics">
-    <div class="controls-row">
-      <h2 style="margin-right:auto">Sales Analytics</h2>
-      <div class="subtabs">
-        <button id="an-sat" class="active" onclick="switchDaySubtab('SAT','an')">Saturday</button>
-        <button id="an-sun" onclick="switchDaySubtab('SUN','an')">Sunday</button>
+    <div class="analytics-layout">
+      <div class="controls-row analytics-header-row">
+        <h2 style="margin-right:auto">Sales Analytics</h2>
+        <div class="subtabs">
+          <button id="an-sat" class="active" onclick="switchDaySubtab('SAT','an')">Saturday</button>
+          <button id="an-sun" onclick="switchDaySubtab('SUN','an')">Sunday</button>
+        </div>
       </div>
-    </div>
-    <div class="analytics-summary">
-      <div class="total-sales">Total Sales: $<span id="grand-total-sales">0.00</span></div>
-    </div>
-    <div class="charts-container">
-      <div class="chart-wrapper"><canvas id="sales-over-time-chart"></canvas></div>
-      <div class="chart-wrapper"><canvas id="best-selling-items-chart"></canvas></div>
-      <div class="chart-wrapper"><canvas id="payment-methods-chart"></canvas></div>
-      <div class="chart-wrapper"><canvas id="orders-over-time-chart"></canvas></div>
-      <div class="chart-wrapper"><canvas id="hourly-sales-chart"></canvas></div>
-      <!-- OOS analytics could go here in the future -->
+      <div class="analytics-panels">
+        <section class="analytics-panel">
+          <h3>Items Sold</h3>
+          <div class="panel-body">
+            <div class="items-table-wrapper">
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>Item Name</th>
+                    <th>Units Sold</th>
+                    <th>Gross ($)</th>
+                  </tr>
+                </thead>
+                <tbody id="analytics-items-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+        <section class="analytics-panel">
+          <h3>Payment Method Split</h3>
+          <div class="panel-body">
+            <div class="analytics-metric-row">
+              <div class="analytics-metric">
+                <span>Total Orders</span>
+                <strong id="analytics-total-orders">0</strong>
+              </div>
+              <div class="analytics-metric">
+                <span>Total Revenue</span>
+                <strong id="analytics-total-revenue">$0.00</strong>
+              </div>
+            </div>
+            <div class="payment-charts">
+              <div class="payment-chart">
+                <canvas id="payment-count-chart"></canvas>
+                <div class="chart-caption">By Orders</div>
+              </div>
+              <div class="payment-chart">
+                <canvas id="payment-revenue-chart"></canvas>
+                <div class="chart-caption">By Revenue</div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="analytics-panel">
+          <h3>Hourly Sales</h3>
+          <div class="panel-body">
+            <div class="hourly-chart-wrapper">
+              <canvas id="hourly-sales-chart"></canvas>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   </div>
 
@@ -706,6 +815,7 @@
     </div>
   </div>
 
+  <div id="payment-toast" class="toast payment-toast" role="status" aria-live="polite"></div>
   <div id="price-toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- (Stripe card modal removed for Zelle/Cash flow) -->
@@ -804,6 +914,18 @@
     const oosMap = {}; // code -> boolean (true = OOS)
     let posBrandBadgeEl = null;
     let displayBrandFloatingEl = null;
+    const paymentState = {
+      processing:false,
+      processingMessage:'',
+      lastOrderKey:null,
+      lastOrderPath:null,
+      lastOrderNumber:null,
+      lastMethod:null,
+      lastOrderDetails:null,
+      lastDisplayPayload:null,
+      lastOrderBaseSubtotal:0
+    };
+    let paymentToastTimeout = null;
 
    /* ==========================
        MENU (2025 — per day)
@@ -1432,6 +1554,140 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(numberEl){
         numberEl.textContent = getNextOrderNumber();
       }
+      updatePaymentStatusUI();
+    }
+
+    function setPaymentButtonsDisabled(disabled){
+      ['cash-payment-button','zelle-payment-button'].forEach(id=>{
+        const btn = document.getElementById(id);
+        if(btn){
+          btn.disabled = disabled;
+          btn.classList.toggle('is-disabled', disabled);
+        }
+      });
+    }
+
+    function showPaymentStatus(message, options={}){
+      const row = document.getElementById('payment-status-row');
+      const chip = document.getElementById('payment-status-chip');
+      const changeBtn = document.getElementById('payment-change-link');
+      if(!row || !chip) return;
+      chip.textContent = message;
+      row.classList.remove('hide');
+      const changeTarget = options.changeTarget;
+      if(changeBtn){
+        if(changeTarget){
+          changeBtn.textContent = `Change to ${changeTarget}`;
+          changeBtn.dataset.targetMethod = changeTarget;
+          changeBtn.classList.remove('hide');
+          changeBtn.disabled = Boolean(options.disableChange);
+        }else{
+          changeBtn.classList.add('hide');
+          changeBtn.disabled = true;
+          delete changeBtn.dataset.targetMethod;
+        }
+      }
+    }
+
+    function hidePaymentStatus(){
+      const row = document.getElementById('payment-status-row');
+      const changeBtn = document.getElementById('payment-change-link');
+      if(row) row.classList.add('hide');
+      if(changeBtn){
+        changeBtn.classList.add('hide');
+        changeBtn.disabled = true;
+        delete changeBtn.dataset.targetMethod;
+      }
+    }
+
+    function updatePaymentStatusUI(){
+      if(paymentState.processing){
+        showPaymentStatus(paymentState.processingMessage || 'Working…', { disableChange:true });
+        return;
+      }
+      if(paymentState.lastOrderKey && paymentState.lastOrderNumber && paymentState.lastMethod){
+        let changeTarget = null;
+        if(paymentState.lastMethod === 'Cash' && IS_POS1){
+          changeTarget = 'Zelle';
+        }else if(paymentState.lastMethod === 'Zelle'){
+          changeTarget = 'Cash';
+        }
+        showPaymentStatus(`Recorded as ${paymentState.lastMethod} (Order #${paymentState.lastOrderNumber})`, {
+          changeTarget,
+          disableChange: !changeTarget
+        });
+      }else{
+        hidePaymentStatus();
+      }
+    }
+
+    function showPaymentToast(message, variant='success'){
+      const toast = document.getElementById('payment-toast');
+      if(!toast) return;
+      if(paymentToastTimeout){
+        clearTimeout(paymentToastTimeout);
+        paymentToastTimeout = null;
+      }
+      toast.textContent = message;
+      if(variant === 'error'){
+        toast.classList.add('error');
+      }else{
+        toast.classList.remove('error');
+      }
+      toast.classList.add('show');
+      paymentToastTimeout = setTimeout(()=>{
+        toast.classList.remove('show');
+      }, 2600);
+    }
+
+    function hidePaymentToast(){
+      const toast = document.getElementById('payment-toast');
+      if(toast){
+        toast.classList.remove('show');
+      }
+      if(paymentToastTimeout){
+        clearTimeout(paymentToastTimeout);
+        paymentToastTimeout = null;
+      }
+    }
+
+    function resetPaymentState(){
+      paymentState.processing = false;
+      paymentState.processingMessage = '';
+      paymentState.lastOrderKey = null;
+      paymentState.lastOrderPath = null;
+      paymentState.lastOrderNumber = null;
+      paymentState.lastMethod = null;
+      paymentState.lastOrderDetails = null;
+      paymentState.lastDisplayPayload = null;
+      paymentState.lastOrderBaseSubtotal = 0;
+      setPaymentButtonsDisabled(false);
+      hidePaymentStatus();
+      hidePaymentToast();
+    }
+
+    function getRecordedBaseSubtotal(){
+      const stored = Number(paymentState.lastOrderBaseSubtotal);
+      if(Number.isFinite(stored) && stored>=0){
+        return stored;
+      }
+      const detailSubtotal = paymentState.lastOrderDetails && paymentState.lastOrderDetails.subtotal !== undefined
+        ? Number(paymentState.lastOrderDetails.subtotal)
+        : NaN;
+      if(Number.isFinite(detailSubtotal) && detailSubtotal>=0){
+        return detailSubtotal;
+      }
+      return round2(total);
+    }
+
+    function lastOrderRefPath(){
+      if(paymentState.lastOrderPath){
+        return paymentState.lastOrderPath;
+      }
+      if(paymentState.lastOrderKey){
+        return `${ordersPath()}/${paymentState.lastOrderKey}`;
+      }
+      return null;
     }
 
     function buildCurrentOrderItemsSnapshot(){
@@ -1544,6 +1800,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
        ========================== */
     function processPayment(method){
       if(orderList.length===0){ alert('Add at least one item.'); return; }
+      if(paymentState.processing){ return; }
+      if(paymentState.lastOrderKey){
+        showPaymentToast('Order already recorded. Use the change link or Next Customer.', 'error');
+        return;
+      }
 
       if(method==='Zelle' && !IS_POS1){
         alert('Zelle payments can only be recorded on POS1.');
@@ -1556,7 +1817,14 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       }
 
       const finalizePayment = (zellePhoneValue, zellePhoneDigits)=>{
-        orderNumber = Number(orderNumber)+1; // keep original per-day sequence
+        paymentState.processing = true;
+        paymentState.processingMessage = `Recording ${method}…`;
+        setPaymentButtonsDisabled(true);
+        updatePaymentStatusUI();
+
+        const previousOrderNumber = Number(orderNumber) || 0;
+        orderNumber = previousOrderNumber + 1; // keep per-day sequence
+        const recordedOrderNumber = Number(orderNumber);
         const orderItemsSnapshot = buildCurrentOrderItemsSnapshot();
         const feeSnapshot = getZelleFeeSnapshot();
         const subtotalValueNumber = round2(total);
@@ -1565,20 +1833,21 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         const appliedFeeCents = shouldApplyFee ? feeSnapshot.amountCents : 0;
         const finalTotalCents = baseTotalCents + appliedFeeCents;
         const finalTotalValue = (finalTotalCents/100).toFixed(2);
-        const subtotalString = subtotalValueNumber.toFixed(2);
+        const subtotalString = (baseTotalCents/100).toFixed(2);
 
         const orderDetails = {
-          orderNumber,
+          orderNumber: recordedOrderNumber,
           items: orderItemsSnapshot,
           total: finalTotalValue,
           method,
-          passFee: false, // columns remain in Order Log; always false here
-          fee: '0.00',    // not used for Zelle/Cash; keeps CSV shape intact
+          passFee: false,
+          fee: '0.00',
           timestamp: firebase.database.ServerValue.TIMESTAMP,
           overwritten: isTotalOverwritten,
           day: DAY
         };
         orderDetails.name = currentCustomerName || null;
+        orderDetails.customerName = orderDetails.name;
         orderDetails.subtotal = subtotalString;
         orderDetails.zelleFeeEnabled = shouldApplyFee;
         orderDetails.zelleFeeCents = appliedFeeCents;
@@ -1588,23 +1857,47 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           orderDetails.zellePhone = typeof zellePhoneValue === 'string' ? zellePhoneValue : '';
           if(zellePhoneDigits){ orderDetails.zellePhoneDigits = zellePhoneDigits; }
         }
-        saveOrderToFirebase(orderDetails);
 
-        // Update Display device
+        const currentOrderPayload = {
+          items: orderItemsSnapshot,
+          total: finalTotalValue,
+          subtotal: subtotalString,
+          paymentMethod: method,
+          orderNumber: recordedOrderNumber,
+          nextOrderNumber: getNextOrderNumber(),
+          name: currentCustomerName || null,
+          zelleFeeEnabled: shouldApplyFee,
+          zelleFeeCents: appliedFeeCents
+        };
+        if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
+
+        saveOrderToFirebase(orderDetails).then(({ key })=>{
+          paymentState.processing = false;
+          paymentState.processingMessage = '';
+          paymentState.lastOrderKey = key;
+          paymentState.lastOrderPath = `${ordersPath()}/${key}`;
+          paymentState.lastOrderNumber = recordedOrderNumber;
+          paymentState.lastMethod = method;
+          paymentState.lastOrderDetails = Object.assign({}, orderDetails);
+          paymentState.lastOrderBaseSubtotal = baseTotalCents/100;
+          paymentState.lastDisplayPayload = IS_POS1 ? Object.assign({}, currentOrderPayload) : null;
+          updatePaymentStatusUI();
+          showPaymentToast(`✅ Payment recorded: ${method} (Order #${recordedOrderNumber})`);
+        }).catch(err=>{
+          console.error('Unable to record payment', err);
+          paymentState.processing = false;
+          paymentState.processingMessage = '';
+          orderNumber = previousOrderNumber;
+          refreshOrderMetaUI();
+          setPaymentButtonsDisabled(false);
+          hidePaymentStatus();
+          showPaymentToast("Couldn't record payment. Try again.", 'error');
+        });
+
         if(IS_POS1){
-          const currentOrderPayload = {
-            items: orderItemsSnapshot,
-            total: finalTotalValue,
-            subtotal: subtotalString,
-            paymentMethod: method,
-            orderNumber,
-            nextOrderNumber: getNextOrderNumber(),
-            name: currentCustomerName || null,
-            zelleFeeEnabled: shouldApplyFee,
-            zelleFeeCents: appliedFeeCents
-          };
-          if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
-          db.ref('currentOrder').set(currentOrderPayload);
+          db.ref('currentOrder').set(currentOrderPayload).catch(err=>{
+            console.error('Unable to update display order', err);
+          });
         }
 
         // Operator still presses "Next Customer" when ready (manual step kept)
@@ -1616,6 +1909,160 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       }else{
         finalizePayment('', '');
       }
+    }
+
+    function handlePaymentChangeClick(event){
+      if(event) event.preventDefault();
+      if(paymentState.processing) return;
+      const target = event && event.currentTarget ? event.currentTarget.dataset.targetMethod : null;
+      if(!target) return;
+      switchPaymentMethod(target);
+    }
+
+    function switchPaymentMethod(targetMethod){
+      if(!paymentState.lastOrderKey || paymentState.processing) return;
+      if(!targetMethod || targetMethod === paymentState.lastMethod) return;
+      if(targetMethod === 'Zelle'){
+        if(!IS_POS1){
+          showPaymentToast('Only POS1 can record Zelle payments.', 'error');
+          return;
+        }
+        if(!activeZelleAccount){
+          alert('Select a Zelle account before switching to Zelle.');
+          return;
+        }
+        openZellePhoneModal((value, digits)=>{
+          performSwitchToZelle(value, digits);
+        });
+      }else if(targetMethod === 'Cash'){
+        performSwitchToCash();
+      }
+    }
+
+    function performSwitchToZelle(zellePhoneValue, zellePhoneDigits){
+      const path = lastOrderRefPath();
+      if(!path) return;
+      const orderRef = db.ref(path);
+      const baseSubtotal = getRecordedBaseSubtotal();
+      const baseCents = Math.max(0, Math.round(baseSubtotal * 100));
+      const feeSnapshot = getZelleFeeSnapshot();
+      const appliedFeeCents = feeSnapshot.enabled ? feeSnapshot.amountCents : 0;
+      const finalTotalCents = baseCents + appliedFeeCents;
+      const totalValue = (finalTotalCents/100).toFixed(2);
+      const subtotalValue = (baseCents/100).toFixed(2);
+      paymentState.processing = true;
+      paymentState.processingMessage = 'Switching to Zelle…';
+      updatePaymentStatusUI();
+      const updates = {
+        method:'Zelle',
+        total: totalValue,
+        subtotal: subtotalValue,
+        zelleStatus:'PENDING',
+        zelleAccount: activeZelleAccount || null,
+        zelleFeeEnabled: feeSnapshot.enabled,
+        zelleFeeCents: appliedFeeCents,
+        zellePhone: typeof zellePhoneValue === 'string' ? zellePhoneValue : '',
+        zellePhoneDigits: zellePhoneDigits ? zellePhoneDigits : null,
+        passFee:false,
+        fee:'0.00'
+      };
+      orderRef.update(updates).then(()=>{
+        paymentState.processing = false;
+        paymentState.processingMessage = '';
+        paymentState.lastMethod = 'Zelle';
+        paymentState.lastOrderDetails = Object.assign({}, paymentState.lastOrderDetails || {}, updates, {
+          method:'Zelle',
+          total: totalValue,
+          subtotal: subtotalValue
+        });
+        if(!zellePhoneDigits && paymentState.lastOrderDetails){
+          delete paymentState.lastOrderDetails.zellePhoneDigits;
+        }
+        paymentState.lastOrderBaseSubtotal = baseCents/100;
+        if(IS_POS1 && paymentState.lastDisplayPayload){
+          const payload = Object.assign({}, paymentState.lastDisplayPayload, {
+            paymentMethod:'Zelle',
+            total: totalValue,
+            subtotal: subtotalValue,
+            zelleAccount: activeZelleAccount || null,
+            zelleFeeEnabled: feeSnapshot.enabled,
+            zelleFeeCents: appliedFeeCents
+          });
+          paymentState.lastDisplayPayload = payload;
+          db.ref('currentOrder').update(payload).catch(err=>{
+            console.error('Unable to update display order', err);
+          });
+        }
+        updatePaymentStatusUI();
+        showPaymentToast(`✅ Payment updated: Zelle (Order #${paymentState.lastOrderNumber})`);
+      }).catch(err=>{
+        console.error('Unable to switch to Zelle', err);
+        paymentState.processing = false;
+        paymentState.processingMessage = '';
+        updatePaymentStatusUI();
+        showPaymentToast("Couldn't update payment. Try again.", 'error');
+      });
+    }
+
+    function performSwitchToCash(){
+      const path = lastOrderRefPath();
+      if(!path) return;
+      const orderRef = db.ref(path);
+      const baseSubtotal = getRecordedBaseSubtotal();
+      const baseCents = Math.max(0, Math.round(baseSubtotal * 100));
+      const baseValue = (baseCents/100).toFixed(2);
+      paymentState.processing = true;
+      paymentState.processingMessage = 'Switching to Cash…';
+      updatePaymentStatusUI();
+      const updates = {
+        method:'Cash',
+        total: baseValue,
+        subtotal: baseValue,
+        zelleFeeEnabled:false,
+        zelleFeeCents:0,
+        zelleStatus:null,
+        zelleAccount:null,
+        zellePhone:null,
+        zellePhoneDigits:null
+      };
+      orderRef.update(updates).then(()=>{
+        paymentState.processing = false;
+        paymentState.processingMessage = '';
+        paymentState.lastMethod = 'Cash';
+        if(!paymentState.lastOrderDetails) paymentState.lastOrderDetails = {};
+        paymentState.lastOrderDetails.method = 'Cash';
+        paymentState.lastOrderDetails.total = baseValue;
+        paymentState.lastOrderDetails.subtotal = baseValue;
+        paymentState.lastOrderDetails.zelleFeeEnabled = false;
+        paymentState.lastOrderDetails.zelleFeeCents = 0;
+        delete paymentState.lastOrderDetails.zelleStatus;
+        delete paymentState.lastOrderDetails.zelleAccount;
+        delete paymentState.lastOrderDetails.zellePhone;
+        delete paymentState.lastOrderDetails.zellePhoneDigits;
+        paymentState.lastOrderBaseSubtotal = baseCents/100;
+        if(IS_POS1 && paymentState.lastDisplayPayload){
+          const payload = Object.assign({}, paymentState.lastDisplayPayload, {
+            paymentMethod:'Cash',
+            total: baseValue,
+            subtotal: baseValue,
+            zelleAccount:null,
+            zelleFeeEnabled:false,
+            zelleFeeCents:0
+          });
+          paymentState.lastDisplayPayload = payload;
+          db.ref('currentOrder').update(payload).catch(err=>{
+            console.error('Unable to update display order', err);
+          });
+        }
+        updatePaymentStatusUI();
+        showPaymentToast(`✅ Payment updated: Cash (Order #${paymentState.lastOrderNumber})`);
+      }).catch(err=>{
+        console.error('Unable to switch to Cash', err);
+        paymentState.processing = false;
+        paymentState.processingMessage = '';
+        updatePaymentStatusUI();
+        showPaymentToast("Couldn't update payment. Try again.", 'error');
+      });
     }
 
     function openZellePhoneModal(onComplete){
@@ -1729,32 +2176,36 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     function posCounterPath(){ return `counters/${SEASON}/${DAY}/${POS_ID}`; }
 
     function saveOrderToFirebase(orderDetails){
-      const counterRef = db.ref(posCounterPath());
-      counterRef.transaction(currentValue=>{
-        const currentNumber = Number(currentValue) || 0;
-        return currentNumber + 1;
-      }, (error, committed, snapshot)=>{
-        if(error || !committed){
-          console.error('Unable to increment POS counter', error);
-          alert('Unable to save order. Please try again.');
-          return;
-        }
-        const snapshotValue = snapshot && typeof snapshot.val === 'function' ? snapshot.val() : null;
-        const numericPos = Number(snapshotValue);
-        const posOrderNumber = Number.isFinite(numericPos) && numericPos > 0 ? numericPos : 0;
-        if(posOrderNumber === 0){
-          console.warn('POS counter returned unexpected value:', snapshotValue);
-        }
-        const payload = Object.assign({}, orderDetails, {
-          pos: POS_ID,
-          posOrderNumber: posOrderNumber || null
-        });
-        const ref = db.ref(ordersPath()).push();
-        ref.set(payload).catch(err=>{
-          console.error('Error saving order:', err);
-          alert('An error occurred while saving the order.');
-        });
-      }, false);
+      return new Promise((resolve, reject)=>{
+        const counterRef = db.ref(posCounterPath());
+        counterRef.transaction(currentValue=>{
+          const currentNumber = Number(currentValue) || 0;
+          return currentNumber + 1;
+        }, (error, committed, snapshot)=>{
+          if(error || !committed){
+            console.error('Unable to increment POS counter', error);
+            reject(error || new Error('Counter not committed'));
+            return;
+          }
+          const snapshotValue = snapshot && typeof snapshot.val === 'function' ? snapshot.val() : null;
+          const numericPos = Number(snapshotValue);
+          const posOrderNumber = Number.isFinite(numericPos) && numericPos > 0 ? numericPos : null;
+          if(posOrderNumber === null){
+            console.warn('POS counter returned unexpected value:', snapshotValue);
+          }
+          const payload = Object.assign({}, orderDetails, {
+            pos: POS_ID,
+            posOrderNumber
+          });
+          const ref = db.ref(ordersPath()).push();
+          ref.set(payload).then(()=>{
+            resolve({ key: ref.key, payload });
+          }).catch(err=>{
+            console.error('Error saving order:', err);
+            reject(err);
+          });
+        }, false);
+      });
     }
 
     function deleteOrder(orderKey){
@@ -2803,6 +3254,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       orderList=[]; updateOrderSummary();
       syncTicketCounters();
       isTotalOverwritten=false;
+      resetPaymentState();
       applyCustomerName('', { skipBroadcast:true });
       if(IS_POS1){
         db.ref('currentOrder').remove();
@@ -2881,6 +3333,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       refreshMenuOverridesListener();
       refreshDisplayNameListener();
       orderNumber = 0;
+      resetPaymentState();
       applyCustomerName('', { skipBroadcast:true });
       refreshOrderMetaUI();
 
@@ -2959,15 +3412,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       db.ref(ordersPath()).once('value',(snapshot)=>{
         const orders = snapshot.val() || {};
         const list = Object.values(orders);
-        const grand = list.reduce((s,o)=>s + parseFloat(o.total||0), 0);
-        document.getElementById('grand-total-sales').innerText = grand.toFixed(2);
-
-        // Draw charts
-        createSalesOverTimeChart(list);
-        createBestSellingItemsChart(list);
-        createPaymentMethodsChart(list);
-        createOrdersOverTimeChart(list);
-        createHourlySalesChart(list);
+        renderAnalyticsItemsTable(list);
+        renderAnalyticsPaymentSplit(list);
+        renderAnalyticsHourlyChart(list);
       });
     }
 
@@ -2975,96 +3422,165 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     const chartStore = {};
     function killChart(id){ if(chartStore[id]){ chartStore[id].destroy(); chartStore[id]=null; } }
 
-    function createSalesOverTimeChart(orderList){
-      const salesData = {};
-      orderList.forEach(o=>{
-        const date = new Date(o.timestamp || Date.now()).toLocaleDateString();
-        const tot = parseFloat(o.total||0);
-        salesData[date] = (salesData[date]||0) + tot;
+    function renderAnalyticsItemsTable(orderList){
+      const tbody = document.getElementById('analytics-items-body');
+      if(!tbody) return;
+      const summary = new Map();
+      currentMenu().forEach(item=>{
+        const key = item.code || item.name;
+        if(key) summary.set(key, { name:item.name, units:0, grossCents:0 });
       });
-      const labels = Object.keys(salesData);
-      const data = Object.values(salesData);
-
-      const ctx = document.getElementById('sales-over-time-chart').getContext('2d');
-      killChart('sales'); chartStore['sales'] = new Chart(ctx,{
-        type:'line',
-        data:{ labels, datasets:[{label:'Total Sales ($)', data, backgroundColor:'rgba(184,16,13,.2)', borderColor:'rgba(184,16,13,1)', borderWidth:2, fill:true}]},
-        options:{ scales:{ x:{ title:{display:true,text:'Date'}}, y:{ title:{display:true,text:'Sales ($)'}, beginAtZero:true } } }
-      });
-    }
-
-    function createBestSellingItemsChart(orderList){
-      const itemsSold = {};
-      orderList.forEach(o=>{
-        (o.items||[]).forEach(it=>{
-          const q = parseInt(it.quantity||0);
-          itemsSold[it.name] = (itemsSold[it.name]||0) + q;
+      orderList.forEach(order=>{
+        (order.items || []).forEach(it=>{
+          const quantity = Number(it.quantity) || 0;
+          if(quantity<=0) return;
+          const code = it.code || itemCodeMap[it.name];
+          const entryKey = code || it.name || `unknown-${summary.size}`;
+          const entryName = it.name || code || 'Item';
+          if(!summary.has(entryKey)){
+            summary.set(entryKey, { name: entryName, units:0, grossCents:0 });
+          }
+          const entry = summary.get(entryKey);
+          entry.units += quantity;
+          const priceCents = Math.round((Number(it.price) || 0) * 100);
+          entry.grossCents += priceCents * quantity;
         });
       });
-      const sorted = Object.entries(itemsSold).sort((a,b)=>b[1]-a[1]).slice(0,5);
-      const labels = sorted.map(x=>x[0]);
-      const data = sorted.map(x=>x[1]);
+      const rows = Array.from(summary.values());
+      rows.sort((a,b)=>{
+        if(b.units !== a.units) return b.units - a.units;
+        return a.name.localeCompare(b.name);
+      });
+      tbody.innerHTML='';
+      if(rows.length===0){
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="3" style="text-align:center;color:#666;padding:18px;">No items to display.</td>';
+        tbody.appendChild(tr);
+        return;
+      }
+      rows.forEach(row=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHTML(row.name)}</td>
+          <td>${row.units}</td>
+          <td>$${(row.grossCents/100).toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-      const ctx = document.getElementById('best-selling-items-chart').getContext('2d');
-      killChart('bestsell'); chartStore['bestsell'] = new Chart(ctx,{
+    function renderAnalyticsPaymentSplit(orderList){
+      const methodLabels = ['Cash','Zelle'];
+      const totals = { Cash:{ count:0, revenue:0 }, Zelle:{ count:0, revenue:0 } };
+      orderList.forEach(order=>{
+        const method = order.method === 'Zelle' ? 'Zelle' : 'Cash';
+        const totalValue = Number(order.total) || 0;
+        if(!totals[method]) totals[method] = { count:0, revenue:0 };
+        totals[method].count += 1;
+        totals[method].revenue += totalValue;
+      });
+      const totalOrders = methodLabels.reduce((sum,label)=>sum + (totals[label]?.count || 0), 0);
+      const totalRevenue = methodLabels.reduce((sum,label)=>sum + (totals[label]?.revenue || 0), 0);
+      const ordersEl = document.getElementById('analytics-total-orders');
+      const revenueEl = document.getElementById('analytics-total-revenue');
+      if(ordersEl) ordersEl.textContent = totalOrders;
+      if(revenueEl) revenueEl.textContent = `$${totalRevenue.toFixed(2)}`;
+
+      const countData = methodLabels.map(label=>totals[label]?.count || 0);
+      const revenueData = methodLabels.map(label=>round2(totals[label]?.revenue || 0));
+      renderPaymentDoughnutChart('paymentCount','payment-count-chart', methodLabels, countData, { currency:false });
+      renderPaymentDoughnutChart('paymentRevenue','payment-revenue-chart', methodLabels, revenueData, { currency:true });
+    }
+
+    function renderPaymentDoughnutChart(storeKey, canvasId, labels, data, options={}){
+      const canvas = document.getElementById(canvasId);
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      killChart(storeKey);
+      const colorMap = {
+        Cash: 'rgba(184,16,13,0.85)',
+        Zelle: 'rgba(79,70,229,0.85)'
+      };
+      const borderColorMap = {
+        Cash: 'rgba(184,16,13,1)',
+        Zelle: 'rgba(79,70,229,1)'
+      };
+      const backgroundColors = labels.map(label=>colorMap[label] || 'rgba(107,114,128,0.8)');
+      const borderColors = labels.map(label=>borderColorMap[label] || 'rgba(107,114,128,1)');
+      chartStore[storeKey] = new Chart(ctx,{
+        type:'doughnut',
+        data:{
+          labels,
+          datasets:[{
+            data,
+            backgroundColor: backgroundColors,
+            borderColor: borderColors,
+            borderWidth:1
+          }]
+        },
+        options:{
+          cutout:'58%',
+          plugins:{
+            legend:{ position:'bottom', labels:{ usePointStyle:true } },
+            tooltip:{
+              callbacks:{
+                label:(context)=>{
+                  const value = Number(context.parsed) || 0;
+                  if(options.currency){
+                    return `${context.label}: $${value.toFixed(2)}`;
+                  }
+                  return `${context.label}: ${value}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderAnalyticsHourlyChart(orderList){
+      const hourly = new Array(24).fill(0);
+      orderList.forEach(order=>{
+        const amount = Number(order.total) || 0;
+        const timestamp = Number(order.timestamp);
+        const hour = Number.isFinite(timestamp) ? new Date(timestamp).getHours() : new Date().getHours();
+        hourly[hour] += amount;
+      });
+      const labels = hourly.map((_,idx)=>`${idx}:00`);
+      const data = hourly.map(value=>round2(value));
+      const canvas = document.getElementById('hourly-sales-chart');
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      killChart('hourly');
+      chartStore['hourly'] = new Chart(ctx,{
         type:'bar',
-        data:{ labels, datasets:[{label:'Units Sold', data, backgroundColor:'rgba(184,16,13,.6)', borderColor:'rgba(184,16,13,1)', borderWidth:1}]},
-        options:{ scales:{ x:{ title:{display:true,text:'Items'}}, y:{ title:{display:true,text:'Units'}, beginAtZero:true } } }
-      });
-    }
-
-    function createPaymentMethodsChart(orderList){
-      const methods = {};
-      orderList.forEach(o=>{
-        const m = o.method || 'Unknown';
-        methods[m] = (methods[m]||0)+1;
-      });
-      const labels = Object.keys(methods);
-      const data = Object.values(methods);
-
-      const ctx = document.getElementById('payment-methods-chart').getContext('2d');
-      killChart('pay'); chartStore['pay'] = new Chart(ctx,{
-        type:'pie',
-        data:{ labels, datasets:[{label:'Payment Methods', data,
-          backgroundColor:[
-            'rgba(184,16,13,.6)','rgba(16,184,13,.6)','rgba(13,16,184,.6)','rgba(184,184,13,.6)','rgba(184,13,184,.6)'],
-          borderColor:[
-            'rgba(184,16,13,1)','rgba(16,184,13,1)','rgba(13,16,184,1)','rgba(184,184,13,1)','rgba(184,13,184,1)'],
-          borderWidth:1}]},
-        options:{responsive:true}
-      });
-    }
-
-    function createOrdersOverTimeChart(orderList){
-      const count = {};
-      orderList.forEach(o=>{
-        const d = new Date(o.timestamp || Date.now()).toLocaleDateString();
-        count[d] = (count[d]||0)+1;
-      });
-      const labels = Object.keys(count);
-      const data = Object.values(count);
-
-      const ctx = document.getElementById('orders-over-time-chart').getContext('2d');
-      killChart('orders'); chartStore['orders'] = new Chart(ctx,{
-        type:'line',
-        data:{ labels, datasets:[{label:'Number of Orders', data, backgroundColor:'rgba(16,184,13,.2)', borderColor:'rgba(16,184,13,1)', borderWidth:2, fill:true}]},
-        options:{ scales:{ x:{ title:{display:true,text:'Date'}}, y:{ title:{display:true,text:'Orders'}, beginAtZero:true } } }
-      });
-    }
-
-    function createHourlySalesChart(orderList){
-      const hourly = {}; for(let i=0;i<24;i++) hourly[i]=0;
-      orderList.forEach(o=>{
-        const h = new Date(o.timestamp || Date.now()).getHours();
-        hourly[h] += parseFloat(o.total||0);
-      });
-      const labels = Object.keys(hourly).map(h=>`${h}:00`);
-      const data = Object.values(hourly);
-      const ctx = document.getElementById('hourly-sales-chart').getContext('2d');
-      killChart('hourly'); chartStore['hourly'] = new Chart(ctx,{
-        type:'bar',
-        data:{ labels, datasets:[{label:'Sales ($)', data, backgroundColor:'rgba(13,16,184,.6)', borderColor:'rgba(13,16,184,1)', borderWidth:1}]},
-        options:{ scales:{ x:{ title:{display:true,text:'Hour'}}, y:{ title:{display:true,text:'Sales ($)'}, beginAtZero:true } } }
+        data:{
+          labels,
+          datasets:[{
+            label:'Revenue ($)',
+            data,
+            backgroundColor:'rgba(184,16,13,0.75)',
+            borderRadius:6,
+            maxBarThickness:32
+          }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{
+            legend:{ display:false },
+            tooltip:{
+              callbacks:{
+                label:(context)=>`$${(context.parsed.y || 0).toFixed(2)}`,
+                title:(context)=> context[0] && context[0].label ? `Hour ${context[0].label}` : ''
+              }
+            }
+          },
+          scales:{
+            x:{ grid:{ display:false } },
+            y:{ beginAtZero:true, ticks:{ callback:(value)=>`$${value}` } }
+          }
+        }
       });
     }
 
@@ -3092,11 +3608,16 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         }
       });
     }
+    const paymentChangeLinkEl = document.getElementById('payment-change-link');
+    if(paymentChangeLinkEl){
+      paymentChangeLinkEl.addEventListener('click', handlePaymentChangeClick);
+    }
     function initApp(){
       refreshMenuOverridesListener();
       refreshDisplayNameListener();
       initializeMenuItems();
       syncTicketCounters();
+      resetPaymentState();
       refreshOrderMetaUI();
       setMode('POS');
       ensureZelleConfigSeeded();
