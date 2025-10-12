@@ -164,6 +164,7 @@
     .inline-inventory-bar{width:100%;margin-top:6px}
     .inline-inventory-track{height:6px;border-radius:999px;background:rgba(0,0,0,.08);overflow:hidden;position:relative}
     .inline-inventory-fill{height:100%;background:var(--brand);transition:width .2s ease;min-width:0}
+    .inventory-chip{display:none;margin-top:6px;padding:4px 8px;border-radius:999px;background:#f3f4f6;color:#555;font-size:11px;font-weight:600}
     .inventory-tooltip{
       position:absolute;bottom:100%;left:50%;transform:translate(-50%,-10px);
       background:rgba(17,24,39,.92);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;white-space:nowrap;
@@ -380,35 +381,60 @@
     }
 
     /* Inventory */
-    .inventory-view{display:none;padding:20px;box-sizing:border-box;height:calc(100vh - 160px);min-height:420px}
-    .inventory-layout{display:flex;flex-direction:column;gap:16px;height:100%}
-    .inventory-summary-card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 8px 20px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.06);display:flex;flex-direction:column;gap:12px}
-    .inventory-summary-title{font-size:18px;font-weight:700;color:var(--brand);margin:0}
-    .inventory-metrics{display:flex;flex-wrap:wrap;gap:12px}
-    .inventory-metric-card{background:rgba(184,16,13,.08);border-radius:12px;padding:12px 16px;min-width:150px;display:flex;flex-direction:column;gap:4px}
-    .inventory-metric-card span{font-size:12px;color:#555;text-transform:uppercase;letter-spacing:.6px}
-    .inventory-metric-card strong{font-size:20px;color:var(--brand)}
-    .inventory-oos-summary{font-size:13px;color:#555;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-    .inventory-oos-summary strong{color:var(--brand)}
-    .inventory-list-wrapper{flex:1;min-height:0;background:#fff;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.06);overflow:auto;padding:14px}
-    .inventory-items-list{display:flex;flex-direction:column;gap:12px}
-    .inventory-item-card{border:1px solid #e5e7eb;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:#fff}
-    .inventory-item-card.is-oos{border-color:rgba(184,16,13,.4);box-shadow:0 0 0 1px rgba(184,16,13,.12)}
-    .inventory-item-header{display:flex;flex-direction:column;gap:6px}
-    .inventory-item-name{display:flex;align-items:center;gap:8px;font-weight:700;color:#111}
-    .inventory-item-code{font-size:12px;color:#666;background:#f3f4f6;border-radius:999px;padding:2px 8px;font-weight:600}
-    .inventory-item-stats{display:flex;justify-content:space-between;font-size:12px;color:#666}
-    .inventory-input-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    .inventory-input-group{display:flex;flex-direction:column;gap:4px;min-width:120px}
-    .inventory-input-group label{font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.5px}
-    .inventory-input-group input{padding:8px 10px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;max-width:120px}
+    .inventory-view{display:none;padding:18px;box-sizing:border-box;height:calc(100vh - 160px);min-height:420px;display:flex;flex-direction:column;gap:16px;background:#f5f5f7}
+    .inventory-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+    .inventory-stat-card{background:#fff;border-radius:14px;padding:12px 14px;border:1px solid rgba(0,0,0,.05);box-shadow:0 6px 16px rgba(0,0,0,.04);display:flex;flex-direction:column;gap:4px}
+    .inventory-stat-card span{font-size:11px;color:#666;letter-spacing:.5px;text-transform:uppercase;font-weight:600}
+    .inventory-stat-card strong{font-size:20px;color:var(--brand);font-weight:700}
+    .inventory-panel{flex:1;min-height:0;background:#fff;border-radius:16px;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 20px rgba(0,0,0,.06);display:flex;flex-direction:column;overflow:hidden}
+    .inventory-scroll{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+    .inventory-controls{position:sticky;top:0;z-index:2;background:#fff;padding-bottom:12px;margin:-4px -4px 12px -4px;padding:4px 4px 12px 4px;border-bottom:1px solid #f0f0f0;display:flex;flex-direction:column;gap:12px}
+    .inventory-control-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .inventory-search{flex:1 1 240px;min-width:200px}
+    .inventory-search input{width:100%;padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;font-size:14px}
+    .inventory-day-toggle{display:inline-flex;border:1px solid #e5e7eb;border-radius:999px;overflow:hidden}
+    .inventory-day-toggle button{padding:6px 14px;border:none;background:transparent;font-weight:600;font-size:13px;color:#555;cursor:pointer}
+    .inventory-day-toggle button.active{background:var(--brand);color:#fff}
+    .inventory-filter-pills{display:flex;gap:8px;flex-wrap:wrap}
+    .inventory-filter-pill{padding:6px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fafafa;font-weight:600;font-size:13px;color:#555;cursor:pointer;transition:all .15s ease}
+    .inventory-filter-pill:hover{border-color:var(--brand);color:var(--brand)}
+    .inventory-filter-pill.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .inventory-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;align-content:flex-start}
+    .inventory-item-card{border:1px solid #e5e7eb;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.04);position:relative}
+    .inventory-item-card.is-oos{border-color:rgba(184,16,13,.35);box-shadow:0 0 0 1px rgba(184,16,13,.12)}
+    .inventory-item-card.is-low:not(.is-zero){border-color:rgba(178,106,0,.4)}
+    .inventory-item-card.is-zero{border-color:rgba(184,16,13,.4)}
+    .inventory-item-card.is-untracked{border-style:dashed}
+    .inventory-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .inventory-item-name{display:flex;flex-direction:column;gap:6px}
+    .inventory-item-name strong{font-size:15px;color:#111}
+    .inventory-item-code{font-size:11px;color:#666;background:#f3f4f6;border-radius:999px;padding:2px 8px;font-weight:600;align-self:flex-start}
+    .inventory-track-toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#555;font-weight:600;cursor:pointer;user-select:none}
+    .inventory-track-toggle input{appearance:none;width:34px;height:18px;border-radius:999px;background:#d1d5db;position:relative;transition:background .2s ease}
+    .inventory-track-toggle input::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:1px;left:1px;transition:transform .2s ease}
+    .inventory-track-toggle input:checked{background:var(--brand)}
+    .inventory-track-toggle input:checked::after{transform:translateX(16px)}
+    .inventory-card-meta{display:flex;gap:12px;font-size:12px;color:#666;flex-wrap:wrap}
+    .inventory-card-meta span{display:flex;align-items:center;gap:4px;font-weight:600}
+    .inventory-card-meta span strong{color:#111;font-size:14px;font-weight:700}
+    .inventory-card-body{display:flex;flex-direction:column;gap:10px}
+    .inventory-input-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .inventory-input-group{display:flex;flex-direction:column;gap:4px}
+    .inventory-input-group label{font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px}
+    .inventory-input-group input{padding:8px 10px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;width:100%}
     .inventory-quick-buttons{display:flex;flex-wrap:wrap;gap:8px}
-    .inventory-quick-button{padding:6px 10px;border-radius:8px;border:1px solid rgba(184,16,13,.2);background:#fff;font-weight:600;color:var(--brand);cursor:pointer;font-size:12px;min-width:48px}
+    .inventory-quick-button{padding:6px 10px;border-radius:8px;border:1px solid rgba(184,16,13,.2);background:#fff;font-weight:600;color:var(--brand);cursor:pointer;font-size:12px;min-width:52px}
     .inventory-quick-button:hover{background:rgba(184,16,13,.08)}
-    .inventory-empty{font-size:14px;color:#666;text-align:center;padding:30px 0}
+    .inventory-untracked-label{display:none;font-size:12px;font-weight:600;color:#555;background:#f3f4f6;border-radius:999px;padding:6px 10px;align-self:flex-start}
+    .inventory-zero-warning{display:none;font-size:12px;font-weight:600;color:var(--brand);background:rgba(184,16,13,.08);border-radius:8px;padding:6px 10px;align-self:flex-start}
+    .inventory-empty{font-size:14px;color:#666;text-align:center;padding:24px;border:1px dashed #d1d5db;border-radius:12px;background:#fafafa}
     @media (max-width:900px){
       .inventory-view{height:auto;min-height:0}
-      .inventory-summary-card{position:static}
+    }
+    @media (max-width:640px){
+      .inventory-grid{grid-template-columns:1fr}
+      .inventory-card-header{flex-direction:column;align-items:flex-start}
+      .inventory-track-toggle{align-self:flex-start}
     }
 
     /* Modals */
@@ -719,31 +745,49 @@
 
   <!-- Analytics -->
   <div class="inventory-view" id="inventory-view">
-    <div class="inventory-layout">
-      <section class="inventory-summary-card">
-        <h2 class="inventory-summary-title">Inventory Overview</h2>
-        <div class="inventory-metrics">
-          <div class="inventory-metric-card">
-            <span>Total Initial Units</span>
-            <strong id="inventory-total-initial">0</strong>
+    <div class="inventory-stats-row">
+      <div class="inventory-stat-card">
+        <span>Total Initial Units</span>
+        <strong id="inventory-total-initial">0</strong>
+      </div>
+      <div class="inventory-stat-card">
+        <span>Total Remaining Units</span>
+        <strong id="inventory-total-remaining">0</strong>
+      </div>
+      <div class="inventory-stat-card">
+        <span>Units Sold So Far</span>
+        <strong id="inventory-total-sold">0</strong>
+      </div>
+      <div class="inventory-stat-card">
+        <span># Low Items</span>
+        <strong id="inventory-low-count">0</strong>
+      </div>
+      <div class="inventory-stat-card">
+        <span># Zero Items</span>
+        <strong id="inventory-zero-count">0</strong>
+      </div>
+    </div>
+    <div class="inventory-panel">
+      <div class="inventory-scroll">
+        <div class="inventory-controls">
+          <div class="inventory-control-row">
+            <div class="inventory-search">
+              <input type="text" id="inventory-filter-input" placeholder="Search inventory…" autocomplete="off">
+            </div>
+            <div class="inventory-day-toggle" role="group" aria-label="Inventory day selector">
+              <button id="inventory-day-sat" type="button" class="active" onclick="setDay('SAT')">Sat</button>
+              <button id="inventory-day-sun" type="button" onclick="setDay('SUN')">Sun</button>
+            </div>
           </div>
-          <div class="inventory-metric-card">
-            <span>Total Remaining Units</span>
-            <strong id="inventory-total-remaining">0</strong>
-          </div>
-          <div class="inventory-metric-card">
-            <span>Units Sold So Far</span>
-            <strong id="inventory-total-sold">0</strong>
+          <div class="inventory-filter-pills" role="group" aria-label="Inventory filters">
+            <button type="button" class="inventory-filter-pill active" data-inventory-filter="ALL">All</button>
+            <button type="button" class="inventory-filter-pill" data-inventory-filter="LOW">Low (&lt;20%)</button>
+            <button type="button" class="inventory-filter-pill" data-inventory-filter="ZERO">Zero</button>
+            <button type="button" class="inventory-filter-pill" data-inventory-filter="UNTRACKED">No-inventory items</button>
+            <button type="button" class="inventory-filter-pill" data-inventory-filter="TRACKED">Tracked items</button>
           </div>
         </div>
-        <div class="inventory-oos-summary">
-          <span>Out of stock:</span>
-          <strong id="inventory-oos-count">0</strong>
-          <span id="inventory-oos-list">—</span>
-        </div>
-      </section>
-      <div class="inventory-list-wrapper">
-        <div class="inventory-items-list" id="inventory-items-list">
+        <div class="inventory-grid" id="inventory-items-grid">
           <div class="inventory-empty" id="inventory-empty-state">Loading inventory…</div>
         </div>
       </div>
@@ -1032,9 +1076,10 @@
     const manualOosMap = {}; // manual toggles only
     const inventoryState = { SAT:{}, SUN:{} };
     const inventoryInputTimers = {};
-    const inventoryDomCache = { day:null, items:{}, emptyEl:null };
+    const inventoryDomCache = { day:null, items:{}, emptyEl:null, totalItems:0 };
     let inventoryListenerRef = null;
     let inventoryLoaded = { SAT:false, SUN:false };
+    const inventoryFilterState = { search:'', pill:'ALL' };
     let activeInventoryTooltip = null;
     let activeInventoryTooltipTimeout = null;
     const latestOrdersSnapshot = { SAT:{}, SUN:{} };
@@ -3052,7 +3097,7 @@ function currentMenu(){ return menuForDay(DAY); }
     }
 
     function defaultInventoryRecord(){
-      return { initial:0, current:0, updatedAt:null, tracked:false };
+      return { initial:0, current:0, updatedAt:null, track:true };
     }
 
     function getInventoryStateForDay(day){
@@ -3072,7 +3117,9 @@ function currentMenu(){ return menuForDay(DAY); }
         if(Object.prototype.hasOwnProperty.call(snapshot,'updatedAt')){
           record.updatedAt = snapshot.updatedAt;
         }
-        record.tracked = true;
+        if(Object.prototype.hasOwnProperty.call(snapshot,'track')){
+          record.track = Boolean(snapshot.track !== false);
+        }
       }
       const state = getInventoryStateForDay(day);
       state[code] = record;
@@ -3091,8 +3138,10 @@ function currentMenu(){ return menuForDay(DAY); }
       if(partial && Object.prototype.hasOwnProperty.call(partial,'updatedAt')){
         existing.updatedAt = partial.updatedAt;
       }
+      if(partial && Object.prototype.hasOwnProperty.call(partial,'track')){
+        existing.track = Boolean(partial.track);
+      }
       if(existing.current < 0) existing.current = 0;
-      existing.tracked = true;
       state[code] = existing;
       return existing;
     }
@@ -3128,8 +3177,7 @@ function currentMenu(){ return menuForDay(DAY); }
     function getInventoryAvailableForCode(code, day=DAY){
       const record = getInventoryRecordForCode(code, day);
       const current = Number(record.current) || 0;
-      const initial = Number(record.initial) || 0;
-      if(!record.tracked){
+      if(record.track === false){
         return Infinity;
       }
       return current;
@@ -3192,74 +3240,96 @@ function currentMenu(){ return menuForDay(DAY); }
     }
 
     function buildInventoryDom(dayKey, menu){
-      const listEl = document.getElementById('inventory-items-list');
-      if(!listEl) return;
-      listEl.innerHTML = '';
+      const gridEl = document.getElementById('inventory-items-grid');
+      if(!gridEl) return;
+      gridEl.innerHTML = '';
       inventoryDomCache.day = dayKey;
       inventoryDomCache.items = {};
+      inventoryDomCache.totalItems = menu.length;
+
       const emptyEl = document.createElement('div');
       emptyEl.id = 'inventory-empty-state';
       emptyEl.className = 'inventory-empty';
-      emptyEl.textContent = inventoryLoaded[dayKey] ? 'No items configured for this day.' : 'Loading inventory…';
-      listEl.appendChild(emptyEl);
+      emptyEl.textContent = inventoryLoaded[dayKey] ? (menu.length === 0 ? 'No items configured for this day.' : 'No items match filters.') : 'Loading inventory…';
+      emptyEl.style.display = 'none';
+      gridEl.appendChild(emptyEl);
       inventoryDomCache.emptyEl = emptyEl;
 
       menu.forEach(item=>{
         const rowDay = dayKey;
-        const row = document.createElement('div');
-        row.className = 'inventory-item-card';
-        row.setAttribute('data-code', item.code);
+        const card = document.createElement('div');
+        card.className = 'inventory-item-card';
+        card.setAttribute('data-code', item.code);
+        const searchText = `${item.name} ${item.code}`.toLowerCase();
+        card.setAttribute('data-search-text', searchText);
 
         const header = document.createElement('div');
-        header.className = 'inventory-item-header';
+        header.className = 'inventory-card-header';
 
-        const nameRow = document.createElement('div');
-        nameRow.className = 'inventory-item-name';
-        const nameLabel = document.createElement('span');
-        nameLabel.textContent = item.name;
+        const nameBlock = document.createElement('div');
+        nameBlock.className = 'inventory-item-name';
+        const nameEl = document.createElement('strong');
+        nameEl.textContent = item.name;
         const codeBadge = document.createElement('span');
         codeBadge.className = 'inventory-item-code';
         codeBadge.textContent = item.code;
-        nameRow.appendChild(nameLabel);
-        nameRow.appendChild(codeBadge);
-        header.appendChild(nameRow);
+        nameBlock.appendChild(nameEl);
+        nameBlock.appendChild(codeBadge);
+
+        const toggleLabel = document.createElement('label');
+        toggleLabel.className = 'inventory-track-toggle';
+        toggleLabel.title = 'Toggle inventory tracking';
+        const toggleInput = document.createElement('input');
+        toggleInput.type = 'checkbox';
+        toggleInput.addEventListener('change', event=>{
+          handleInventoryTrackToggle(rowDay, item.code, event.target.checked);
+        });
+        const toggleText = document.createElement('span');
+        toggleText.textContent = 'Track inventory';
+        toggleLabel.appendChild(toggleInput);
+        toggleLabel.appendChild(toggleText);
+
+        header.appendChild(nameBlock);
+        header.appendChild(toggleLabel);
+
+        const metaRow = document.createElement('div');
+        metaRow.className = 'inventory-card-meta';
+        const soldSpan = document.createElement('span');
+        soldSpan.innerHTML = 'Sold so far: <strong>0</strong>';
+        const soldValue = soldSpan.querySelector('strong');
+        const remainingSpan = document.createElement('span');
+        remainingSpan.innerHTML = 'Current: <strong>0</strong>';
+        const remainingValue = remainingSpan.querySelector('strong');
+        metaRow.appendChild(soldSpan);
+        metaRow.appendChild(remainingSpan);
 
         const barWrapper = document.createElement('div');
         barWrapper.className = 'inline-inventory-bar';
-        const track = document.createElement('div');
-        track.className = 'inline-inventory-track';
-        const fill = document.createElement('div');
-        fill.className = 'inline-inventory-fill';
-        track.appendChild(fill);
-        barWrapper.appendChild(track);
+        const barTrack = document.createElement('div');
+        barTrack.className = 'inline-inventory-track';
+        const barFill = document.createElement('div');
+        barFill.className = 'inline-inventory-fill';
+        barTrack.appendChild(barFill);
+        barWrapper.appendChild(barTrack);
         barWrapper.addEventListener('click', event=>{
           event.stopPropagation();
           const message = barWrapper.getAttribute('data-tooltip-message') || '';
-          showInlineInventoryTooltip(row, message);
+          showInlineInventoryTooltip(card, message);
         });
         barWrapper.addEventListener('pointerdown', event=>{
           if(event.pointerType === 'touch' || event.pointerType === 'pen'){
             event.stopPropagation();
             const message = barWrapper.getAttribute('data-tooltip-message') || '';
-            showInlineInventoryTooltip(row, message);
+            showInlineInventoryTooltip(card, message);
           }
         });
-        header.appendChild(barWrapper);
 
-        const stats = document.createElement('div');
-        stats.className = 'inventory-item-stats';
-        const soldEl = document.createElement('span');
-        soldEl.textContent = 'Sold so far: 0';
-        const remainingEl = document.createElement('span');
-        remainingEl.textContent = 'Remaining: 0';
-        stats.appendChild(soldEl);
-        stats.appendChild(remainingEl);
-        header.appendChild(stats);
+        const body = document.createElement('div');
+        body.className = 'inventory-card-body';
 
-        row.appendChild(header);
+        const inputGrid = document.createElement('div');
+        inputGrid.className = 'inventory-input-grid';
 
-        const inputsRow = document.createElement('div');
-        inputsRow.className = 'inventory-input-row';
         const initialGroup = document.createElement('div');
         initialGroup.className = 'inventory-input-group';
         const initialLabel = document.createElement('label');
@@ -3273,7 +3343,6 @@ function currentMenu(){ return menuForDay(DAY); }
         });
         initialGroup.appendChild(initialLabel);
         initialGroup.appendChild(initialInput);
-        inputsRow.appendChild(initialGroup);
 
         const currentGroup = document.createElement('div');
         currentGroup.className = 'inventory-input-group';
@@ -3288,8 +3357,9 @@ function currentMenu(){ return menuForDay(DAY); }
         });
         currentGroup.appendChild(currentLabel);
         currentGroup.appendChild(currentInput);
-        inputsRow.appendChild(currentGroup);
-        row.appendChild(inputsRow);
+
+        inputGrid.appendChild(initialGroup);
+        inputGrid.appendChild(currentGroup);
 
         const quickRow = document.createElement('div');
         quickRow.className = 'inventory-quick-buttons';
@@ -3301,18 +3371,42 @@ function currentMenu(){ return menuForDay(DAY); }
           btn.addEventListener('click', ()=>handleInventoryQuickAdjust(rowDay, item.code, delta));
           quickRow.appendChild(btn);
         });
-        row.appendChild(quickRow);
 
-        listEl.appendChild(row);
+        const untrackedLabel = document.createElement('div');
+        untrackedLabel.className = 'inventory-untracked-label';
+        untrackedLabel.textContent = 'Untracked';
+
+        const zeroWarning = document.createElement('div');
+        zeroWarning.className = 'inventory-zero-warning';
+        zeroWarning.textContent = '0 left';
+
+        body.appendChild(inputGrid);
+        body.appendChild(quickRow);
+        body.appendChild(untrackedLabel);
+        body.appendChild(zeroWarning);
+
+        card.appendChild(header);
+        card.appendChild(metaRow);
+        card.appendChild(barWrapper);
+        card.appendChild(body);
+
+        gridEl.appendChild(card);
 
         inventoryDomCache.items[item.code] = {
-          row,
+          code: item.code,
+          card,
+          searchText,
           barWrapper,
-          barFill: fill,
-          soldEl,
-          remainingEl,
+          barFill,
+          soldValue,
+          remainingValue,
           initialInput,
-          currentInput
+          currentInput,
+          inputGrid,
+          quickRow,
+          trackToggle: toggleInput,
+          untrackedLabel,
+          zeroWarning
         };
       });
     }
@@ -3320,60 +3414,101 @@ function currentMenu(){ return menuForDay(DAY); }
     function updateInventoryRowDisplay(dayKey, item, record){
       const cache = inventoryDomCache.items[item.code];
       if(!cache) return;
-      const soldUnits = Math.max(0, (record.initial || 0) - (record.current || 0));
-      cache.initialInput.value = record.initial || 0;
-      cache.currentInput.value = record.current || 0;
-      cache.soldEl.textContent = `Sold so far: ${soldUnits}`;
-      cache.remainingEl.textContent = `Remaining: ${record.current || 0}`;
-      const percent = computeInventoryPercent(record.initial, record.current);
-      cache.barFill.style.width = `${percent}%`;
-      const message = record.current > 0 ? `${record.current} left` : 'No stock';
-      cache.barWrapper.setAttribute('data-tooltip-message', message);
-      cache.barWrapper.title = message;
-      const hasInventory = (record.initial || 0) > 0 || (record.current || 0) > 0;
-      const exhausted = hasInventory ? record.current <= 0 : false;
-      if(exhausted){
-        cache.row.classList.add('is-oos');
+      const tracked = record.track !== false;
+      const initial = Number(record.initial) || 0;
+      const current = Number(record.current) || 0;
+      const soldUnits = Math.max(0, initial - current);
+      const percent = computeInventoryPercent(initial, current);
+      cache.trackToggle.checked = tracked;
+      cache.initialInput.value = initial;
+      cache.currentInput.value = current;
+      cache.initialInput.disabled = !tracked;
+      cache.currentInput.disabled = !tracked;
+      cache.soldValue.textContent = tracked ? soldUnits : '—';
+      cache.remainingValue.textContent = tracked ? current : '—';
+
+      if(tracked){
+        cache.inputGrid.style.display = '';
+        cache.quickRow.style.display = '';
+        cache.barWrapper.style.display = '';
+        cache.untrackedLabel.style.display = 'none';
+        const message = current > 0 ? `${current} left` : 'No stock';
+        cache.barWrapper.setAttribute('data-tooltip-message', message);
+        cache.barWrapper.title = message;
+        cache.barFill.style.width = `${percent}%`;
+        cache.zeroWarning.style.display = current <= 0 ? 'inline-flex' : 'none';
       }else{
-        cache.row.classList.remove('is-oos');
+        cache.inputGrid.style.display = 'none';
+        cache.quickRow.style.display = 'none';
+        cache.barWrapper.style.display = 'none';
+        cache.untrackedLabel.style.display = 'inline-flex';
+        cache.zeroWarning.style.display = 'none';
+        cache.barWrapper.removeAttribute('data-tooltip-message');
+        cache.barWrapper.title = '';
       }
+
+      const manual = Boolean(manualOosMap[item.code]);
+      const isZero = tracked && current <= 0 && (initial > 0 || current === 0);
+      const isLow = tracked && initial > 0 && percent > 0 && percent < 20;
+      cache.card.classList.toggle('is-oos', manual);
+      cache.card.classList.toggle('is-zero', isZero);
+      cache.card.classList.toggle('is-low', isLow);
+      cache.card.classList.toggle('is-untracked', !tracked);
+      cache.card.setAttribute('data-percent', percent);
+      cache.card.setAttribute('data-remaining', current);
+      cache.card.setAttribute('data-tracked', tracked ? '1' : '0');
     }
 
     function renderInventoryView(){
-      const listEl = document.getElementById('inventory-items-list');
-      if(!listEl) return;
+      const gridEl = document.getElementById('inventory-items-grid');
+      if(!gridEl) return;
       const dayKey = DAY;
       const menu = currentMenu();
 
-      const shouldRebuild = inventoryDomCache.day !== dayKey || menu.length !== Object.keys(inventoryDomCache.items).length || menu.some(item=>!inventoryDomCache.items[item.code]);
+      const shouldRebuild = inventoryDomCache.day !== dayKey || menu.length !== inventoryDomCache.totalItems || menu.some(item=>!inventoryDomCache.items[item.code]);
       if(shouldRebuild){
         buildInventoryDom(dayKey, menu);
+      }else{
+        inventoryDomCache.totalItems = menu.length;
+        if(inventoryDomCache.emptyEl){
+          inventoryDomCache.emptyEl.style.display = 'none';
+        }
       }
 
       let totalInitial = 0;
       let totalRemaining = 0;
       let totalSold = 0;
-      const oosCodes = [];
+      let lowCount = 0;
+      let zeroCount = 0;
 
       menu.forEach(item=>{
         const record = getInventoryRecordForCode(item.code, dayKey);
         updateInventoryRowDisplay(dayKey, item, record);
-        totalInitial += record.initial || 0;
-        totalRemaining += record.current || 0;
-        const soldUnits = Math.max(0, (record.initial || 0) - (record.current || 0));
+        if(record.track === false){
+          return;
+        }
+        const initial = Number(record.initial) || 0;
+        const current = Number(record.current) || 0;
+        const soldUnits = Math.max(0, initial - current);
+        const percent = computeInventoryPercent(initial, current);
+        totalInitial += initial;
+        totalRemaining += current;
         totalSold += soldUnits;
-        const hasInventory = (record.initial || 0) > 0 || (record.current || 0) > 0;
-        if((manualOosMap[item.code] || false) || (hasInventory && record.current <= 0)){
-          oosCodes.push(item.code);
+        if(initial > 0 && percent > 0 && percent < 20){
+          lowCount++;
+        }
+        if(current <= 0){
+          zeroCount++;
         }
       });
 
       if(inventoryDomCache.emptyEl){
         if(menu.length === 0){
           inventoryDomCache.emptyEl.textContent = inventoryLoaded[dayKey] ? 'No items configured for this day.' : 'Loading inventory…';
-          inventoryDomCache.emptyEl.style.display = 'block';
+        }else if(inventoryLoaded[dayKey]){
+          inventoryDomCache.emptyEl.textContent = 'No items match filters.';
         }else{
-          inventoryDomCache.emptyEl.style.display = 'none';
+          inventoryDomCache.emptyEl.textContent = 'Loading inventory…';
         }
       }
 
@@ -3383,13 +3518,99 @@ function currentMenu(){ return menuForDay(DAY); }
       if(totalRemainingEl) totalRemainingEl.textContent = totalRemaining;
       const totalSoldEl = document.getElementById('inventory-total-sold');
       if(totalSoldEl) totalSoldEl.textContent = totalSold;
-      const oosCountEl = document.getElementById('inventory-oos-count');
-      if(oosCountEl) oosCountEl.textContent = oosCodes.length;
-      const oosListEl = document.getElementById('inventory-oos-list');
-      if(oosListEl) oosListEl.textContent = oosCodes.length ? oosCodes.join(', ') : '—';
+      const lowCountEl = document.getElementById('inventory-low-count');
+      if(lowCountEl) lowCountEl.textContent = lowCount;
+      const zeroCountEl = document.getElementById('inventory-zero-count');
+      if(zeroCountEl) zeroCountEl.textContent = zeroCount;
+
+      applyInventoryFilters();
+    }
+
+    function setInventorySearch(value){
+      inventoryFilterState.search = (value || '').toString().trim().toLowerCase();
+      applyInventoryFilters();
+    }
+
+    function setInventoryFilter(filter){
+      const allowed = ['ALL','LOW','ZERO','UNTRACKED','TRACKED'];
+      const normalized = allowed.includes(filter) ? filter : 'ALL';
+      if(inventoryFilterState.pill === normalized) return;
+      inventoryFilterState.pill = normalized;
+      syncInventoryFilterButtons();
+      applyInventoryFilters();
+    }
+
+    function syncInventoryFilterButtons(){
+      const buttons = document.querySelectorAll('[data-inventory-filter]');
+      buttons.forEach(btn=>{
+        const filter = btn.getAttribute('data-inventory-filter');
+        btn.classList.toggle('active', filter === inventoryFilterState.pill);
+      });
+    }
+
+    function syncInventoryDayButtons(){
+      const satBtn = document.getElementById('inventory-day-sat');
+      const sunBtn = document.getElementById('inventory-day-sun');
+      if(satBtn) satBtn.classList.toggle('active', DAY === 'SAT');
+      if(sunBtn) sunBtn.classList.toggle('active', DAY === 'SUN');
+    }
+
+    function applyInventoryFilters(){
+      const dayKey = inventoryDomCache.day || DAY;
+      const entries = Object.values(inventoryDomCache.items || {});
+      const searchTerm = inventoryFilterState.search;
+      let visibleCount = 0;
+      entries.forEach(cache=>{
+        const record = getInventoryRecordForCode(cache.code, dayKey);
+        const tracked = record.track !== false;
+        const initial = Number(record.initial) || 0;
+        const current = Number(record.current) || 0;
+        const percent = computeInventoryPercent(initial, current);
+        const searchValue = cache.searchText || '';
+        const matchesSearch = !searchTerm || searchValue.includes(searchTerm);
+        let matchesFilter = true;
+        switch(inventoryFilterState.pill){
+          case 'LOW':
+            matchesFilter = tracked && initial > 0 && percent > 0 && percent < 20;
+            break;
+          case 'ZERO':
+            matchesFilter = tracked && current <= 0;
+            break;
+          case 'UNTRACKED':
+            matchesFilter = !tracked;
+            break;
+          case 'TRACKED':
+            matchesFilter = tracked;
+            break;
+          default:
+            matchesFilter = true;
+        }
+        const shouldShow = matchesSearch && matchesFilter;
+        cache.card.style.display = shouldShow ? '' : 'none';
+        if(shouldShow) visibleCount++;
+      });
+
+      const totalItems = inventoryDomCache.totalItems || entries.length;
+      const dayLoaded = inventoryLoaded[dayKey];
+      if(inventoryDomCache.emptyEl){
+        if(totalItems === 0){
+          inventoryDomCache.emptyEl.textContent = dayLoaded ? 'No items configured for this day.' : 'Loading inventory…';
+          if(!dayLoaded){
+            inventoryDomCache.emptyEl.textContent = 'Loading inventory…';
+          }
+          inventoryDomCache.emptyEl.style.display = 'block';
+        }else if(visibleCount === 0){
+          inventoryDomCache.emptyEl.textContent = dayLoaded ? 'No items match filters.' : 'Loading inventory…';
+          inventoryDomCache.emptyEl.style.display = 'block';
+        }else{
+          inventoryDomCache.emptyEl.style.display = 'none';
+        }
+      }
     }
 
     function handleInventoryInputChange(dayKey, code, field, rawValue){
+      const record = getInventoryRecordForCode(code, dayKey);
+      if(record.track === false) return;
       const value = sanitizeInventoryValue(rawValue);
       mergeInventoryRecord(dayKey, code, { [field]: value });
       handleInventoryStateUpdate(dayKey, { skipRender:true });
@@ -3403,8 +3624,19 @@ function currentMenu(){ return menuForDay(DAY); }
     function handleInventoryQuickAdjust(dayKey, code, delta){
       if(!Number.isFinite(delta)) return;
       const record = getInventoryRecordForCode(code, dayKey);
+      if(record.track === false) return;
       const next = Math.max(0, (record.current || 0) + delta);
       mergeInventoryRecord(dayKey, code, { current: next });
+      handleInventoryStateUpdate(dayKey, { skipRender:true });
+      if(dayKey === DAY){
+        renderInventoryView();
+        updateItemCardInventoryBars();
+      }
+      scheduleInventoryWrite(dayKey, code);
+    }
+
+    function handleInventoryTrackToggle(dayKey, code, shouldTrack){
+      mergeInventoryRecord(dayKey, code, { track: shouldTrack });
       handleInventoryStateUpdate(dayKey, { skipRender:true });
       if(dayKey === DAY){
         renderInventoryView();
@@ -3431,6 +3663,7 @@ function currentMenu(){ return menuForDay(DAY); }
       const payload = {
         initial: record.initial || 0,
         current: record.current || 0,
+        track: record.track === false ? false : true,
         updatedAt: firebase.database.ServerValue.TIMESTAMP
       };
       db.ref(inventoryItemPathForDay(dayKey, code)).update(payload).catch(err=>{
@@ -3440,13 +3673,9 @@ function currentMenu(){ return menuForDay(DAY); }
 
     function computeOosStateForDay(dayKey){
       const menu = menuForDay(dayKey);
-      const state = getInventoryStateForDay(dayKey);
       const result = {};
       menu.forEach(item=>{
-        const record = state[item.code] || defaultInventoryRecord();
-        const hasInventory = (record.initial || 0) > 0 || (record.current || 0) > 0;
-        const exhausted = hasInventory ? record.current <= 0 : false;
-        result[item.code] = Boolean(manualOosMap[item.code]) || exhausted;
+        result[item.code] = Boolean(manualOosMap[item.code]);
       });
       return result;
     }
@@ -3548,7 +3777,11 @@ function currentMenu(){ return menuForDay(DAY); }
     }
 
     async function applyInventoryTransactionDelta(dayKey, deltaMap, options={}){
-      const entries = Object.entries(deltaMap || {}).filter(([code, delta])=>Number(delta));
+      const entries = Object.entries(deltaMap || {}).filter(([code, delta])=>{
+        if(!Number(delta)) return false;
+        const record = getInventoryRecordForCode(code, dayKey);
+        return record.track !== false;
+      });
       if(entries.length === 0){
         if(dayKey === DAY && !options.skipRender){
           renderInventoryView();
@@ -3593,14 +3826,28 @@ function currentMenu(){ return menuForDay(DAY); }
         const code = card.getAttribute('data-code');
         if(!code) return;
         const record = getInventoryRecordForCode(code, DAY);
+        const tracked = record.track !== false;
         const percent = computeInventoryPercent(record.initial, record.current);
         const fill = card.querySelector('.inline-inventory-fill');
-        if(fill) fill.style.width = `${percent}%`;
-        const message = record.current > 0 ? `${record.current} left` : 'No stock';
         const bar = card.querySelector('.inline-inventory-bar');
-        if(bar){
-          bar.setAttribute('data-tooltip-message', message);
-          bar.title = message;
+        const chip = card.querySelector('.inventory-chip');
+        if(tracked){
+          if(fill) fill.style.width = `${percent}%`;
+          if(bar){
+            const message = record.current > 0 ? `${record.current} left` : 'No stock';
+            bar.setAttribute('data-tooltip-message', message);
+            bar.title = message;
+            bar.style.display = '';
+          }
+          if(chip) chip.style.display = 'none';
+        }else{
+          if(fill) fill.style.width = '0%';
+          if(bar){
+            bar.style.display = 'none';
+            bar.removeAttribute('data-tooltip-message');
+            bar.title = '';
+          }
+          if(chip) chip.style.display = 'inline-flex';
         }
         const manual = Boolean(manualOosMap[code]);
         const isOut = Boolean(oosMap[code]);
@@ -3922,6 +4169,7 @@ function currentMenu(){ return menuForDay(DAY); }
         const effectivePrice = getEffectivePriceFor(item);
         const effectiveTicketColorLabel = getEffectiveTicketColorLabel(item);
         const record = getInventoryRecordForCode(item.code, DAY);
+        const tracked = record.track !== false;
         const card = document.createElement('div');
         card.className='item-box';
         card.setAttribute('data-code', item.code);
@@ -3957,24 +4205,36 @@ function currentMenu(){ return menuForDay(DAY); }
         track.className = 'inline-inventory-track';
         const fill = document.createElement('div');
         fill.className = 'inline-inventory-fill';
-        const percent = computeInventoryPercent(record.initial, record.current);
+        const percent = tracked ? computeInventoryPercent(record.initial, record.current) : 0;
         fill.style.width = `${percent}%`;
         track.appendChild(fill);
         barWrapper.appendChild(track);
-        const message = record.current > 0 ? `${record.current} left` : 'No stock';
-        barWrapper.setAttribute('data-tooltip-message', message);
-        barWrapper.title = message;
+        if(tracked){
+          const message = record.current > 0 ? `${record.current} left` : 'No stock';
+          barWrapper.setAttribute('data-tooltip-message', message);
+          barWrapper.title = message;
+        }else{
+          barWrapper.style.display = 'none';
+        }
         barWrapper.addEventListener('click', event=>{
           event.stopPropagation();
-          showInlineInventoryTooltip(card, message);
+          const message = barWrapper.getAttribute('data-tooltip-message') || '';
+          if(message) showInlineInventoryTooltip(card, message);
         });
         barWrapper.addEventListener('pointerdown', event=>{
           if(event.pointerType === 'touch' || event.pointerType === 'pen'){
             event.stopPropagation();
-            showInlineInventoryTooltip(card, message);
+            const message = barWrapper.getAttribute('data-tooltip-message') || '';
+            if(message) showInlineInventoryTooltip(card, message);
           }
         });
         card.appendChild(barWrapper);
+
+        const untrackedChip = document.createElement('span');
+        untrackedChip.className = 'inventory-chip';
+        untrackedChip.textContent = 'Untracked';
+        untrackedChip.style.display = tracked ? 'none' : 'inline-flex';
+        card.appendChild(untrackedChip);
 
         const img = document.createElement('img');
         img.src = item.image;
@@ -4233,6 +4493,7 @@ function currentMenu(){ return menuForDay(DAY); }
       // Toggle active states in top bar
       document.getElementById('btn-day-sat').classList.toggle('active', DAY==='SAT');
       document.getElementById('btn-day-sun').classList.toggle('active', DAY==='SUN');
+      syncInventoryDayButtons();
 
       // Toggle active states in subtabs, if present
       const otSat = document.getElementById('ot-sat'); if(otSat) otSat.classList.toggle('active', DAY==='SAT');
@@ -4315,6 +4576,7 @@ function currentMenu(){ return menuForDay(DAY); }
       // Sync top bar buttons
       document.getElementById('btn-day-sat').classList.toggle('active', DAY==='SAT');
       document.getElementById('btn-day-sun').classList.toggle('active', DAY==='SUN');
+      syncInventoryDayButtons();
 
       // Rebuild POS grid and refresh OOS state
       initializeMenuItems();
@@ -4606,6 +4868,19 @@ function currentMenu(){ return menuForDay(DAY); }
     if(paymentChangeLinkEl){
       paymentChangeLinkEl.addEventListener('click', handlePaymentChangeClick);
     }
+    const inventorySearchInput = document.getElementById('inventory-filter-input');
+    if(inventorySearchInput){
+      inventorySearchInput.addEventListener('input', event=>{
+        setInventorySearch(event.target.value);
+      });
+      setInventorySearch(inventorySearchInput.value);
+    }
+    document.querySelectorAll('[data-inventory-filter]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const filter = btn.getAttribute('data-inventory-filter');
+        setInventoryFilter(filter);
+      });
+    });
     function initApp(){
       refreshMenuOverridesListener();
       refreshDisplayNameListener();
@@ -4622,6 +4897,8 @@ function currentMenu(){ return menuForDay(DAY); }
       loadOOSMap();
       refreshInventoryListener();
       renderInventoryView();
+      syncInventoryFilterButtons();
+      syncInventoryDayButtons();
       loadOrdersFromFirebase();
     }
     applyPosModeUI();
