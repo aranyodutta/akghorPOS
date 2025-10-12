@@ -386,11 +386,6 @@
     .inventory-stat-card{background:#fff;border-radius:14px;padding:12px 14px;border:1px solid rgba(0,0,0,.05);box-shadow:0 6px 16px rgba(0,0,0,.04);display:flex;flex-direction:column;gap:4px}
     .inventory-stat-card span{font-size:11px;color:#666;letter-spacing:.5px;text-transform:uppercase;font-weight:600}
     .inventory-stat-card strong{font-size:20px;color:var(--brand);font-weight:700}
-    .inventory-insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-    .inventory-insight-card{background:#fff;border-radius:14px;border:1px solid rgba(0,0,0,.05);box-shadow:0 6px 16px rgba(0,0,0,.04);padding:12px 16px;display:flex;flex-direction:column;gap:12px;min-height:220px}
-    .inventory-insight-card h3{margin:0;font-size:13px;color:#333;text-transform:uppercase;letter-spacing:.6px}
-    .inventory-insight-card canvas{width:100%;height:180px}
-    .inventory-insight-empty{flex:1;display:flex;align-items:center;justify-content:center;font-size:13px;color:#888;text-align:center}
     .inventory-panel{flex:1;min-height:0;background:#fff;border-radius:16px;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 20px rgba(0,0,0,.06);display:flex;flex-direction:column;overflow:hidden}
     .inventory-scroll{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
     .inventory-controls{position:sticky;top:0;z-index:2;background:#fff;padding-bottom:12px;margin:-4px -4px 12px -4px;padding:4px 4px 12px 4px;border-bottom:1px solid #f0f0f0;display:flex;flex-direction:column;gap:12px}
@@ -435,7 +430,7 @@
     .inventory-empty{font-size:14px;color:#666;text-align:center;padding:24px;border:1px dashed #d1d5db;border-radius:12px;background:#fafafa}
     @media (max-width:900px){
       .inventory-view{height:auto;min-height:0}
-      .inventory-insight-card canvas{height:160px}
+
     }
     @media (max-width:640px){
       .inventory-grid{grid-template-columns:1fr}
@@ -773,24 +768,7 @@
         <strong id="inventory-zero-count">0</strong>
       </div>
     </div>
-    <div class="inventory-insights-grid">
-      <div class="inventory-insight-card">
-        <h3>Stock Status</h3>
-        <canvas id="inventory-stock-status-chart"></canvas>
-        <div class="inventory-insight-empty" id="inventory-stock-status-empty">No tracked inventory yet.</div>
-      </div>
-      <div class="inventory-insight-card">
-        <h3>Low Stock Items</h3>
-        <canvas id="inventory-low-stock-chart"></canvas>
-        <div class="inventory-insight-empty" id="inventory-low-stock-empty">All tracked items are healthy.</div>
-      </div>
-      <div class="inventory-insight-card">
-        <h3>Consumption Today by Hour</h3>
-        <canvas id="inventory-consumption-chart"></canvas>
-        <div class="inventory-insight-empty" id="inventory-consumption-empty">No orders recorded for this day yet.</div>
-      </div>
-    </div>
-    <div class="inventory-panel">
+
       <div class="inventory-scroll">
         <div class="inventory-controls">
           <div class="inventory-control-row">
@@ -3503,14 +3481,13 @@ function currentMenu(){ return menuForDay(DAY); }
       let totalSold = 0;
       let lowCount = 0;
       let zeroCount = 0;
-      let untrackedCount = 0;
-      const lowItemsData = [];
+
 
       menu.forEach(item=>{
         const record = getInventoryRecordForCode(item.code, dayKey);
         updateInventoryRowDisplay(dayKey, item, record);
         if(record.track === false){
-          untrackedCount++;
+
           return;
         }
         const initial = Number(record.initial) || 0;
@@ -3520,11 +3497,9 @@ function currentMenu(){ return menuForDay(DAY); }
         totalInitial += initial;
         totalRemaining += current;
         totalSold += soldUnits;
-        if(initial > 0){
-          lowItemsData.push({ name:item.name, percent, current });
-          if(percent > 0 && percent < 20){
-            lowCount++;
-          }
+        if(initial > 0 && percent > 0 && percent < 20){
+          lowCount++;
+
         }
         if(current <= 0){
           zeroCount++;
@@ -3552,198 +3527,10 @@ function currentMenu(){ return menuForDay(DAY); }
       const zeroCountEl = document.getElementById('inventory-zero-count');
       if(zeroCountEl) zeroCountEl.textContent = zeroCount;
 
-      const sortedLowItems = lowItemsData
-        .filter(entry=>Number.isFinite(entry.percent))
-        .sort((a,b)=>{
-          if(a.percent === b.percent) return (a.current||0) - (b.current||0);
-          return a.percent - b.percent;
-        })
-        .slice(0, 5);
-
-      renderInventoryStockStatusChart(totalRemaining, totalSold, untrackedCount);
-      renderInventoryLowItemsChart(sortedLowItems);
-      renderInventoryConsumptionChart(buildInventoryConsumptionSeries(dayKey));
 
       applyInventoryFilters();
     }
 
-    function renderInventoryStockStatusChart(remaining, sold, untrackedCount){
-      const canvas = document.getElementById('inventory-stock-status-chart');
-      const emptyEl = document.getElementById('inventory-stock-status-empty');
-      if(!canvas) return;
-      const total = (Number(remaining) || 0) + (Number(sold) || 0) + (Number(untrackedCount) || 0);
-      if(total <= 0){
-        killChart('inventoryStockStatus');
-        canvas.style.display = 'none';
-        if(emptyEl) emptyEl.style.display = 'flex';
-        return;
-      }
-      canvas.style.display = 'block';
-      if(emptyEl) emptyEl.style.display = 'none';
-      const ctx = canvas.getContext('2d');
-      killChart('inventoryStockStatus');
-      chartStore['inventoryStockStatus'] = new Chart(ctx, {
-        type:'doughnut',
-        data:{
-          labels:['Remaining','Sold','Untracked'],
-          datasets:[{
-            data:[remaining, sold, untrackedCount],
-            backgroundColor:['rgba(23,128,61,0.85)','rgba(184,16,13,0.85)','rgba(107,114,128,0.6)'],
-            borderColor:['rgba(23,128,61,1)','rgba(184,16,13,1)','rgba(107,114,128,0.8)'],
-            borderWidth:1
-          }]
-        },
-        options:{
-          cutout:'62%',
-          plugins:{
-            legend:{ position:'bottom', labels:{ usePointStyle:true } },
-            tooltip:{
-              callbacks:{
-                label:(context)=>{
-                  const value = Number(context.parsed) || 0;
-                  const label = context.label || '';
-                  return `${label}: ${value}`;
-                }
-              }
-            }
-          }
-        }
-      });
-    }
-
-    function renderInventoryLowItemsChart(items){
-      const canvas = document.getElementById('inventory-low-stock-chart');
-      const emptyEl = document.getElementById('inventory-low-stock-empty');
-      if(!canvas) return;
-      if(!items || items.length === 0){
-        killChart('inventoryLowItems');
-        canvas.style.display = 'none';
-        if(emptyEl) emptyEl.style.display = 'flex';
-        return;
-      }
-      canvas.style.display = 'block';
-      if(emptyEl) emptyEl.style.display = 'none';
-      const labels = items.map(entry=>entry.name);
-      const percents = items.map(entry=>Math.max(0, Math.min(100, Number(entry.percent) || 0)));
-      const ctx = canvas.getContext('2d');
-      killChart('inventoryLowItems');
-      chartStore['inventoryLowItems'] = new Chart(ctx, {
-        type:'bar',
-        data:{
-          labels,
-          datasets:[{
-            data: percents,
-            backgroundColor:'rgba(184,16,13,0.75)',
-            borderRadius:8,
-            maxBarThickness:28
-          }]
-        },
-        options:{
-          indexAxis:'y',
-          maintainAspectRatio:false,
-          plugins:{
-            legend:{ display:false },
-            tooltip:{
-              callbacks:{
-                label:(context)=>{
-                  const value = Number(context.parsed.x);
-                  return `${context.label}: ${Math.max(0, value).toFixed(0)}%`;
-                }
-              }
-            }
-          },
-          scales:{
-            x:{
-              beginAtZero:true,
-              max:100,
-              ticks:{ callback:(value)=>`${value}%` },
-              grid:{ display:false }
-            },
-            y:{ grid:{ display:false } }
-          }
-        }
-      });
-    }
-
-    function renderInventoryConsumptionChart(series){
-      const canvas = document.getElementById('inventory-consumption-chart');
-      const emptyEl = document.getElementById('inventory-consumption-empty');
-      if(!canvas) return;
-      const dataSeries = Array.isArray(series) ? series.map(value=>Number(value) || 0) : [];
-      const totalUnits = dataSeries.reduce((sum,value)=>sum + value, 0);
-      if(totalUnits <= 0){
-        killChart('inventoryConsumption');
-        canvas.style.display = 'none';
-        if(emptyEl) emptyEl.style.display = 'flex';
-        return;
-      }
-      canvas.style.display = 'block';
-      if(emptyEl) emptyEl.style.display = 'none';
-      const labels = dataSeries.map((_,idx)=>`${idx}:00`);
-      const ctx = canvas.getContext('2d');
-      killChart('inventoryConsumption');
-      chartStore['inventoryConsumption'] = new Chart(ctx, {
-        type:'line',
-        data:{
-          labels,
-          datasets:[{
-            label:'Units sold',
-            data:dataSeries,
-            borderColor:'rgba(184,16,13,0.85)',
-            backgroundColor:'rgba(184,16,13,0.15)',
-            tension:0.3,
-            fill:true,
-            pointRadius:2,
-            pointHoverRadius:4
-          }]
-        },
-        options:{
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{
-            legend:{ display:false },
-            tooltip:{
-              callbacks:{
-                label:(context)=>{
-                  const value = Number(context.parsed.y) || 0;
-                  return `${value.toFixed(0)} units`;
-                }
-              }
-            }
-          },
-          scales:{
-            x:{
-              ticks:{ maxTicksLimit:8 },
-              grid:{ display:false }
-            },
-            y:{
-              beginAtZero:true,
-              ticks:{ precision:0 },
-              grid:{ color:'rgba(0,0,0,0.05)' }
-            }
-          }
-        }
-      });
-    }
-
-    function buildInventoryConsumptionSeries(dayKey){
-      const hourly = new Array(24).fill(0);
-      Object.values(orderHistory || {}).forEach(order=>{
-        if(!order || typeof order !== 'object') return;
-        const timestamp = Number(order.timestamp);
-        if(!Number.isFinite(timestamp)) return;
-        const hour = new Date(timestamp).getHours();
-        const items = Array.isArray(order.items) ? order.items : [];
-        items.forEach(entry=>{
-          const qty = Number(entry && entry.quantity) || 0;
-          if(qty <= 0) return;
-          if(hour >= 0 && hour < 24){
-            hourly[hour] += qty;
-          }
-        });
-      });
-      return hourly;
-    }
 
     function setInventorySearch(value){
       inventoryFilterState.search = (value || '').toString().trim().toLowerCase();
