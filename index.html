@@ -69,20 +69,12 @@
     .ticket-section{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
     .ticket{display:flex;align-items:center;gap:6px}
     .ticket-label{
-      background:#eee;color:#333;padding:6px 10px;border-radius:6px;font-weight:bold;font-size:14px;text-transform:capitalize
+      background:#eee;color:#333;padding:6px 10px;border-radius:6px;font-weight:bold;font-size:14px
     }
-    .ticket-label[data-color="purple"],
     .ticket-label.ticket-purple{background:#6f42c1;color:#fff}
-    .ticket-label[data-color="red"],
     .ticket-label.ticket-red{background:#d6336c;color:#fff}
-    .ticket-label[data-color="green"],
     .ticket-label.ticket-green{background:#2f9e44;color:#fff}
-    .ticket-label[data-color="blue"],
     .ticket-label.ticket-blue{background:#1c7ed6;color:#fff}
-    .ticket-label[data-color="yellow"]{background:#f4d03f;color:#6b4f00}
-    .ticket-label[data-color="orange"]{background:#f39c12;color:#fff}
-    .ticket-label[data-color="teal"]{background:#17a2b8;color:#fff}
-    .ticket-label[data-color="pink"]{background:#e83e8c;color:#fff}
     .ticket-count{font-size:16px;color:#fff}
 
     /* Layout */
@@ -91,9 +83,6 @@
       flex:1;padding:20px;display:flex;flex-wrap:wrap;gap:12px;
       justify-content:flex-start;background:#f9f9f9;min-height:calc(100vh - 140px);
     }
-    .menu-empty{width:100%;padding:60px 20px;text-align:center;color:#777;font-size:18px;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center}
-    .menu-empty button{padding:10px 16px;border:none;border-radius:8px;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
-    .menu-empty button:hover{background:var(--brand-dark)}
     .order-summary{
       width:360px;background:var(--panel);padding:20px;border-left:1px solid #ddd;position:relative;
     }
@@ -350,45 +339,6 @@
       padding:6px 8px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,.06);
       box-shadow:0 1px 2px rgba(0,0,0,.05)
     }
-    /* Items Admin */
-    .items-admin{display:none;padding:24px;background:#f8f8f8;min-height:calc(100vh - 140px);overflow:auto}
-    .items-admin h2{margin:0 0 12px;font-size:24px}
-    .items-admin-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px}
-    .items-admin-header .subtabs{margin:0}
-    .items-admin-header .search-box{flex:1 1 220px;min-width:200px}
-    .items-admin-header .search-box input{width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:15px}
-    .items-admin-header .primary-button{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer}
-    .items-admin-header .primary-button:hover{background:var(--brand-dark)}
-    .items-admin-table-wrapper{background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.06);overflow:hidden;border:1px solid #e5e5e5}
-    .items-admin table{width:100%;border-collapse:collapse}
-    .items-admin thead{background:#fafafa}
-    .items-admin th,.items-admin td{padding:10px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
-    .items-admin tbody tr:hover{background:#fdf2f2}
-    .items-admin td.actions{white-space:nowrap}
-    .items-admin .inline-number{width:100px;padding:6px;border:1px solid #ccc;border-radius:6px;font-size:14px}
-    .items-admin .inline-select{padding:6px 28px 6px 10px;border:1px solid #ccc;border-radius:6px;font-size:14px;min-width:140px}
-    .items-admin .inline-checkbox{width:18px;height:18px}
-    .items-admin .thumbnail{width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #eee;background:#fafafa}
-    .items-admin .empty-state{padding:30px;text-align:center;color:#777;font-size:15px}
-    .items-admin .sort-buttons{display:inline-flex;flex-direction:column;margin-left:6px;vertical-align:middle}
-    .items-admin .sort-buttons button{border:1px solid #ccc;background:#fff;padding:2px 4px;margin:1px;border-radius:4px;cursor:pointer;font-size:12px}
-    .items-admin .sort-buttons button:hover{background:#f1f5f9}
-    .items-admin .table-button{padding:8px 12px;border:none;border-radius:6px;font-weight:600;cursor:pointer;background:#e5e7eb;color:#111;margin-right:6px}
-    .items-admin .table-button.primary{background:var(--brand);color:#fff}
-    .items-admin .table-button.danger{background:#b8100d;color:#fff}
-    .items-admin .ticket-color-manager{margin-top:24px;background:#fff;border-radius:12px;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.04);border:1px solid #e5e5e5}
-    .items-admin .ticket-color-list{display:flex;flex-direction:column;gap:10px;margin-top:14px}
-    .items-admin .ticket-color-row{display:flex;align-items:center;gap:10px}
-    .items-admin .ticket-color-row input{flex:1;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:14px}
-    .items-admin .ticket-color-row button{padding:8px 12px;border:none;border-radius:6px;font-weight:600;cursor:pointer}
-    .items-admin .ticket-color-row button.primary{background:var(--brand);color:#fff}
-    .items-admin .ticket-color-row button.secondary{background:#e5e7eb;color:#111}
-    .items-admin .ticket-color-row button.danger{background:#b8100d;color:#fff}
-    .items-admin .ticket-color-add{display:flex;gap:10px;margin-top:16px}
-    .items-admin .ticket-color-add input{flex:1;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:14px}
-    .items-admin .ticket-color-add button{padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;background:var(--brand);color:#fff}
-    .items-admin .ticket-color-add button:hover{background:var(--brand-dark)}
-    .items-admin .ticket-color-hint{font-size:13px;color:#777;margin-top:10px}
     .switch-log-row:hover{background:rgba(184,16,13,.06)}
     .switch-log-time{color:#4b5563;font-weight:600}
     .switch-log-arrow{text-align:right;color:#b0100d;font-weight:600}
@@ -596,7 +546,12 @@
 
     <div class="pos-indicator" id="pos-indicator" aria-live="polite">POS1</div>
 
-    <div class="ticket-section" id="ticket-counter-container" aria-live="polite"></div>
+    <div class="ticket-section">
+      <div class="ticket"><div class="ticket-label ticket-purple">Purple</div><span class="ticket-count" id="ticket-purple-count">0</span></div>
+      <div class="ticket"><div class="ticket-label ticket-red">Red</div><span class="ticket-count" id="ticket-red-count">0</span></div>
+      <div class="ticket"><div class="ticket-label ticket-green">Green</div><span class="ticket-count" id="ticket-green-count">0</span></div>
+      <div class="ticket"><div class="ticket-label ticket-blue">Blue</div><span class="ticket-count" id="ticket-blue-count">0</span></div>
+    </div>
   </div>
   <!-- Mode Switch -->
   <div id="mode-switch-row" style="padding:10px 20px;display:flex;gap:10px;align-items:center;">
@@ -789,49 +744,6 @@
   </div>
 
 
-  <!-- Items Admin -->
-  <div class="items-admin" id="items-admin-view">
-    <div class="items-admin-header">
-      <h2 style="margin-right:auto">Items (Admin)</h2>
-      <div class="subtabs" role="group" aria-label="Items day selector">
-        <button id="items-admin-sat" class="active" onclick="setItemsAdminDay('SAT')">Saturday</button>
-        <button id="items-admin-sun" onclick="setItemsAdminDay('SUN')">Sunday</button>
-      </div>
-      <div class="search-box">
-        <input type="text" id="items-admin-search" placeholder="Search items…" oninput="renderItemsAdminTable()" autocomplete="off">
-      </div>
-      <button type="button" class="primary-button" onclick="openItemModal('create')">Add Item</button>
-    </div>
-    <div class="items-admin-table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:90px;">Code</th>
-            <th>Name</th>
-            <th style="width:110px;">Price ($)</th>
-            <th style="width:170px;">Ticket Color</th>
-            <th style="width:90px;">Image</th>
-            <th style="width:90px;">Active</th>
-            <th style="width:80px;">Sort</th>
-            <th style="width:140px;">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="items-admin-table-body">
-          <tr><td colspan="8" class="empty-state">Loading items…</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="ticket-color-manager" id="ticket-color-manager">
-      <h3 style="margin:0 0 6px;">Ticket Colors</h3>
-      <p class="ticket-color-hint">Manage the shared list of ticket colors for the 2025 season.</p>
-      <div class="ticket-color-list" id="ticket-color-list"></div>
-      <div class="ticket-color-add">
-        <input type="text" id="ticket-color-new" placeholder="Add a new color name" autocomplete="off">
-        <button type="button" onclick="handleAddTicketColor()">Add Color</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Analytics -->
   <div class="inventory-view" id="inventory-view">
     <div class="inventory-stats-row">
@@ -994,7 +906,6 @@
    <button id="stock-tab-button" class="tab-button" onclick="switchTab('Stock Log')">Stock Log</button>
     <button id="inventory-tab-button" class="tab-button" onclick="switchTab('Inventory')">Inventory</button>
     <button id="analytics-tab-button" class="tab-button" onclick="switchTab('Analytics')">Analytics</button>
-    <button id="items-admin-tab-button" class="tab-button" onclick="switchTab('Items Admin')">Items (Admin)</button>
   </div>
 
   <!-- Edit Total Modal -->
@@ -1018,57 +929,19 @@
       </div>
       <div style="margin:16px 0 0;text-align:left">
         <label for="edit-ticket-color-select" class="modal-label">Ticket Color</label>
-        <select id="edit-ticket-color-select" style="width:100%;padding:10px;font-size:16px;border-radius:8px;border:1px solid #d1d5db;"></select>
+        <select id="edit-ticket-color-select" style="width:100%;padding:10px;font-size:16px;border-radius:8px;border:1px solid #d1d5db;">
+          <option value="na">N/A</option>
+          <option value="purple">Purple</option>
+          <option value="red">Red</option>
+          <option value="green">Green</option>
+          <option value="blue">Blue</option>
+        </select>
       </div>
       <div class="modal-actions">
         <button type="button" class="modal-button secondary" onclick="closeEditPriceModal()">Cancel</button>
         <button type="button" class="modal-button primary" onclick="savePriceOverride()">Save</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Item Editor Modal -->
-  <div id="item-editor-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="item-editor-title">
-    <div class="modal-content" role="document" style="max-width:520px;">
-      <button class="close-modal-button" onclick="closeItemModal()" aria-label="Close item editor">&times;</button>
-      <h2 id="item-editor-title">Add Item</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
-        <div style="grid-column:1 / span 2;text-align:left;">
-          <label class="modal-label" for="item-name-input">Name</label>
-          <input type="text" id="item-name-input" maxlength="80" style="width:100%;padding:10px;border-radius:8px;border:1px solid #d1d5db;font-size:16px;">
-        </div>
-        <div style="text-align:left;">
-          <label class="modal-label" for="item-code-input">Code</label>
-          <input type="text" id="item-code-input" maxlength="12" style="width:100%;padding:10px;border-radius:8px;border:1px solid #d1d5db;font-size:16px;text-transform:uppercase;">
-        </div>
-        <div style="text-align:left;">
-          <label class="modal-label" for="item-price-input">Price</label>
-          <input type="number" id="item-price-input" step="0.01" min="0" style="width:100%;padding:10px;border-radius:8px;border:1px solid #d1d5db;font-size:16px;">
-        </div>
-        <div style="text-align:left;">
-          <label class="modal-label" for="item-ticket-select">Ticket Color</label>
-          <select id="item-ticket-select" style="width:100%;padding:10px;border-radius:8px;border:1px solid #d1d5db;font-size:16px;"></select>
-        </div>
-        <div style="grid-column:1 / span 2;text-align:left;">
-          <label class="modal-label" for="item-image-input">Image URL</label>
-          <input type="url" id="item-image-input" placeholder="https://" style="width:100%;padding:10px;border-radius:8px;border:1px solid #d1d5db;font-size:16px;">
-        </div>
-        <div style="text-align:left;">
-          <label class="modal-label" for="item-active-input">Active</label>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <input type="checkbox" id="item-active-input" checked>
-            <span>Show in POS</span>
-          </div>
-        </div>
-        <div style="text-align:left;">
-          <label class="modal-label" for="item-sort-input">Sort</label>
-          <input type="number" id="item-sort-input" step="1" min="0" style="width:100%;padding:10px;border-radius:8px;border:1px solid #d1d5db;font-size:16px;">
-        </div>
-      </div>
-      <div class="modal-actions" style="margin-top:24px;">
-        <button type="button" class="modal-button secondary" onclick="closeItemModal()">Cancel</button>
-        <button type="button" class="modal-button primary" onclick="saveItemFromModal()">Save</button>
-      </div>
+      <button type="button" id="reset-price-button" class="modal-reset" onclick="resetPriceOverride()">Reset to default</button>
     </div>
   </div>
 
@@ -1150,6 +1023,15 @@
     const SEASON = '2025';
     let DAY = 'SAT'; // default; can switch to 'SUN'
 
+    // Ticket display metadata (color -> element id)
+    const TICKET_COLOR_META = {
+      'Purple': { elementId:'ticket-purple-count' },
+      'Red': { elementId:'ticket-red-count' },
+      'Green': { elementId:'ticket-green-count' },
+      'Blue': { elementId:'ticket-blue-count' }
+    };
+    const TICKET_COLOR_KEYS = Object.keys(TICKET_COLOR_META);
+
     const BRAND = {
       enabled: true,
       name: "Stratford Meridian",
@@ -1158,11 +1040,12 @@
       link: null
     };
 
-    // POS/Admin editing state
+    // Menu overrides (price + ticket color)
+    let menuOverrides = {};
+    let menuOverridesRef = null;
     let currentPriceEdit = null;
     let lastFocusBeforePriceModal = null;
     let priceToastTimeout = null;
-    let currentItemModal = null;
     let currentCustomerName = '';
     let customerNameModalEl = null;
     let lastFocusBeforeNameModal = null;
@@ -1220,216 +1103,77 @@
    /* ==========================
        MENU (2025 — per day)
        ========================== */
-    const MENU_DAYS = ['SAT','SUN'];
-    const DEFAULT_TICKET_COLORS = ['Purple','Red','Green','Blue'];
-    let itemsAdminDay = 'SAT';
+// SATURDAY
+const menuItemsSAT = [
+  { name:'Vegetable Chop (2)', price:8.00, ticketColor:'Purple', code:'VC',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f3c2e6fb4a6.png' },
+  { name:'Mochar Chop (2)',    price:8.00, ticketColor:'Purple', code:'MCH',
+    image:'https://i.imgur.com/0ecrrKA.png' },
+  { name:'Phuchka (6)',        price:8.00, ticketColor:'Purple', code:'PK',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0b27ab06b35ca1f6a.png' },
+  { name:'Chandrapouli (2)',   price:8.00, ticketColor:'Purple', code:'CP',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f61a06fb4a5.png' },
+  { name:'Kacha Golla',        price:8.00, ticketColor:'Purple', code:'KG',
+    image:'https://i.imgur.com/8hgAghz.png' },
+  { name:'Patisapta (2)',      price:10.00, ticketColor:'Red',    code:'PS',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d060741004166cbed6.png' },
+  { name:'Jhal Muri',          price:7.00,  ticketColor:'Green',  code:'JM',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d05b2570a5a1cb27bb.png' },
+  { name:'Misti Paan',         price:2.50,  ticketColor:null,     code:'MP',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d08c006b5d16abcfae.png' },
+  { name:'Coffee',             price:5.00,  ticketColor:'Blue',   code:'MC',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d06074102d146cbed5.png' },
+  { name:'Bengali Cha',        price:5.00,  ticketColor:'Blue',   code:'CHA',
+    image:'https://i.imgur.com/6cCcBkW.png' },
+  { name:'Water',              price:1.00,  ticketColor:null,     code:'W',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0ed66479dc3b42f76.png' },
+  { name:'Coke',               price:2.00,  ticketColor:null,     code:'C',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95a7dbb6c7ba.png' },
+  { name:'Pujor Mishti Box',   price:12.00, ticketColor:null,     code:'PMB',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95c546b6c7b8.png' },
+  { name:'Sindoor',            price:2.00,  ticketColor:null,     code:'SND',
+    image:'https://i.imgur.com/MMLI93P.png' }
+];
 
-    const menuState = {
-      SAT:{ ref:null, loaded:false, map:{}, ordered:[], active:[] },
-      SUN:{ ref:null, loaded:false, map:{}, ordered:[], active:[] }
-    };
 
-    let ticketColorsRef = null;
-    let ticketColors = DEFAULT_TICKET_COLORS.slice();
-    const ticketCounterElements = {};
+// SUNDAY
+const menuItemsSUN = [
+  { name:'Vegetable Chop (2)', price:8.00,  ticketColor:'Purple', code:'VC',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f3c2e6fb4a6.png' },
+  { name:'Mochar Chop (2)',    price:8.00,  ticketColor:'Purple', code:'MCH',
+    image:'https://i.imgur.com/0ecrrKA.png' },
+  { name:'Phuchka (6)',        price:8.00,  ticketColor:'Purple', code:'PK',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0b27ab06b35ca1f6a.png' },
+  { name:'Chandrapouli (2)',   price:8.00,  ticketColor:'Purple', code:'CP',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f61a06fb4a5.png' },
+  { name:'Baked Sandesh (2)',  price:8.00,  ticketColor:'Purple', code:'BS',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d07fa05f83316fb4a4.png' },
+  { name:'Kacha Golla',        price:8.00,  ticketColor:'Purple', code:'KG',
+    image:'https://i.imgur.com/8hgAghz.png' },
+  { name:'Patisapta (2)',      price:10.00, ticketColor:'Red',    code:'PS',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d060741004166cbed6.png' },
+  { name:'Jhal Muri',          price:7.00,  ticketColor:'Green',  code:'JM',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d05b2570a5a1cb27bb.png' },
+  { name:'Misti Paan',         price:2.50,  ticketColor:null,     code:'MP',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d08c006b5d16abcfae.png' },
+  { name:'Coffee',             price:5.00,  ticketColor:'Blue',   code:'MC',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d06074102d146cbed5.png' },
+  { name:'Bengali Cha',        price:5.00,  ticketColor:'Blue',   code:'CHA',
+    image:'https://i.imgur.com/6cCcBkW.png' },
+  { name:'Water',              price:1.00,  ticketColor:null,     code:'W',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0ed66479dc3b42f76.png' },
+  { name:'Coke',               price:2.00,  ticketColor:null,     code:'C',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95a7dbb6c7ba.png' },
+  { name:'Pujor Mishti Box',   price:12.00, ticketColor:null,     code:'PMB',
+    image:'https://storage.googleapis.com/msgsndr/slWdpqUTRhMfisMySSJ0/media/66fe07d0a5ba95c546b6c7b8.png' },
+  { name:'Sindoor',            price:2.00,  ticketColor:null,     code:'SND',
+    image:'https://i.imgur.com/MMLI93P.png' },
+  { name:'Paan Leaves (2)',    price:1.00,  ticketColor:null,     code:'PL',
+    image:'https://i.imgur.com/qEXFQf5.png' }
+];
 
-    function menuPathForDay(day){
-      return `menu/${SEASON}/${day}`;
-    }
-
-    function normalizeTicketColorValue(value){
-      if(value === undefined || value === null) return '';
-      const raw = String(value).trim();
-      if(raw === '') return '';
-      const lower = raw.toLowerCase();
-      if(lower === 'na' || lower === 'n/a' || lower === 'none') return '';
-      return raw;
-    }
-
-    function normalizeMenuItem(day, code, raw){
-      const name = raw && raw.name ? String(raw.name).trim() : code;
-      const priceRaw = raw && raw.price !== undefined ? Number(raw.price) : 0;
-      const price = Number.isFinite(priceRaw) ? round2(priceRaw) : 0;
-      const ticketColor = normalizeTicketColorValue(raw && raw.ticketColor);
-      const image = raw && raw.image ? String(raw.image).trim() : '';
-      const active = raw && raw.active === false ? false : true;
-      const sortRaw = raw && raw.sort !== undefined ? Number(raw.sort) : 100;
-      const sort = Number.isFinite(sortRaw) ? sortRaw : 100;
-      return { code, name, price, ticketColor, image, active, sort, day };
-    }
-
-    function updateMenuState(day, value){
-      const node = value || {};
-      const map = {};
-      Object.keys(node).forEach(code=>{
-        map[code] = normalizeMenuItem(day, code, node[code]);
-      });
-      const ordered = Object.values(map).sort((a,b)=>{
-        const sortDiff = (a.sort||0) - (b.sort||0);
-        if(sortDiff !== 0) return sortDiff;
-        const nameDiff = a.name.localeCompare(b.name);
-        if(nameDiff !== 0) return nameDiff;
-        return a.code.localeCompare(b.code);
-      });
-      const active = ordered.filter(item=>item.active !== false);
-      menuState[day] = Object.assign(menuState[day] || {}, { map, ordered, active, loaded:true });
-      rebuildItemCodeMap();
-      if(day === DAY){
-        initializeMenuItems();
-        syncTicketCounters();
-        refreshInventoryListener();
-        renderInventoryView();
-      }
-      if(day === itemsAdminDay){
-        renderItemsAdminTable();
-      }
-    }
-
-    function attachMenuListeners(){
-      MENU_DAYS.forEach(day=>{
-        if(menuState[day] && menuState[day].ref){
-          menuState[day].ref.off();
-        }
-        const ref = db.ref(menuPathForDay(day));
-        menuState[day].ref = ref;
-        ref.on('value', snapshot=>{
-          updateMenuState(day, snapshot.val());
-        });
-      });
-    }
-
-    function menuForDay(dayValue){
-      const state = menuState[dayValue] || menuState.SAT;
-      return state ? state.ordered : [];
-    }
-
-    function activeMenuForDay(dayValue){
-      const state = menuState[dayValue] || menuState.SAT;
-      return state ? state.active : [];
-    }
-
-    function currentMenu(){
-      return activeMenuForDay(DAY);
-    }
-
-    function getMenuItemByCode(day, code){
-      const state = menuState[day] || menuState.SAT;
-      if(!state || !state.map) return null;
-      return state.map[code] || null;
-    }
-
-    function getOrderedMenu(day){
-      const state = menuState[day] || menuState.SAT;
-      return state ? state.ordered : [];
-    }
-
-    function getEffectivePriceFor(item){
-      if(!item) return 0;
-      const price = Number(item.price);
-      return Number.isFinite(price) ? price : 0;
-    }
-
-    function getEffectiveTicketColorLabel(item){
-      if(!item) return null;
-      const value = normalizeTicketColorValue(item.ticketColor);
-      return value === '' ? null : value;
-    }
-
-    function renderTicketCounters(){
-      const container = document.getElementById('ticket-counter-container');
-      if(!container) return;
-      container.innerHTML = '';
-      Object.keys(ticketCounterElements).forEach(key=>{ delete ticketCounterElements[key]; });
-      if(ticketColors.length === 0){
-        const placeholder = document.createElement('div');
-        placeholder.className = 'ticket';
-        const label = document.createElement('div');
-        label.className = 'ticket-label';
-        label.textContent = 'No Colors';
-        const count = document.createElement('span');
-        count.className = 'ticket-count';
-        count.textContent = '0';
-        placeholder.appendChild(label);
-        placeholder.appendChild(count);
-        container.appendChild(placeholder);
-        return;
-      }
-      ticketColors.forEach(color=>{
-        const wrapper = document.createElement('div');
-        wrapper.className = 'ticket';
-        const label = document.createElement('div');
-        label.className = 'ticket-label';
-        const normalized = color.toLowerCase();
-        label.setAttribute('data-color', normalized);
-        label.classList.add(`ticket-${normalized.replace(/[^a-z0-9-]/g,'-')}`);
-        label.textContent = color;
-        const countEl = document.createElement('span');
-        countEl.className = 'ticket-count';
-        countEl.textContent = '0';
-        wrapper.appendChild(label);
-        wrapper.appendChild(countEl);
-        container.appendChild(wrapper);
-        ticketCounterElements[color] = countEl;
-      });
-    }
-
-    function populateTicketColorSelect(selectEl, selectedValue){
-      if(!selectEl) return;
-      const current = selectedValue === undefined ? selectEl.value : selectedValue;
-      selectEl.innerHTML = '';
-      const noneOption = document.createElement('option');
-      noneOption.value = '';
-      noneOption.textContent = 'N/A';
-      selectEl.appendChild(noneOption);
-      ticketColors.forEach(color=>{
-        const opt = document.createElement('option');
-        opt.value = color;
-        opt.textContent = color;
-        selectEl.appendChild(opt);
-      });
-      selectEl.value = current || '';
-      selectEl.setAttribute('data-selected', selectEl.value);
-    }
-
-    function updateTicketColorSelects(){
-      const editSelect = document.getElementById('edit-ticket-color-select');
-      if(editSelect){
-        populateTicketColorSelect(editSelect, editSelect.getAttribute('data-selected') || editSelect.value || '');
-      }
-      const modalSelect = document.getElementById('item-ticket-select');
-      if(modalSelect){
-        populateTicketColorSelect(modalSelect, modalSelect.getAttribute('data-selected') || modalSelect.value || '');
-      }
-      renderItemsAdminTable();
-      renderTicketColorManager();
-    }
-
-    function attachTicketColorsListener(){
-      if(ticketColorsRef){
-        ticketColorsRef.off();
-      }
-      ticketColorsRef = db.ref(`tickets/${SEASON}/colors`);
-      ticketColorsRef.on('value', snapshot=>{
-        const value = snapshot.val();
-        let next = Array.isArray(value) ? value.map(v=>normalizeTicketColorValue(v)).filter(Boolean) : [];
-        const deduped = [];
-        next.forEach(color=>{
-          if(!deduped.some(existing=>existing.toLowerCase() === color.toLowerCase())){
-            deduped.push(color);
-          }
-        });
-        if(deduped.length === 0){
-          deduped.push(...DEFAULT_TICKET_COLORS);
-          db.ref(`tickets/${SEASON}/colors`).set(deduped).catch(err=>{
-            console.error('Unable to seed default ticket colors', err);
-          });
-        }
-        ticketColors = deduped;
-        renderTicketCounters();
-        updateTicketColorSelects();
-        syncTicketCounters();
-      });
-    }
+function menuForDay(dayValue){ return dayValue === 'SUN' ? menuItemsSUN : menuItemsSAT; }
+function currentMenu(){ return menuForDay(DAY); }
 
     function normalizePosValue(raw){
       if(raw === 'POS2' || raw === 'POS3') return raw;
@@ -1443,6 +1187,98 @@
       currentMenu().forEach(it => {
         itemCodeMap[it.name] = it.code;
       });
+    }
+
+    function menuOverridesPath(){ return `menu/${SEASON}/${DAY}`; }
+    function menuOverrideItemPath(code){ return `${menuOverridesPath()}/${code}`; }
+
+    function refreshMenuOverridesListener(){
+      if(menuOverridesRef){ menuOverridesRef.off(); }
+      menuOverrides = {};
+      menuOverridesRef = db.ref(menuOverridesPath());
+      menuOverridesRef.on('value', snapshot=>{
+        const node = snapshot.val() || {};
+        const next = {};
+        Object.keys(node).forEach(code=>{
+          const entry = node[code] || {};
+          const override = {};
+          if(Object.prototype.hasOwnProperty.call(entry,'price')){
+            const raw = parseFloat(entry.price);
+            if(!isNaN(raw)) override.price = raw;
+          }
+          if(Object.prototype.hasOwnProperty.call(entry,'ticketColor')){
+            override.ticketColor = normalizeTicketColorValue(entry.ticketColor);
+          }
+          if(Object.keys(override).length){
+            next[code] = override;
+          }
+        });
+        menuOverrides = next;
+        initializeMenuItems();
+      });
+    }
+
+    function normalizeTicketColorValue(value){
+      const raw = value === undefined || value === null ? '' : String(value).trim().toLowerCase();
+      if(raw === '' || raw === 'na' || raw === 'n/a' || raw === 'none') return 'na';
+      if(raw === 'purple' || raw === 'red' || raw === 'green' || raw === 'blue') return raw;
+      return 'na';
+    }
+
+    function ticketColorValueToLabel(value){
+      switch(value){
+        case 'purple': return 'Purple';
+        case 'red': return 'Red';
+        case 'green': return 'Green';
+        case 'blue': return 'Blue';
+        default: return null;
+      }
+    }
+
+    function getMenuOverride(code){
+      if(!code) return null;
+      return Object.prototype.hasOwnProperty.call(menuOverrides, code) ? menuOverrides[code] : null;
+    }
+
+    function hasMenuOverride(code){
+      const override = getMenuOverride(code);
+      if(!override) return false;
+      return override.price !== undefined || override.ticketColor !== undefined;
+    }
+
+    function getOverrideTicketColorValue(code){
+      const override = getMenuOverride(code);
+      return override && override.ticketColor !== undefined ? override.ticketColor : null;
+    }
+
+    function getItemDefaultTicketColorValue(item){
+      if(!item || !item.ticketColor) return 'na';
+      return normalizeTicketColorValue(item.ticketColor);
+    }
+
+    function getEffectiveTicketColorValue(item){
+      if(!item) return 'na';
+      const code = item.code;
+      const overrideValue = code ? getOverrideTicketColorValue(code) : null;
+      if(overrideValue && overrideValue !== 'na') return overrideValue;
+      if(overrideValue === 'na') return 'na';
+      return getItemDefaultTicketColorValue(item);
+    }
+
+    function getEffectiveTicketColorLabel(item){
+      const value = getEffectiveTicketColorValue(item);
+      return ticketColorValueToLabel(value);
+    }
+
+    function getEffectivePriceFor(item){
+      if(!item) return 0;
+      const fallback = parseFloat(item.price) || 0;
+      const override = item.code ? getMenuOverride(item.code) : null;
+      if(override && override.price !== undefined){
+        const raw = parseFloat(override.price);
+        if(!isNaN(raw)) return raw;
+      }
+      return fallback;
     }
 
     /* ==========================
@@ -1862,20 +1698,17 @@
     }
 
     function syncTicketCounters(){
-      const counts = {};
-      ticketColors.forEach(color=>{ counts[color] = 0; });
+      const counts = { Purple:0, Red:0, Green:0, Blue:0 };
       orderList.forEach(item=>{
         const qty = Number(item.quantity)||0;
-        const color = item.ticketColor ? String(item.ticketColor).trim() : '';
-        if(color && Object.prototype.hasOwnProperty.call(counts, color)){
-          counts[color] += qty;
+        if(item.ticketColor && counts.hasOwnProperty(item.ticketColor)){
+          counts[item.ticketColor] += qty;
         }
       });
-      ticketColors.forEach(color=>{
-        const el = ticketCounterElements[color];
-        if(el){
-          el.textContent = counts[color] || 0;
-        }
+      TICKET_COLOR_KEYS.forEach(color=>{
+        const meta = TICKET_COLOR_META[color];
+        const el = document.getElementById(meta.elementId);
+        if(el) el.innerText = counts[color] || 0;
       });
     }
 
@@ -3631,7 +3464,7 @@
       const gridEl = document.getElementById('inventory-items-grid');
       if(!gridEl) return;
       const dayKey = DAY;
-      const menu = activeMenuForDay(DAY);
+      const menu = currentMenu();
 
       const shouldRebuild = inventoryDomCache.day !== dayKey || menu.length !== inventoryDomCache.totalItems || menu.some(item=>!inventoryDomCache.items[item.code]);
       if(shouldRebuild){
@@ -4329,44 +4162,18 @@
     function searchItems(){
       const q = (document.getElementById('search-input').value||'').toLowerCase();
       document.querySelectorAll('.item-box').forEach(box=>{
-        const name = (box.getAttribute('data-name')||'').toLowerCase();
-        const code = (box.getAttribute('data-code')||'').toLowerCase();
-        const matches = !q || name.includes(q) || code.includes(q);
-        box.style.display = matches ? 'flex' : 'none';
+        const name = box.querySelector('strong').innerText.toLowerCase();
+        box.style.display = name.includes(q) ? 'flex' : 'none';
       });
     }
 
     function initializeMenuItems(){
       rebuildItemCodeMap();
       const grid = document.getElementById('item-grid');
-      if(!grid) return;
       grid.innerHTML = '';
-      const state = menuState[DAY];
-      if(!state || !state.loaded){
-        const loading = document.createElement('div');
-        loading.className = 'menu-empty';
-        loading.textContent = 'Loading menu…';
-        grid.appendChild(loading);
-        return;
-      }
-      const menu = currentMenu();
-      if(menu.length === 0){
-        const empty = document.createElement('div');
-        empty.className = 'menu-empty';
-        const message = document.createElement('div');
-        message.textContent = 'No active items configured for this day.';
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.textContent = 'Open Items (Admin)';
-        button.onclick = ()=>{ setItemsAdminDay(DAY); switchTab('Items Admin'); };
-        empty.appendChild(message);
-        empty.appendChild(button);
-        grid.appendChild(empty);
-        return;
-      }
-      menu.forEach(item=>{
+      currentMenu().forEach(item=>{
         const effectivePrice = getEffectivePriceFor(item);
-        const ticketColorLabel = getEffectiveTicketColorLabel(item);
+        const effectiveTicketColorLabel = getEffectiveTicketColorLabel(item);
         const record = getInventoryRecordForCode(item.code, DAY);
         const tracked = record.track !== false;
         const card = document.createElement('div');
@@ -4376,13 +4183,10 @@
         if(oosMap[item.code]) card.classList.add('is-oos');
         card.onclick = ()=>{
           if(!oosMap[item.code]){
-            addItem({
-              code: item.code,
-              name: item.name,
+            addItem(Object.assign({}, item, {
               price: effectivePrice,
-              ticketColor: ticketColorLabel,
-              image: item.image
-            });
+              ticketColor: effectiveTicketColorLabel
+            }));
           }
         };
 
@@ -4439,7 +4243,7 @@
         card.appendChild(untrackedChip);
 
         const img = document.createElement('img');
-        img.src = item.image || 'https://via.placeholder.com/150?text=Menu';
+        img.src = item.image;
         img.alt = item.name;
         card.appendChild(img);
 
@@ -4450,7 +4254,7 @@
           editBtn.type='button';
           editBtn.className='edit-price-btn';
           editBtn.innerHTML='✏️ Edit';
-          editBtn.setAttribute('aria-label', `Edit item ${item.name}`);
+          editBtn.setAttribute('aria-label', `Edit price for ${item.name}`);
           editBtn.onclick = (e)=>{ e.stopPropagation(); openEditPriceModal(item); };
           actions.appendChild(editBtn);
           const oosBtn = document.createElement('button');
@@ -4462,469 +4266,6 @@
         }
         grid.appendChild(card);
       });
-    }
-
-    /* ==========================
-       Items Admin Helpers
-       ========================== */
-    function setItemsAdminDay(day){
-      if(!MENU_DAYS.includes(day)) return;
-      itemsAdminDay = day;
-      const satBtn = document.getElementById('items-admin-sat');
-      if(satBtn) satBtn.classList.toggle('active', day === 'SAT');
-      const sunBtn = document.getElementById('items-admin-sun');
-      if(sunBtn) sunBtn.classList.toggle('active', day === 'SUN');
-      renderItemsAdminTable();
-    }
-
-    function renderItemsAdminTable(){
-      const tbody = document.getElementById('items-admin-table-body');
-      if(!tbody) return;
-      const state = menuState[itemsAdminDay];
-      if(!state || !state.loaded){
-        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Loading items…</td></tr>';
-        return;
-      }
-      const searchBox = document.getElementById('items-admin-search');
-      const query = (searchBox && searchBox.value ? searchBox.value : '').toLowerCase();
-      const ordered = getOrderedMenu(itemsAdminDay);
-      const items = ordered.filter(item=>{
-        if(!query) return true;
-        const name = (item.name || '').toLowerCase();
-        const code = (item.code || '').toLowerCase();
-        return name.includes(query) || code.includes(query);
-      });
-      if(items.length === 0){
-        const message = ordered.length === 0 ? 'No items configured yet.' : 'No items match the search.';
-        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">${message}</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = '';
-      items.forEach(item=>{
-        const tr = document.createElement('tr');
-        const effectivePrice = getEffectivePriceFor(item);
-
-        const codeTd = document.createElement('td');
-        codeTd.textContent = item.code || '';
-        tr.appendChild(codeTd);
-
-        const nameTd = document.createElement('td');
-        nameTd.textContent = item.name || '';
-        tr.appendChild(nameTd);
-
-        const priceTd = document.createElement('td');
-        const priceInput = document.createElement('input');
-        priceInput.type = 'number';
-        priceInput.step = '0.01';
-        priceInput.min = '0';
-        priceInput.className = 'inline-number';
-        priceInput.value = effectivePrice.toFixed(2);
-        priceInput.addEventListener('change', ()=>handleInlinePriceChange(itemsAdminDay, item.code, priceInput.value));
-        priceTd.appendChild(priceInput);
-        tr.appendChild(priceTd);
-
-        const ticketTd = document.createElement('td');
-        const ticketSelect = document.createElement('select');
-        ticketSelect.className = 'inline-select';
-        ticketSelect.setAttribute('data-selected', item.ticketColor || '');
-        populateTicketColorSelect(ticketSelect, item.ticketColor || '');
-        ticketSelect.addEventListener('change', ()=>handleInlineTicketChange(itemsAdminDay, item.code, ticketSelect.value));
-        ticketTd.appendChild(ticketSelect);
-        tr.appendChild(ticketTd);
-
-        const imageTd = document.createElement('td');
-        const img = document.createElement('img');
-        img.className = 'thumbnail';
-        img.src = item.image || 'https://via.placeholder.com/64?text=No';
-        img.alt = item.name || item.code;
-        imageTd.appendChild(img);
-        tr.appendChild(imageTd);
-
-        const activeTd = document.createElement('td');
-        const activeInput = document.createElement('input');
-        activeInput.type = 'checkbox';
-        activeInput.className = 'inline-checkbox';
-        activeInput.checked = item.active !== false;
-        activeInput.addEventListener('change', ()=>handleInlineActiveToggle(itemsAdminDay, item.code, activeInput.checked));
-        activeTd.appendChild(activeInput);
-        tr.appendChild(activeTd);
-
-        const sortTd = document.createElement('td');
-        sortTd.textContent = item.sort !== undefined ? item.sort : '';
-        const sortButtons = document.createElement('div');
-        sortButtons.className = 'sort-buttons';
-        const position = ordered.findIndex(entry=>entry.code === item.code);
-        const upBtn = document.createElement('button');
-        upBtn.type = 'button';
-        upBtn.innerHTML = '▲';
-        upBtn.disabled = position <= 0;
-        upBtn.addEventListener('click', ()=>moveItem(itemsAdminDay, item.code, -1));
-        sortButtons.appendChild(upBtn);
-        const downBtn = document.createElement('button');
-        downBtn.type = 'button';
-        downBtn.innerHTML = '▼';
-        downBtn.disabled = position === ordered.length - 1;
-        downBtn.addEventListener('click', ()=>moveItem(itemsAdminDay, item.code, 1));
-        sortButtons.appendChild(downBtn);
-        sortTd.appendChild(sortButtons);
-        tr.appendChild(sortTd);
-
-        const actionsTd = document.createElement('td');
-        actionsTd.className = 'actions';
-        const editButton = document.createElement('button');
-        editButton.type = 'button';
-        editButton.className = 'table-button';
-        editButton.textContent = 'Edit';
-        editButton.addEventListener('click', ()=>openItemModal('edit', item.code));
-        actionsTd.appendChild(editButton);
-        const softDeleteButton = document.createElement('button');
-        softDeleteButton.type = 'button';
-        softDeleteButton.className = item.active === false ? 'table-button primary' : 'table-button danger';
-        softDeleteButton.textContent = item.active === false ? 'Restore' : 'Soft Delete';
-        softDeleteButton.addEventListener('click', ()=>{
-          handleInlineActiveToggle(itemsAdminDay, item.code, item.active === false);
-        });
-        actionsTd.appendChild(softDeleteButton);
-        tr.appendChild(actionsTd);
-
-        tbody.appendChild(tr);
-      });
-    }
-
-    function handleInlinePriceChange(day, code, value){
-      const price = parseFloat(value);
-      if(isNaN(price) || price < 0){
-        alert('Enter a valid price.');
-        renderItemsAdminTable();
-        return;
-      }
-      updateMenuItem(day, code, { price: round2(price) }, 'Price updated.').catch(()=>{
-        renderItemsAdminTable();
-      });
-    }
-
-    function handleInlineTicketChange(day, code, value){
-      const normalized = normalizeTicketColorValue(value);
-      updateMenuItem(day, code, { ticketColor: normalized }, 'Ticket color updated.').catch(()=>{
-        renderItemsAdminTable();
-      });
-    }
-
-    function handleInlineActiveToggle(day, code, isActive){
-      updateMenuItem(day, code, { active: !!isActive }, isActive ? 'Item restored.' : 'Item hidden.').catch(()=>{
-        renderItemsAdminTable();
-      });
-    }
-
-    function moveItem(day, code, delta){
-      const ordered = getOrderedMenu(day).slice();
-      const index = ordered.findIndex(item=>item.code === code);
-      if(index < 0) return;
-      const nextIndex = index + delta;
-      if(nextIndex < 0 || nextIndex >= ordered.length) return;
-      const [entry] = ordered.splice(index,1);
-      ordered.splice(nextIndex, 0, entry);
-      const updates = {};
-      ordered.forEach((item, idx)=>{
-        updates[`${item.code}/sort`] = (idx + 1) * 10;
-      });
-      db.ref(menuPathForDay(day)).update(updates)
-        .then(()=>{ showPriceToast('Sort order updated.'); })
-        .catch(err=>{
-          console.error('Unable to update sort order', err);
-          alert('Unable to update sort order. Please try again.');
-          renderItemsAdminTable();
-        });
-    }
-
-    function updateMenuItem(day, code, updates, message){
-      if(!code) return Promise.resolve();
-      const payload = Object.assign({}, updates);
-      if(payload.day === undefined) payload.day = day;
-      return db.ref(`${menuPathForDay(day)}/${code}`).update(payload).then(()=>{
-        if(message) showPriceToast(message);
-      }).catch(err=>{
-        console.error('Unable to update item', err);
-        alert('Unable to update item: ' + (err && err.message ? err.message : 'Please try again.'));
-        throw err;
-      });
-    }
-
-    function openItemModal(mode, code){
-      const modal = document.getElementById('item-editor-modal');
-      if(!modal) return;
-      const title = document.getElementById('item-editor-title');
-      const nameInput = document.getElementById('item-name-input');
-      const codeInput = document.getElementById('item-code-input');
-      const priceInput = document.getElementById('item-price-input');
-      const ticketSelect = document.getElementById('item-ticket-select');
-      const imageInput = document.getElementById('item-image-input');
-      const activeInput = document.getElementById('item-active-input');
-      const sortInput = document.getElementById('item-sort-input');
-      const day = itemsAdminDay;
-      let item = null;
-      if(mode === 'edit' && code){
-        item = getMenuItemByCode(day, code);
-        if(!item){
-          alert('Item not found.');
-          return;
-        }
-      }
-      currentItemModal = { mode, day, code: item ? item.code : null };
-      if(title) title.textContent = mode === 'edit' && item ? `Edit Item — ${item.name}` : 'Add Item';
-      if(nameInput) nameInput.value = item ? item.name || '' : '';
-      if(codeInput){
-        codeInput.value = item ? item.code || '' : '';
-        codeInput.disabled = mode === 'edit';
-      }
-      if(priceInput) priceInput.value = item ? getEffectivePriceFor(item).toFixed(2) : '';
-      if(ticketSelect){
-        ticketSelect.setAttribute('data-selected', item ? item.ticketColor || '' : '');
-        populateTicketColorSelect(ticketSelect, item ? item.ticketColor || '' : '');
-      }
-      if(imageInput) imageInput.value = item ? item.image || '' : '';
-      if(activeInput) activeInput.checked = !item || item.active !== false;
-      if(sortInput){
-        const defaultSort = (getOrderedMenu(day).length + 1) * 10;
-        sortInput.value = item && item.sort !== undefined ? item.sort : defaultSort;
-      }
-      modal.style.display = 'block';
-      setTimeout(()=>{
-        if(nameInput) nameInput.focus();
-      }, 0);
-    }
-
-    function closeItemModal(){
-      const modal = document.getElementById('item-editor-modal');
-      if(modal) modal.style.display = 'none';
-      currentItemModal = null;
-      const fields = ['item-name-input','item-code-input','item-price-input','item-image-input','item-sort-input'];
-      fields.forEach(id=>{
-        const el = document.getElementById(id);
-        if(el) el.value = '';
-      });
-      const activeInput = document.getElementById('item-active-input');
-      if(activeInput) activeInput.checked = true;
-    }
-
-    function saveItemFromModal(){
-      if(!currentItemModal) return;
-      const mode = currentItemModal.mode;
-      const day = currentItemModal.day || itemsAdminDay;
-      const nameInput = document.getElementById('item-name-input');
-      const codeInput = document.getElementById('item-code-input');
-      const priceInput = document.getElementById('item-price-input');
-      const ticketSelect = document.getElementById('item-ticket-select');
-      const imageInput = document.getElementById('item-image-input');
-      const activeInput = document.getElementById('item-active-input');
-      const sortInput = document.getElementById('item-sort-input');
-      const name = nameInput ? nameInput.value.trim() : '';
-      if(!name){
-        alert('Name is required.');
-        if(nameInput) nameInput.focus();
-        return;
-      }
-      let code = codeInput ? codeInput.value.trim().toUpperCase() : '';
-      if(mode === 'edit'){ code = currentItemModal.code; }
-      if(!code){
-        alert('Code is required.');
-        if(codeInput) codeInput.focus();
-        return;
-      }
-      if(mode === 'create' && menuState[day] && menuState[day].map && menuState[day].map[code]){
-        alert('An item with that code already exists.');
-        if(codeInput) codeInput.focus();
-        return;
-      }
-      const price = parseFloat(priceInput ? priceInput.value : '');
-      if(isNaN(price) || price < 0){
-        alert('Enter a valid price.');
-        if(priceInput) priceInput.focus();
-        return;
-      }
-      const ticketColor = ticketSelect ? normalizeTicketColorValue(ticketSelect.value) : '';
-      const image = imageInput ? imageInput.value.trim() : '';
-      const active = activeInput ? activeInput.checked : true;
-      let sort = parseInt(sortInput ? sortInput.value : '', 10);
-      if(!Number.isFinite(sort)){
-        const base = getOrderedMenu(day).length + (mode === 'create' ? 1 : 0);
-        sort = base * 10;
-      }
-      const payload = {
-        name,
-        price: round2(price),
-        ticketColor,
-        image,
-        active,
-        sort,
-        day
-      };
-      const ref = db.ref(`${menuPathForDay(day)}/${code}`);
-      const promise = mode === 'edit' ? ref.update(payload) : ref.set(payload);
-      promise.then(()=>{
-        showPriceToast('Item saved.');
-        closeItemModal();
-      }).catch(err=>{
-        console.error('Unable to save item', err);
-        alert('Unable to save item: ' + (err && err.message ? err.message : 'Please try again.'));
-      });
-    }
-
-    function renderTicketColorManager(){
-      const list = document.getElementById('ticket-color-list');
-      if(!list) return;
-      list.innerHTML = '';
-      if(ticketColors.length === 0){
-        const empty = document.createElement('div');
-        empty.className = 'empty-state';
-        empty.textContent = 'No ticket colors yet.';
-        list.appendChild(empty);
-        return;
-      }
-      ticketColors.forEach((color, index)=>{
-        const row = document.createElement('div');
-        row.className = 'ticket-color-row';
-        const input = document.createElement('input');
-        input.value = color;
-        input.addEventListener('keydown', event=>{
-          if(event.key === 'Enter'){
-            event.preventDefault();
-            handleRenameTicketColor(index, input.value);
-          }
-        });
-        input.addEventListener('blur', ()=>handleRenameTicketColor(index, input.value, { silent:true }));
-        const renameBtn = document.createElement('button');
-        renameBtn.className = 'secondary';
-        renameBtn.textContent = 'Rename';
-        renameBtn.addEventListener('click', ()=>handleRenameTicketColor(index, input.value));
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'danger';
-        removeBtn.textContent = 'Remove';
-        removeBtn.addEventListener('click', ()=>handleRemoveTicketColor(index));
-        row.appendChild(input);
-        row.appendChild(renameBtn);
-        row.appendChild(removeBtn);
-        list.appendChild(row);
-      });
-    }
-
-    function handleAddTicketColor(){
-      const input = document.getElementById('ticket-color-new');
-      if(!input) return;
-      const value = normalizeTicketColorValue(input.value);
-      if(!value){
-        alert('Enter a color name.');
-        return;
-      }
-      if(ticketColors.some(color=>color.toLowerCase() === value.toLowerCase())){
-        alert('That color already exists.');
-        return;
-      }
-      db.ref(`tickets/${SEASON}/colors`).set(ticketColors.concat([value]))
-        .then(()=>{
-          showPriceToast('Color added.');
-          input.value = '';
-        })
-        .catch(err=>{
-          console.error('Unable to add color', err);
-          alert('Unable to add color: ' + (err && err.message ? err.message : 'Please try again.'));
-        });
-    }
-
-    function handleRenameTicketColor(index, rawValue, options={}){
-      const current = ticketColors[index];
-      if(current === undefined) return;
-      const nextValue = normalizeTicketColorValue(rawValue);
-      if(nextValue === ''){
-        if(!options.silent) alert('Color name cannot be empty.');
-        renderTicketColorManager();
-        return;
-      }
-      if(nextValue.toLowerCase() === current.toLowerCase()){
-        if(current !== nextValue){
-          // Case change only
-        }else{
-          return;
-        }
-      }
-      if(ticketColors.some((color, idx)=>idx!==index && color.toLowerCase() === nextValue.toLowerCase())){
-        if(!options.silent) alert('That color already exists.');
-        renderTicketColorManager();
-        return;
-      }
-      const nextColors = ticketColors.slice();
-      nextColors[index] = nextValue;
-      const updates = {};
-      MENU_DAYS.forEach(day=>{
-        const state = menuState[day];
-        if(!state || !state.map) return;
-        Object.values(state.map).forEach(item=>{
-          const value = normalizeTicketColorValue(item.ticketColor);
-          if(value && value.toLowerCase() === current.toLowerCase()){
-            updates[`menu/${SEASON}/${day}/${item.code}/ticketColor`] = nextValue;
-          }
-        });
-      });
-      updates[`tickets/${SEASON}/colors`] = nextColors;
-      db.ref().update(updates)
-        .then(()=>{ if(!options.silent) showPriceToast('Color renamed.'); })
-        .catch(err=>{
-          console.error('Unable to rename color', err);
-          alert('Unable to rename color: ' + (err && err.message ? err.message : 'Please try again.'));
-          renderTicketColorManager();
-        });
-    }
-
-    function handleRemoveTicketColor(index){
-      const color = ticketColors[index];
-      if(color === undefined) return;
-      if(ticketColors.length <= 1){
-        alert('Keep at least one ticket color before removing this one.');
-        return;
-      }
-      const available = ticketColors.filter((_, idx)=>idx!==index);
-      const affected = [];
-      MENU_DAYS.forEach(day=>{
-        const state = menuState[day];
-        if(!state || !state.map) return;
-        Object.values(state.map).forEach(item=>{
-          const value = normalizeTicketColorValue(item.ticketColor);
-          if(value && value.toLowerCase() === color.toLowerCase()){
-            affected.push({ day, code:item.code });
-          }
-        });
-      });
-      let replacement = '';
-      if(affected.length){
-        const options = available.join(', ');
-        const promptValue = window.prompt(`"${color}" is used by ${affected.length} item(s). Choose a replacement color (${options}):`, available[0] || '');
-        if(!promptValue){
-          renderTicketColorManager();
-          return;
-        }
-        const normalized = normalizeTicketColorValue(promptValue);
-        const match = available.find(opt=>opt.toLowerCase() === normalized.toLowerCase());
-        if(!match){
-          alert('Please type one of the listed colors exactly.');
-          renderTicketColorManager();
-          return;
-        }
-        replacement = match;
-      }
-      const updates = {};
-      updates[`tickets/${SEASON}/colors`] = available;
-      if(affected.length){
-        affected.forEach(entry=>{
-          updates[`menu/${SEASON}/${entry.day}/${entry.code}/ticketColor`] = replacement;
-        });
-      }
-      db.ref().update(updates)
-        .then(()=>{ showPriceToast('Color removed.'); })
-        .catch(err=>{
-          console.error('Unable to remove color', err);
-          alert('Unable to remove color: ' + (err && err.message ? err.message : 'Please try again.'));
-          renderTicketColorManager();
-        });
     }
 
     function getPriceModalFocusableElements(){
@@ -4960,22 +4301,29 @@
     function openEditPriceModal(item){
       if(!item) return;
       if(!IS_POS1){
-        alert('Only POS1 can edit items.');
+        alert('Only POS1 can edit prices.');
         return;
       }
-      currentPriceEdit = { code:item.code, day:item.day || DAY };
+      currentPriceEdit = { code:item.code, name:item.name, defaultPrice:parseFloat(item.price)||0 };
       const modal = document.getElementById('edit-price-modal');
       const title = document.getElementById('edit-price-title');
       const input = document.getElementById('edit-price-input');
+      const resetBtn = document.getElementById('reset-price-button');
       const ticketSelect = document.getElementById('edit-ticket-color-select');
-      if(title) title.innerText = `Edit Item — ${item.name}`;
+      if(title) title.innerText = `Edit Price — ${item.name}`;
       if(input){
         const price = getEffectivePriceFor(item);
         input.value = price.toFixed(2);
       }
       if(ticketSelect){
-        ticketSelect.setAttribute('data-selected', item.ticketColor || '');
-        populateTicketColorSelect(ticketSelect, item.ticketColor || '');
+        let ticketValue = getOverrideTicketColorValue(item.code);
+        if(ticketValue === null){
+          ticketValue = getItemDefaultTicketColorValue(item);
+        }
+        ticketSelect.value = ticketValue || 'na';
+      }
+      if(resetBtn){
+        resetBtn.style.display = hasMenuOverride(item.code) ? 'inline-block' : 'none';
       }
       lastFocusBeforePriceModal = document.activeElement;
       if(modal){
@@ -4998,10 +4346,7 @@
       const input = document.getElementById('edit-price-input');
       if(input) input.value = '';
       const ticketSelect = document.getElementById('edit-ticket-color-select');
-      if(ticketSelect){
-        ticketSelect.setAttribute('data-selected', '');
-        populateTicketColorSelect(ticketSelect, '');
-      }
+      if(ticketSelect) ticketSelect.value = 'na';
       if(lastFocusBeforePriceModal && typeof lastFocusBeforePriceModal.focus === 'function'){
         lastFocusBeforePriceModal.focus();
       }
@@ -5011,7 +4356,7 @@
     function savePriceOverride(){
       if(!currentPriceEdit) return;
       if(!IS_POS1){
-        alert('Only POS1 can edit items.');
+        alert('Only POS1 can edit prices.');
         return;
       }
       const input = document.getElementById('edit-price-input');
@@ -5022,15 +4367,13 @@
         return;
       }
       const code = currentPriceEdit.code;
-      const day = currentPriceEdit.day || DAY;
       const ticketSelect = document.getElementById('edit-ticket-color-select');
-      const ticketColorValue = ticketSelect ? normalizeTicketColorValue(ticketSelect.value) : '';
+      const ticketColorValue = ticketSelect ? normalizeTicketColorValue(ticketSelect.value) : 'na';
       const payload = {
         price: round2(value),
-        ticketColor: ticketColorValue,
-        day
+        ticketColor: ticketColorValue || 'na'
       };
-      db.ref(`${menuPathForDay(day)}/${code}`).update(payload)
+      db.ref(menuOverrideItemPath(code)).update(payload)
         .then(()=>{
           showPriceToast('Item updated.');
           closeEditPriceModal();
@@ -5038,9 +4381,30 @@
           syncTicketCounters();
         })
         .catch(err=>{
-          console.error('Unable to update item', err);
+          console.error('Unable to update item override', err);
           const message = err && err.message ? err.message : 'Please try again.';
           alert('Unable to Update Item: ' + message);
+        });
+    }
+
+    function resetPriceOverride(){
+      if(!currentPriceEdit) return;
+      if(!IS_POS1){
+        alert('Only POS1 can edit prices.');
+        return;
+      }
+      const code = currentPriceEdit.code;
+      db.ref(menuOverrideItemPath(code)).remove()
+        .then(()=>{
+          showPriceToast('Item reset to default.');
+          closeEditPriceModal();
+          updateOrderSummary();
+          syncTicketCounters();
+        })
+        .catch(err=>{
+          console.error('Unable to reset item override', err);
+          const message = err && err.message ? err.message : 'Please try again.';
+          alert('Unable to reset item: ' + message);
         });
     }
 
@@ -5073,11 +4437,10 @@
       function switchTab(tab){
         const posView = document.querySelector('.container');
         const orderTrackingView = document.getElementById('order-tracking');
-      const zelleView = document.getElementById('zelle-confirmations');
-      const stockLogView = document.getElementById('stock-log');
-      const inventoryView = document.getElementById('inventory-view');
-      const analyticsView = document.getElementById('analytics');
-      const itemsAdminView = document.getElementById('items-admin-view');
+        const zelleView = document.getElementById('zelle-confirmations');
+        const stockLogView = document.getElementById('stock-log');
+        const inventoryView = document.getElementById('inventory-view');
+        const analyticsView = document.getElementById('analytics');
 
       // reset all
       posView.style.display='none';
@@ -5086,7 +4449,6 @@
         analyticsView.style.display='none';
         if(inventoryView) inventoryView.style.display='none';
       if(stockLogView) stockLogView.style.display='none';
-      if(itemsAdminView) itemsAdminView.style.display='none';
 
       document.getElementById('pos-tab-button').classList.remove('active');
       document.getElementById('order-tracking-tab-button').classList.remove('active');
@@ -5095,8 +4457,6 @@
         document.getElementById('analytics-tab-button').classList.remove('active');
         const inventoryTabButton = document.getElementById('inventory-tab-button');
         if(inventoryTabButton) inventoryTabButton.classList.remove('active');
-      const itemsAdminTabButton = document.getElementById('items-admin-tab-button');
-      if(itemsAdminTabButton) itemsAdminTabButton.classList.remove('active');
 
       if(tab==='POS'){
         posView.style.display='flex';
@@ -5129,12 +4489,6 @@
           analyticsView.style.display='block';
           document.getElementById('analytics-tab-button').classList.add('active');
           generateAnalytics();
-        }else if(tab==='Items Admin'){
-          if(itemsAdminView){
-            itemsAdminView.style.display='block';
-            if(itemsAdminTabButton) itemsAdminTabButton.classList.add('active');
-            setItemsAdminDay(itemsAdminDay);
-          }
         }
       }
 
@@ -5157,11 +4511,7 @@
       const zeSat = document.getElementById('ze-sat'); if(zeSat) zeSat.classList.toggle('active', DAY==='SAT');
       const zeSun = document.getElementById('ze-sun'); if(zeSun) zeSun.classList.toggle('active', DAY==='SUN');
 
-      const itemsAdminView = document.getElementById('items-admin-view');
-      if(itemsAdminView && itemsAdminView.style.display === 'block'){
-        setItemsAdminDay(DAY);
-      }
-
+      refreshMenuOverridesListener();
       refreshDisplayNameListener();
       orderNumber = 0;
       resetPaymentState();
@@ -5198,6 +4548,7 @@
       if(DAY===next) return;
       DAY = next;
 
+      refreshMenuOverridesListener();
       refreshDisplayNameListener();
       orderNumber = 0;
       applyCustomerName('', { skipBroadcast:true });
@@ -5232,11 +4583,6 @@
       document.getElementById('btn-day-sat').classList.toggle('active', DAY==='SAT');
       document.getElementById('btn-day-sun').classList.toggle('active', DAY==='SUN');
       syncInventoryDayButtons();
-
-      const itemsAdminView = document.getElementById('items-admin-view');
-      if(itemsAdminView && itemsAdminView.style.display === 'block'){
-        setItemsAdminDay(DAY);
-      }
 
       // Rebuild POS grid and refresh OOS state
       initializeMenuItems();
@@ -5542,13 +4888,9 @@
       });
     });
     function initApp(){
-      renderTicketCounters();
-      renderTicketColorManager();
-      attachTicketColorsListener();
-      attachMenuListeners();
+      refreshMenuOverridesListener();
       refreshDisplayNameListener();
       initializeMenuItems();
-      renderItemsAdminTable();
       syncTicketCounters();
       resetPaymentState();
       refreshOrderMetaUI();
@@ -5563,7 +4905,6 @@
       renderInventoryView();
       syncInventoryFilterButtons();
       syncInventoryDayButtons();
-      setItemsAdminDay(itemsAdminDay);
       loadOrdersFromFirebase();
     }
     applyPosModeUI();
