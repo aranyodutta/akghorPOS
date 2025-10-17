@@ -155,12 +155,26 @@
     .item-box{
       background:#fff;padding:10px;width:160px;border:1px solid #ddd;text-align:center;cursor:pointer;border-radius:8px;
       transition:transform .1s ease, background-color .2s; box-shadow:0 2px 5px rgba(0,0,0,.06);
-      display:flex;flex-direction:column;align-items:center
+      display:flex;flex-direction:column;align-items:center;position:relative
     }
     .item-box:hover{background:#f7f7f7; transform:translateY(-2px)}
     .item-box strong{font-size:14px;color:#333}
     .item-box .price{font-size:14px;color:var(--brand);font-weight:bold;margin-top:2px}
     .item-box img{max-width:100%;height:auto;margin-top:6px;flex-grow:1;object-fit:contain}
+    .inline-inventory-bar{width:100%;margin-top:6px}
+    .inline-inventory-track{height:6px;border-radius:999px;background:rgba(0,0,0,.08);overflow:hidden;position:relative}
+    .inline-inventory-fill{height:100%;background:var(--brand);transition:width .2s ease;min-width:0}
+    .inventory-chip{display:none;margin-top:6px;padding:4px 8px;border-radius:999px;background:#f3f4f6;color:#555;font-size:11px;font-weight:600}
+    .inventory-tooltip{
+      position:absolute;bottom:100%;left:50%;transform:translate(-50%,-10px);
+      background:rgba(17,24,39,.92);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;white-space:nowrap;
+      pointer-events:none;box-shadow:0 10px 25px rgba(0,0,0,.18);z-index:10;opacity:0;animation:inventoryTooltipFade .18s ease forwards
+    }
+    .inventory-tooltip::after{
+      content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+      border-width:6px;border-style:solid;border-color:rgba(17,24,39,.92) transparent transparent transparent
+    }
+    @keyframes inventoryTooltipFade{from{opacity:0;transform:translate(-50%,0);}to{opacity:1;transform:translate(-50%,-10px);}}
     .item-actions{display:flex;gap:6px;margin-top:8px}
     .edit-price-btn{
       padding:6px 8px;font-size:12px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:4px
@@ -364,6 +378,64 @@
       .analytics-panels{grid-template-columns:1fr}
       .payment-chart{max-width:100%}
       .hourly-chart-wrapper{min-height:240px}
+    }
+
+    /* Inventory */
+    .inventory-view{display:none;padding:18px;box-sizing:border-box;height:calc(100vh - 160px);min-height:420px;display:flex;flex-direction:column;gap:16px;background:#f5f5f7}
+    .inventory-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+    .inventory-stat-card{background:#fff;border-radius:14px;padding:12px 14px;border:1px solid rgba(0,0,0,.05);box-shadow:0 6px 16px rgba(0,0,0,.04);display:flex;flex-direction:column;gap:4px}
+    .inventory-stat-card span{font-size:11px;color:#666;letter-spacing:.5px;text-transform:uppercase;font-weight:600}
+    .inventory-stat-card strong{font-size:20px;color:var(--brand);font-weight:700}
+    .inventory-panel{flex:1;min-height:0;background:#fff;border-radius:16px;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 20px rgba(0,0,0,.06);display:flex;flex-direction:column;overflow:hidden}
+    .inventory-scroll{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+    .inventory-controls{position:sticky;top:0;z-index:2;background:#fff;padding-bottom:12px;margin:-4px -4px 12px -4px;padding:4px 4px 12px 4px;border-bottom:1px solid #f0f0f0;display:flex;flex-direction:column;gap:12px}
+    .inventory-control-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .inventory-search{flex:1 1 240px;min-width:200px}
+    .inventory-search input{width:100%;padding:8px 12px;border-radius:999px;border:1px solid #d1d5db;font-size:14px}
+    .inventory-day-toggle{display:inline-flex;border:1px solid #e5e7eb;border-radius:999px;overflow:hidden}
+    .inventory-day-toggle button{padding:6px 14px;border:none;background:transparent;font-weight:600;font-size:13px;color:#555;cursor:pointer}
+    .inventory-day-toggle button.active{background:var(--brand);color:#fff}
+    .inventory-filter-pills{display:flex;gap:8px;flex-wrap:wrap}
+    .inventory-filter-pill{padding:6px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fafafa;font-weight:600;font-size:13px;color:#555;cursor:pointer;transition:all .15s ease}
+    .inventory-filter-pill:hover{border-color:var(--brand);color:var(--brand)}
+    .inventory-filter-pill.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .inventory-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;align-content:flex-start}
+    .inventory-item-card{border:1px solid #e5e7eb;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.04);position:relative}
+    .inventory-item-card.is-oos{border-color:rgba(184,16,13,.35);box-shadow:0 0 0 1px rgba(184,16,13,.12)}
+    .inventory-item-card.is-low:not(.is-zero){border-color:rgba(178,106,0,.4)}
+    .inventory-item-card.is-zero{border-color:rgba(184,16,13,.4)}
+    .inventory-item-card.is-untracked{border-style:dashed}
+    .inventory-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .inventory-item-name{display:flex;flex-direction:column;gap:6px}
+    .inventory-item-name strong{font-size:15px;color:#111}
+    .inventory-item-code{font-size:11px;color:#666;background:#f3f4f6;border-radius:999px;padding:2px 8px;font-weight:600;align-self:flex-start}
+    .inventory-track-toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#555;font-weight:600;cursor:pointer;user-select:none}
+    .inventory-track-toggle input{appearance:none;width:34px;height:18px;border-radius:999px;background:#d1d5db;position:relative;transition:background .2s ease}
+    .inventory-track-toggle input::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:1px;left:1px;transition:transform .2s ease}
+    .inventory-track-toggle input:checked{background:var(--brand)}
+    .inventory-track-toggle input:checked::after{transform:translateX(16px)}
+    .inventory-card-meta{display:flex;gap:12px;font-size:12px;color:#666;flex-wrap:wrap}
+    .inventory-card-meta span{display:flex;align-items:center;gap:4px;font-weight:600}
+    .inventory-card-meta span strong{color:#111;font-size:14px;font-weight:700}
+    .inventory-card-body{display:flex;flex-direction:column;gap:10px}
+    .inventory-input-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .inventory-input-group{display:flex;flex-direction:column;gap:4px}
+    .inventory-input-group label{font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px}
+    .inventory-input-group input{padding:8px 10px;border-radius:8px;border:1px solid #d1d5db;font-size:14px;width:100%}
+    .inventory-quick-buttons{display:flex;flex-wrap:wrap;gap:8px}
+    .inventory-quick-button{padding:6px 10px;border-radius:8px;border:1px solid rgba(184,16,13,.2);background:#fff;font-weight:600;color:var(--brand);cursor:pointer;font-size:12px;min-width:52px}
+    .inventory-quick-button:hover{background:rgba(184,16,13,.08)}
+    .inventory-untracked-label{display:none;font-size:12px;font-weight:600;color:#555;background:#f3f4f6;border-radius:999px;padding:6px 10px;align-self:flex-start}
+    .inventory-zero-warning{display:none;font-size:12px;font-weight:600;color:var(--brand);background:rgba(184,16,13,.08);border-radius:8px;padding:6px 10px;align-self:flex-start}
+    .inventory-empty{font-size:14px;color:#666;text-align:center;padding:24px;border:1px dashed #d1d5db;border-radius:12px;background:#fafafa}
+    @media (max-width:900px){
+      .inventory-view{height:auto;min-height:0}
+
+    }
+    @media (max-width:640px){
+      .inventory-grid{grid-template-columns:1fr}
+      .inventory-card-header{flex-direction:column;align-items:flex-start}
+      .inventory-track-toggle{align-self:flex-start}
     }
 
     /* Modals */
@@ -673,6 +745,57 @@
 
 
   <!-- Analytics -->
+  <div class="inventory-view" id="inventory-view">
+    <div class="inventory-stats-row">
+      <div class="inventory-stat-card">
+        <span>Total Initial Units</span>
+        <strong id="inventory-total-initial">0</strong>
+      </div>
+      <div class="inventory-stat-card">
+        <span>Total Remaining Units</span>
+        <strong id="inventory-total-remaining">0</strong>
+      </div>
+      <div class="inventory-stat-card">
+        <span>Units Sold So Far</span>
+        <strong id="inventory-total-sold">0</strong>
+      </div>
+      <div class="inventory-stat-card">
+        <span># Low Items</span>
+        <strong id="inventory-low-count">0</strong>
+      </div>
+      <div class="inventory-stat-card">
+        <span># Zero Items</span>
+        <strong id="inventory-zero-count">0</strong>
+      </div>
+    </div>
+
+      <div class="inventory-scroll">
+        <div class="inventory-controls">
+          <div class="inventory-control-row">
+            <div class="inventory-search">
+              <input type="text" id="inventory-filter-input" placeholder="Search inventory…" autocomplete="off">
+            </div>
+            <div class="inventory-day-toggle" role="group" aria-label="Inventory day selector">
+              <button id="inventory-day-sat" type="button" class="active" onclick="setDay('SAT')">Sat</button>
+              <button id="inventory-day-sun" type="button" onclick="setDay('SUN')">Sun</button>
+            </div>
+          </div>
+          <div class="inventory-filter-pills" role="group" aria-label="Inventory filters">
+            <button type="button" class="inventory-filter-pill active" data-inventory-filter="ALL">All</button>
+            <button type="button" class="inventory-filter-pill" data-inventory-filter="LOW">Low (&lt;20%)</button>
+            <button type="button" class="inventory-filter-pill" data-inventory-filter="ZERO">Zero</button>
+            <button type="button" class="inventory-filter-pill" data-inventory-filter="UNTRACKED">No-inventory items</button>
+            <button type="button" class="inventory-filter-pill" data-inventory-filter="TRACKED">Tracked items</button>
+          </div>
+        </div>
+        <div class="inventory-grid" id="inventory-items-grid">
+          <div class="inventory-empty" id="inventory-empty-state">Loading inventory…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics -->
   <div class="analytics" id="analytics">
     <div class="analytics-layout">
       <div class="controls-row analytics-header-row">
@@ -726,6 +849,44 @@
           </div>
         </section>
         <section class="analytics-panel">
+          <h3>Expected vs Actual</h3>
+          <div class="panel-body scrollable">
+            <div class="analytics-metric-row">
+              <div class="analytics-metric">
+                <span>Expected Revenue</span>
+                <strong id="analytics-expected-revenue">$0.00</strong>
+              </div>
+              <div class="analytics-metric">
+                <span>Actual Revenue</span>
+                <strong id="analytics-actual-revenue">$0.00</strong>
+              </div>
+              <div class="analytics-metric">
+                <span>Shrinkage (Units)</span>
+                <strong id="analytics-shrinkage-units">0</strong>
+              </div>
+              <div class="analytics-metric">
+                <span>Shrinkage ($)</span>
+                <strong id="analytics-shrinkage-dollars">$0.00</strong>
+              </div>
+            </div>
+            <div class="items-table-wrapper" style="margin-top:12px;">
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Initial</th>
+                    <th>Current</th>
+                    <th>Units Sold</th>
+                    <th>Unaccounted (Units)</th>
+                    <th>Unaccounted ($)</th>
+                  </tr>
+                </thead>
+                <tbody id="analytics-expected-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+        <section class="analytics-panel">
           <h3>Hourly Sales</h3>
           <div class="panel-body">
             <div class="hourly-chart-wrapper">
@@ -740,9 +901,10 @@
   <!-- Footer Tabs -->
    <div class="bottom-tabs">
     <button id="pos-tab-button" class="tab-button active" onclick="switchTab('POS')">POS</button>
-    <button id="order-tracking-tab-button" class="tab-button" onclick="switchTab('Order Tracking')">Order Tracking</button>
-    <button id="zelle-tab-button" class="tab-button" onclick="switchTab('Zelle')">Zelle Control</button>
-    <button id="stock-tab-button" class="tab-button" onclick="switchTab('Stock Log')">Stock Log</button>
+   <button id="order-tracking-tab-button" class="tab-button" onclick="switchTab('Order Tracking')">Order Tracking</button>
+   <button id="zelle-tab-button" class="tab-button" onclick="switchTab('Zelle')">Zelle Control</button>
+   <button id="stock-tab-button" class="tab-button" onclick="switchTab('Stock Log')">Stock Log</button>
+    <button id="inventory-tab-button" class="tab-button" onclick="switchTab('Inventory')">Inventory</button>
     <button id="analytics-tab-button" class="tab-button" onclick="switchTab('Analytics')">Analytics</button>
   </div>
 
@@ -911,7 +1073,18 @@
     let orderTrackingFilter = 'ALL';
     let ordersRef = null;
     let isTotalOverwritten = false;
-    const oosMap = {}; // code -> boolean (true = OOS)
+    const oosMap = {}; // effective OOS state per code
+    const manualOosMap = {}; // manual toggles only
+    const inventoryState = { SAT:{}, SUN:{} };
+    const inventoryInputTimers = {};
+    const inventoryDomCache = { day:null, items:{}, emptyEl:null, totalItems:0 };
+    let inventoryListenerRef = null;
+    let inventoryLoaded = { SAT:false, SUN:false };
+    const inventoryFilterState = { search:'', pill:'ALL' };
+    let activeInventoryTooltip = null;
+    let activeInventoryTooltipTimeout = null;
+    const latestOrdersSnapshot = { SAT:{}, SUN:{} };
+    let ordersDeltaListener = null;
     let posBrandBadgeEl = null;
     let displayBrandFloatingEl = null;
     const paymentState = {
@@ -999,7 +1172,8 @@ const menuItemsSUN = [
     image:'https://i.imgur.com/qEXFQf5.png' }
 ];
 
-function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
+function menuForDay(dayValue){ return dayValue === 'SUN' ? menuItemsSUN : menuItemsSAT; }
+function currentMenu(){ return menuForDay(DAY); }
 
     function normalizePosValue(raw){
       if(raw === 'POS2' || raw === 'POS3') return raw;
@@ -1471,7 +1645,13 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       if(!item) return;
       const code = item.code || itemCodeMap[item.name];
       if(oosMap[code]) return; // blocked when out of stock
+      const available = getInventoryAvailableForCode(code);
       const existing = orderList.find(i=>i.code===code);
+      const currentQty = existing ? existing.quantity : 0;
+      if(available !== Infinity && available <= currentQty){
+        showPriceToast(`Only ${Math.max(0, available)} left`);
+        return;
+      }
       if(existing) existing.quantity += 1;
       else orderList.push({
         code,
@@ -1826,6 +2006,21 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         orderNumber = previousOrderNumber + 1; // keep per-day sequence
         const recordedOrderNumber = Number(orderNumber);
         const orderItemsSnapshot = buildCurrentOrderItemsSnapshot();
+        const quantityMap = mapOrderItemsQuantities(orderItemsSnapshot);
+        const availability = ensureInventoryAvailability(quantityMap);
+        if(!availability.ok){
+          const first = availability.insufficient[0];
+          paymentState.processing = false;
+          paymentState.processingMessage = '';
+          orderNumber = previousOrderNumber;
+          refreshOrderMetaUI();
+          setPaymentButtonsDisabled(false);
+          hidePaymentStatus();
+          const limitMessage = first && first.code ? `Only ${Math.max(0, first.available)} left for ${first.code}` : 'Not enough stock to record this order.';
+          showPaymentToast(limitMessage, 'error');
+          return;
+        }
+        const deltaMap = buildInventoryDeltaFromQuantities(quantityMap, -1);
         const feeSnapshot = getZelleFeeSnapshot();
         const subtotalValueNumber = round2(total);
         const baseTotalCents = Math.max(0, Math.round(subtotalValueNumber * 100));
@@ -1871,7 +2066,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         };
         if(method==='Zelle') currentOrderPayload.zelleAccount = activeZelleAccount;
 
-        saveOrderToFirebase(orderDetails).then(({ key })=>{
+        let inventoryCommitted = false;
+        applyInventoryTransactionDelta(DAY, deltaMap).then(()=>{
+          inventoryCommitted = true;
+          return saveOrderToFirebase(orderDetails);
+        }).then(({ key })=>{
           paymentState.processing = false;
           paymentState.processingMessage = '';
           paymentState.lastOrderKey = key;
@@ -1883,6 +2082,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           paymentState.lastDisplayPayload = IS_POS1 ? Object.assign({}, currentOrderPayload) : null;
           updatePaymentStatusUI();
           showPaymentToast(`✅ Payment recorded: ${method} (Order #${recordedOrderNumber})`);
+          if(IS_POS1){
+            db.ref('currentOrder').set(currentOrderPayload).catch(err=>{
+              console.error('Unable to update display order', err);
+            });
+          }
         }).catch(err=>{
           console.error('Unable to record payment', err);
           paymentState.processing = false;
@@ -1891,14 +2095,16 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           refreshOrderMetaUI();
           setPaymentButtonsDisabled(false);
           hidePaymentStatus();
-          showPaymentToast("Couldn't record payment. Try again.", 'error');
+          if(inventoryCommitted){
+            applyInventoryTransactionDelta(DAY, invertDeltaMap(deltaMap), { skipRender:false }).catch(revertErr=>{
+              console.error('Inventory rollback failed', revertErr);
+            });
+            showPaymentToast("Couldn't record payment. Try again.", 'error');
+          }else{
+            const message = err && err.message ? err.message : 'Not enough stock to record this order.';
+            showPaymentToast(message, 'error');
+          }
         });
-
-        if(IS_POS1){
-          db.ref('currentOrder').set(currentOrderPayload).catch(err=>{
-            console.error('Unable to update display order', err);
-          });
-        }
 
         // Operator still presses "Next Customer" when ready (manual step kept)
         refreshOrderMetaUI();
@@ -2231,10 +2437,12 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
     function loadOrdersFromFirebase(){
       if(ordersRef) ordersRef.off();
+      const dayKey = DAY;
       ordersRef = db.ref(ordersPath());
       ordersRef.on('value',(snapshot)=>{
         const orders = snapshot.val();
         orderHistory = {};
+        const normalized = {};
         const tbody = document.getElementById('order-log');
         tbody.innerHTML = '';
         if(orders){
@@ -2244,14 +2452,86 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           Object.keys(orders).forEach(key=>{
             const order = orders[key];
             logOrder(key, order);
+            normalized[key] = normalizeOrderForSnapshot(order);
           });
           const numbers = Object.values(orders).map(o=>Number(o.orderNumber)).filter(n=>!isNaN(n));
           orderNumber = numbers.length>0 ? Math.max(...numbers) : 0;
         }else{
           orderNumber = 0;
         }
+        latestOrdersSnapshot[dayKey] = normalized;
         refreshOrderMetaUI();
         applyOrderTrackingFilter();
+      });
+      attachOrderDeltaListeners();
+    }
+
+    function attachOrderDeltaListeners(){
+      if(ordersDeltaListener && ordersDeltaListener.ref){
+        ordersDeltaListener.ref.off();
+        ordersDeltaListener = null;
+      }
+      if(!IS_POS1){
+        return;
+      }
+      const dayKey = DAY;
+      const ref = db.ref(ordersPath());
+      ref.on('child_changed', snapshot=>{
+        const key = snapshot.key;
+        if(!key) return;
+        handleOrderInventoryChange(dayKey, key, snapshot.val());
+      });
+      ref.on('child_removed', snapshot=>{
+        const key = snapshot.key;
+        if(!key) return;
+        handleOrderInventoryRemoval(dayKey, key, snapshot.val());
+      });
+      ordersDeltaListener = { ref, day: dayKey };
+    }
+
+    function handleOrderInventoryChange(dayKey, orderKey, newOrder){
+      if(!IS_POS1) return;
+      const snapshotMap = latestOrdersSnapshot[dayKey] || {};
+      const previous = snapshotMap[orderKey];
+      const normalized = normalizeOrderForSnapshot(newOrder);
+      snapshotMap[orderKey] = normalized;
+      latestOrdersSnapshot[dayKey] = snapshotMap;
+      if(!previous){
+        return;
+      }
+      const prevQty = mapOrderItemsQuantities(previous.items);
+      const nextQty = mapOrderItemsQuantities(normalized.items);
+      const deltaMap = {};
+      const codes = new Set([...Object.keys(prevQty), ...Object.keys(nextQty)]);
+      codes.forEach(code=>{
+        const diff = (nextQty[code] || 0) - (prevQty[code] || 0);
+        if(diff !== 0){
+          deltaMap[code] = -diff;
+        }
+      });
+      if(Object.keys(deltaMap).length === 0) return;
+      applyInventoryTransactionDelta(dayKey, deltaMap, { skipRender:false }).catch(err=>{
+        console.error('Inventory adjustment failed after order edit', err);
+        showPaymentToast('Inventory sync issue after edit.', 'error');
+      });
+    }
+
+    function handleOrderInventoryRemoval(dayKey, orderKey, removedOrder){
+      if(!IS_POS1) return;
+      const snapshotMap = latestOrdersSnapshot[dayKey] || {};
+      const previous = snapshotMap[orderKey] || normalizeOrderForSnapshot(removedOrder);
+      delete snapshotMap[orderKey];
+      latestOrdersSnapshot[dayKey] = snapshotMap;
+      const qtyMap = mapOrderItemsQuantities(previous.items);
+      const deltaMap = {};
+      Object.keys(qtyMap).forEach(code=>{
+        const qty = qtyMap[code];
+        if(qty) deltaMap[code] = qty;
+      });
+      if(Object.keys(deltaMap).length === 0) return;
+      applyInventoryTransactionDelta(dayKey, deltaMap, { skipRender:false }).catch(err=>{
+        console.error('Inventory adjustment failed after order removal', err);
+        showPaymentToast('Inventory sync issue after deletion.', 'error');
       });
     }
 
@@ -2809,6 +3089,824 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     }
 
     /* ==========================
+       Inventory helpers + state sync
+       ========================== */
+    function sanitizeInventoryValue(raw){
+      const value = Number(raw);
+      if(!Number.isFinite(value) || value < 0) return 0;
+      return Math.round(value);
+    }
+
+    function defaultInventoryRecord(){
+      return { initial:0, current:0, updatedAt:null, track:true };
+    }
+
+    function getInventoryStateForDay(day){
+      if(!inventoryState[day]) inventoryState[day] = {};
+      return inventoryState[day];
+    }
+
+    function setInventoryRecordFromSnapshot(day, code, snapshot){
+      const record = defaultInventoryRecord();
+      if(snapshot && typeof snapshot === 'object'){
+        record.initial = sanitizeInventoryValue(snapshot.initial);
+        if(Object.prototype.hasOwnProperty.call(snapshot,'current')){
+          record.current = sanitizeInventoryValue(snapshot.current);
+        }else{
+          record.current = record.initial;
+        }
+        if(Object.prototype.hasOwnProperty.call(snapshot,'updatedAt')){
+          record.updatedAt = snapshot.updatedAt;
+        }
+        if(Object.prototype.hasOwnProperty.call(snapshot,'track')){
+          record.track = Boolean(snapshot.track !== false);
+        }
+      }
+      const state = getInventoryStateForDay(day);
+      state[code] = record;
+      return record;
+    }
+
+    function mergeInventoryRecord(day, code, partial){
+      const state = getInventoryStateForDay(day);
+      const existing = Object.assign({}, defaultInventoryRecord(), state[code]);
+      if(partial && Object.prototype.hasOwnProperty.call(partial,'initial')){
+        existing.initial = sanitizeInventoryValue(partial.initial);
+      }
+      if(partial && Object.prototype.hasOwnProperty.call(partial,'current')){
+        existing.current = sanitizeInventoryValue(partial.current);
+      }
+      if(partial && Object.prototype.hasOwnProperty.call(partial,'updatedAt')){
+        existing.updatedAt = partial.updatedAt;
+      }
+      if(partial && Object.prototype.hasOwnProperty.call(partial,'track')){
+        existing.track = Boolean(partial.track);
+      }
+      if(existing.current < 0) existing.current = 0;
+      state[code] = existing;
+      return existing;
+    }
+
+    function inventoryItemPathForDay(day, code){
+      return `stock/${SEASON}/${day}/${code}/inventory`;
+    }
+
+    function inventoryDayPathForDay(day){
+      return `stock/${SEASON}/${day}`;
+    }
+
+    function getInventoryRecordForCode(code, day=DAY){
+      const state = getInventoryStateForDay(day);
+      if(!state[code]){
+        state[code] = defaultInventoryRecord();
+      }
+      return state[code];
+    }
+
+    function computeInventoryPercent(initial, current){
+      const safeInitial = Number(initial) || 0;
+      const safeCurrent = Number(current) || 0;
+      if(safeInitial <= 0){
+        return safeCurrent > 0 ? 100 : 0;
+      }
+      const ratio = safeCurrent / safeInitial;
+      if(ratio <= 0) return 0;
+      if(ratio >= 1) return 100;
+      return Math.round(ratio * 100);
+    }
+
+    function getInventoryAvailableForCode(code, day=DAY){
+      const record = getInventoryRecordForCode(code, day);
+      const current = Number(record.current) || 0;
+      if(record.track === false){
+        return Infinity;
+      }
+      return current;
+    }
+
+    function ensureInventoryAvailability(quantityMap){
+      const insufficient = [];
+      Object.keys(quantityMap || {}).forEach(code=>{
+        const need = Number(quantityMap[code]) || 0;
+        if(need <= 0) return;
+        const available = getInventoryAvailableForCode(code);
+        if(available < need){
+          insufficient.push({ code, available: Math.max(0, available) });
+        }
+      });
+      return { ok: insufficient.length === 0, insufficient };
+    }
+
+    function mapOrderItemsQuantities(source){
+      const map = {};
+      if(!source) return map;
+      const list = Array.isArray(source) ? source : (Array.isArray(source.items) ? source.items : []);
+      list.forEach(item=>{
+        if(!item) return;
+        const code = item.code || itemCodeMap[item.name];
+        const qty = Number(item.quantity) || 0;
+        if(!code || qty <= 0) return;
+        map[code] = (map[code] || 0) + qty;
+      });
+      return map;
+    }
+
+    function buildInventoryDeltaFromQuantities(quantityMap, multiplier){
+      const delta = {};
+      Object.keys(quantityMap || {}).forEach(code=>{
+        const qty = Number(quantityMap[code]) || 0;
+        if(!qty) return;
+        delta[code] = (delta[code] || 0) + qty * multiplier;
+      });
+      return delta;
+    }
+
+    function invertDeltaMap(deltaMap){
+      const inverted = {};
+      Object.keys(deltaMap || {}).forEach(code=>{
+        const value = Number(deltaMap[code]) || 0;
+        if(!value) return;
+        inverted[code] = -value;
+      });
+      return inverted;
+    }
+
+    function normalizeOrderForSnapshot(order){
+      if(!order || typeof order !== 'object') return { items: [] };
+      const items = Array.isArray(order.items) ? order.items.map(it=>({
+        code: it && (it.code || itemCodeMap[it.name]),
+        quantity: Number(it && it.quantity) || 0
+      })) : [];
+      return { items };
+    }
+
+    function buildInventoryDom(dayKey, menu){
+      const gridEl = document.getElementById('inventory-items-grid');
+      if(!gridEl) return;
+      gridEl.innerHTML = '';
+      inventoryDomCache.day = dayKey;
+      inventoryDomCache.items = {};
+      inventoryDomCache.totalItems = menu.length;
+
+      const emptyEl = document.createElement('div');
+      emptyEl.id = 'inventory-empty-state';
+      emptyEl.className = 'inventory-empty';
+      emptyEl.textContent = inventoryLoaded[dayKey] ? (menu.length === 0 ? 'No items configured for this day.' : 'No items match filters.') : 'Loading inventory…';
+      emptyEl.style.display = 'none';
+      gridEl.appendChild(emptyEl);
+      inventoryDomCache.emptyEl = emptyEl;
+
+      menu.forEach(item=>{
+        const rowDay = dayKey;
+        const card = document.createElement('div');
+        card.className = 'inventory-item-card';
+        card.setAttribute('data-code', item.code);
+        const searchText = `${item.name} ${item.code}`.toLowerCase();
+        card.setAttribute('data-search-text', searchText);
+
+        const header = document.createElement('div');
+        header.className = 'inventory-card-header';
+
+        const nameBlock = document.createElement('div');
+        nameBlock.className = 'inventory-item-name';
+        const nameEl = document.createElement('strong');
+        nameEl.textContent = item.name;
+        const codeBadge = document.createElement('span');
+        codeBadge.className = 'inventory-item-code';
+        codeBadge.textContent = item.code;
+        nameBlock.appendChild(nameEl);
+        nameBlock.appendChild(codeBadge);
+
+        const toggleLabel = document.createElement('label');
+        toggleLabel.className = 'inventory-track-toggle';
+        toggleLabel.title = 'Toggle inventory tracking';
+        const toggleInput = document.createElement('input');
+        toggleInput.type = 'checkbox';
+        toggleInput.addEventListener('change', event=>{
+          handleInventoryTrackToggle(rowDay, item.code, event.target.checked);
+        });
+        const toggleText = document.createElement('span');
+        toggleText.textContent = 'Track inventory';
+        toggleLabel.appendChild(toggleInput);
+        toggleLabel.appendChild(toggleText);
+
+        header.appendChild(nameBlock);
+        header.appendChild(toggleLabel);
+
+        const metaRow = document.createElement('div');
+        metaRow.className = 'inventory-card-meta';
+        const soldSpan = document.createElement('span');
+        soldSpan.innerHTML = 'Sold so far: <strong>0</strong>';
+        const soldValue = soldSpan.querySelector('strong');
+        const remainingSpan = document.createElement('span');
+        remainingSpan.innerHTML = 'Current: <strong>0</strong>';
+        const remainingValue = remainingSpan.querySelector('strong');
+        metaRow.appendChild(soldSpan);
+        metaRow.appendChild(remainingSpan);
+
+        const barWrapper = document.createElement('div');
+        barWrapper.className = 'inline-inventory-bar';
+        const barTrack = document.createElement('div');
+        barTrack.className = 'inline-inventory-track';
+        const barFill = document.createElement('div');
+        barFill.className = 'inline-inventory-fill';
+        barTrack.appendChild(barFill);
+        barWrapper.appendChild(barTrack);
+        barWrapper.addEventListener('click', event=>{
+          event.stopPropagation();
+          const message = barWrapper.getAttribute('data-tooltip-message') || '';
+          showInlineInventoryTooltip(card, message);
+        });
+        barWrapper.addEventListener('pointerdown', event=>{
+          if(event.pointerType === 'touch' || event.pointerType === 'pen'){
+            event.stopPropagation();
+            const message = barWrapper.getAttribute('data-tooltip-message') || '';
+            showInlineInventoryTooltip(card, message);
+          }
+        });
+
+        const body = document.createElement('div');
+        body.className = 'inventory-card-body';
+
+        const inputGrid = document.createElement('div');
+        inputGrid.className = 'inventory-input-grid';
+
+        const initialGroup = document.createElement('div');
+        initialGroup.className = 'inventory-input-group';
+        const initialLabel = document.createElement('label');
+        initialLabel.textContent = 'Initial';
+        const initialInput = document.createElement('input');
+        initialInput.type = 'number';
+        initialInput.min = '0';
+        initialInput.inputMode = 'numeric';
+        initialInput.addEventListener('input', event=>{
+          handleInventoryInputChange(rowDay, item.code, 'initial', event.target.value);
+        });
+        initialGroup.appendChild(initialLabel);
+        initialGroup.appendChild(initialInput);
+
+        const currentGroup = document.createElement('div');
+        currentGroup.className = 'inventory-input-group';
+        const currentLabel = document.createElement('label');
+        currentLabel.textContent = 'Current';
+        const currentInput = document.createElement('input');
+        currentInput.type = 'number';
+        currentInput.min = '0';
+        currentInput.inputMode = 'numeric';
+        currentInput.addEventListener('input', event=>{
+          handleInventoryInputChange(rowDay, item.code, 'current', event.target.value);
+        });
+        currentGroup.appendChild(currentLabel);
+        currentGroup.appendChild(currentInput);
+
+        inputGrid.appendChild(initialGroup);
+        inputGrid.appendChild(currentGroup);
+
+        const quickRow = document.createElement('div');
+        quickRow.className = 'inventory-quick-buttons';
+        [-10, -1, 1, 10].forEach(delta=>{
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'inventory-quick-button';
+          btn.textContent = delta > 0 ? `+${delta}` : `${delta}`;
+          btn.addEventListener('click', ()=>handleInventoryQuickAdjust(rowDay, item.code, delta));
+          quickRow.appendChild(btn);
+        });
+
+        const untrackedLabel = document.createElement('div');
+        untrackedLabel.className = 'inventory-untracked-label';
+        untrackedLabel.textContent = 'Untracked';
+
+        const zeroWarning = document.createElement('div');
+        zeroWarning.className = 'inventory-zero-warning';
+        zeroWarning.textContent = '0 left';
+
+        body.appendChild(inputGrid);
+        body.appendChild(quickRow);
+        body.appendChild(untrackedLabel);
+        body.appendChild(zeroWarning);
+
+        card.appendChild(header);
+        card.appendChild(metaRow);
+        card.appendChild(barWrapper);
+        card.appendChild(body);
+
+        gridEl.appendChild(card);
+
+        inventoryDomCache.items[item.code] = {
+          code: item.code,
+          card,
+          searchText,
+          barWrapper,
+          barFill,
+          soldValue,
+          remainingValue,
+          initialInput,
+          currentInput,
+          inputGrid,
+          quickRow,
+          trackToggle: toggleInput,
+          untrackedLabel,
+          zeroWarning
+        };
+      });
+    }
+
+    function updateInventoryRowDisplay(dayKey, item, record){
+      const cache = inventoryDomCache.items[item.code];
+      if(!cache) return;
+      const tracked = record.track !== false;
+      const initial = Number(record.initial) || 0;
+      const current = Number(record.current) || 0;
+      const soldUnits = Math.max(0, initial - current);
+      const percent = computeInventoryPercent(initial, current);
+      cache.trackToggle.checked = tracked;
+      cache.initialInput.value = initial;
+      cache.currentInput.value = current;
+      cache.initialInput.disabled = !tracked;
+      cache.currentInput.disabled = !tracked;
+      cache.soldValue.textContent = tracked ? soldUnits : '—';
+      cache.remainingValue.textContent = tracked ? current : '—';
+
+      if(tracked){
+        cache.inputGrid.style.display = '';
+        cache.quickRow.style.display = '';
+        cache.barWrapper.style.display = '';
+        cache.untrackedLabel.style.display = 'none';
+        const message = current > 0 ? `${current} left` : 'No stock';
+        cache.barWrapper.setAttribute('data-tooltip-message', message);
+        cache.barWrapper.title = message;
+        cache.barFill.style.width = `${percent}%`;
+        cache.zeroWarning.style.display = current <= 0 ? 'inline-flex' : 'none';
+      }else{
+        cache.inputGrid.style.display = 'none';
+        cache.quickRow.style.display = 'none';
+        cache.barWrapper.style.display = 'none';
+        cache.untrackedLabel.style.display = 'inline-flex';
+        cache.zeroWarning.style.display = 'none';
+        cache.barWrapper.removeAttribute('data-tooltip-message');
+        cache.barWrapper.title = '';
+      }
+
+      const manual = Boolean(manualOosMap[item.code]);
+      const isZero = tracked && current <= 0 && (initial > 0 || current === 0);
+      const isLow = tracked && initial > 0 && percent > 0 && percent < 20;
+      cache.card.classList.toggle('is-oos', manual);
+      cache.card.classList.toggle('is-zero', isZero);
+      cache.card.classList.toggle('is-low', isLow);
+      cache.card.classList.toggle('is-untracked', !tracked);
+      cache.card.setAttribute('data-percent', percent);
+      cache.card.setAttribute('data-remaining', current);
+      cache.card.setAttribute('data-tracked', tracked ? '1' : '0');
+    }
+
+    function renderInventoryView(){
+      const gridEl = document.getElementById('inventory-items-grid');
+      if(!gridEl) return;
+      const dayKey = DAY;
+      const menu = currentMenu();
+
+      const shouldRebuild = inventoryDomCache.day !== dayKey || menu.length !== inventoryDomCache.totalItems || menu.some(item=>!inventoryDomCache.items[item.code]);
+      if(shouldRebuild){
+        buildInventoryDom(dayKey, menu);
+      }else{
+        inventoryDomCache.totalItems = menu.length;
+        if(inventoryDomCache.emptyEl){
+          inventoryDomCache.emptyEl.style.display = 'none';
+        }
+      }
+
+      let totalInitial = 0;
+      let totalRemaining = 0;
+      let totalSold = 0;
+      let lowCount = 0;
+      let zeroCount = 0;
+
+
+      menu.forEach(item=>{
+        const record = getInventoryRecordForCode(item.code, dayKey);
+        updateInventoryRowDisplay(dayKey, item, record);
+        if(record.track === false){
+
+          return;
+        }
+        const initial = Number(record.initial) || 0;
+        const current = Number(record.current) || 0;
+        const soldUnits = Math.max(0, initial - current);
+        const percent = computeInventoryPercent(initial, current);
+        totalInitial += initial;
+        totalRemaining += current;
+        totalSold += soldUnits;
+        if(initial > 0 && percent > 0 && percent < 20){
+          lowCount++;
+
+        }
+        if(current <= 0){
+          zeroCount++;
+        }
+      });
+
+      if(inventoryDomCache.emptyEl){
+        if(menu.length === 0){
+          inventoryDomCache.emptyEl.textContent = inventoryLoaded[dayKey] ? 'No items configured for this day.' : 'Loading inventory…';
+        }else if(inventoryLoaded[dayKey]){
+          inventoryDomCache.emptyEl.textContent = 'No items match filters.';
+        }else{
+          inventoryDomCache.emptyEl.textContent = 'Loading inventory…';
+        }
+      }
+
+      const totalInitialEl = document.getElementById('inventory-total-initial');
+      if(totalInitialEl) totalInitialEl.textContent = totalInitial;
+      const totalRemainingEl = document.getElementById('inventory-total-remaining');
+      if(totalRemainingEl) totalRemainingEl.textContent = totalRemaining;
+      const totalSoldEl = document.getElementById('inventory-total-sold');
+      if(totalSoldEl) totalSoldEl.textContent = totalSold;
+      const lowCountEl = document.getElementById('inventory-low-count');
+      if(lowCountEl) lowCountEl.textContent = lowCount;
+      const zeroCountEl = document.getElementById('inventory-zero-count');
+      if(zeroCountEl) zeroCountEl.textContent = zeroCount;
+
+
+      applyInventoryFilters();
+    }
+
+
+    function setInventorySearch(value){
+      inventoryFilterState.search = (value || '').toString().trim().toLowerCase();
+      applyInventoryFilters();
+    }
+
+    function setInventoryFilter(filter){
+      const allowed = ['ALL','LOW','ZERO','UNTRACKED','TRACKED'];
+      const normalized = allowed.includes(filter) ? filter : 'ALL';
+      if(inventoryFilterState.pill === normalized) return;
+      inventoryFilterState.pill = normalized;
+      syncInventoryFilterButtons();
+      applyInventoryFilters();
+    }
+
+    function syncInventoryFilterButtons(){
+      const buttons = document.querySelectorAll('[data-inventory-filter]');
+      buttons.forEach(btn=>{
+        const filter = btn.getAttribute('data-inventory-filter');
+        btn.classList.toggle('active', filter === inventoryFilterState.pill);
+      });
+    }
+
+    function syncInventoryDayButtons(){
+      const satBtn = document.getElementById('inventory-day-sat');
+      const sunBtn = document.getElementById('inventory-day-sun');
+      if(satBtn) satBtn.classList.toggle('active', DAY === 'SAT');
+      if(sunBtn) sunBtn.classList.toggle('active', DAY === 'SUN');
+    }
+
+    function applyInventoryFilters(){
+      const dayKey = inventoryDomCache.day || DAY;
+      const entries = Object.values(inventoryDomCache.items || {});
+      const searchTerm = inventoryFilterState.search;
+      let visibleCount = 0;
+      entries.forEach(cache=>{
+        const record = getInventoryRecordForCode(cache.code, dayKey);
+        const tracked = record.track !== false;
+        const initial = Number(record.initial) || 0;
+        const current = Number(record.current) || 0;
+        const percent = computeInventoryPercent(initial, current);
+        const searchValue = cache.searchText || '';
+        const matchesSearch = !searchTerm || searchValue.includes(searchTerm);
+        let matchesFilter = true;
+        switch(inventoryFilterState.pill){
+          case 'LOW':
+            matchesFilter = tracked && initial > 0 && percent > 0 && percent < 20;
+            break;
+          case 'ZERO':
+            matchesFilter = tracked && current <= 0;
+            break;
+          case 'UNTRACKED':
+            matchesFilter = !tracked;
+            break;
+          case 'TRACKED':
+            matchesFilter = tracked;
+            break;
+          default:
+            matchesFilter = true;
+        }
+        const shouldShow = matchesSearch && matchesFilter;
+        cache.card.style.display = shouldShow ? '' : 'none';
+        if(shouldShow) visibleCount++;
+      });
+
+      const totalItems = inventoryDomCache.totalItems || entries.length;
+      const dayLoaded = inventoryLoaded[dayKey];
+      if(inventoryDomCache.emptyEl){
+        if(totalItems === 0){
+          inventoryDomCache.emptyEl.textContent = dayLoaded ? 'No items configured for this day.' : 'Loading inventory…';
+          if(!dayLoaded){
+            inventoryDomCache.emptyEl.textContent = 'Loading inventory…';
+          }
+          inventoryDomCache.emptyEl.style.display = 'block';
+        }else if(visibleCount === 0){
+          inventoryDomCache.emptyEl.textContent = dayLoaded ? 'No items match filters.' : 'Loading inventory…';
+          inventoryDomCache.emptyEl.style.display = 'block';
+        }else{
+          inventoryDomCache.emptyEl.style.display = 'none';
+        }
+      }
+    }
+
+    function handleInventoryInputChange(dayKey, code, field, rawValue){
+      const record = getInventoryRecordForCode(code, dayKey);
+      if(record.track === false) return;
+      const value = sanitizeInventoryValue(rawValue);
+      mergeInventoryRecord(dayKey, code, { [field]: value });
+      handleInventoryStateUpdate(dayKey, { skipRender:true });
+      if(dayKey === DAY){
+        renderInventoryView();
+        updateItemCardInventoryBars();
+      }
+      scheduleInventoryWrite(dayKey, code);
+    }
+
+    function handleInventoryQuickAdjust(dayKey, code, delta){
+      if(!Number.isFinite(delta)) return;
+      const record = getInventoryRecordForCode(code, dayKey);
+      if(record.track === false) return;
+      const next = Math.max(0, (record.current || 0) + delta);
+      mergeInventoryRecord(dayKey, code, { current: next });
+      handleInventoryStateUpdate(dayKey, { skipRender:true });
+      if(dayKey === DAY){
+        renderInventoryView();
+        updateItemCardInventoryBars();
+      }
+      scheduleInventoryWrite(dayKey, code);
+    }
+
+    function handleInventoryTrackToggle(dayKey, code, shouldTrack){
+      mergeInventoryRecord(dayKey, code, { track: shouldTrack });
+      handleInventoryStateUpdate(dayKey, { skipRender:true });
+      if(dayKey === DAY){
+        renderInventoryView();
+        updateItemCardInventoryBars();
+      }
+      scheduleInventoryWrite(dayKey, code);
+    }
+
+    function scheduleInventoryWrite(dayKey, code){
+      const key = `${dayKey}|${code}`;
+      if(inventoryInputTimers[key]){
+        clearTimeout(inventoryInputTimers[key]);
+      }
+      inventoryInputTimers[key] = setTimeout(()=>flushInventoryWrite(dayKey, code), 450);
+    }
+
+    function flushInventoryWrite(dayKey, code){
+      const key = `${dayKey}|${code}`;
+      if(inventoryInputTimers[key]){
+        clearTimeout(inventoryInputTimers[key]);
+        delete inventoryInputTimers[key];
+      }
+      const record = getInventoryRecordForCode(code, dayKey);
+      const payload = {
+        initial: record.initial || 0,
+        current: record.current || 0,
+        track: record.track === false ? false : true,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      };
+      db.ref(inventoryItemPathForDay(dayKey, code)).update(payload).catch(err=>{
+        console.error('Error updating inventory', err);
+      });
+    }
+
+    function computeOosStateForDay(dayKey){
+      const menu = menuForDay(dayKey);
+      const result = {};
+      menu.forEach(item=>{
+        result[item.code] = Boolean(manualOosMap[item.code]);
+      });
+      return result;
+    }
+
+    function applyOosState(dayKey, nextState){
+      let changed = false;
+      if(dayKey !== DAY){
+        Object.keys(nextState).forEach(code=>{
+          oosMap[code] = nextState[code];
+        });
+        return changed;
+      }
+      Object.keys(nextState).forEach(code=>{
+        const value = nextState[code];
+        if(oosMap[code] !== value){
+          changed = true;
+        }
+        oosMap[code] = value;
+      });
+      return changed;
+    }
+
+    function handleInventoryStateUpdate(dayKey, options={}){
+      const next = computeOosStateForDay(dayKey);
+      const changed = applyOosState(dayKey, next);
+      if(dayKey === DAY){
+        if(!options.skipRender){
+          renderInventoryView();
+        }
+        if(changed){
+          initializeMenuItems();
+          searchItems();
+        }else{
+          updateItemCardInventoryBars();
+        }
+      }
+    }
+
+    function refreshInventoryListener(){
+      if(inventoryListenerRef){
+        inventoryListenerRef.off();
+        inventoryListenerRef = null;
+      }
+      const dayKey = DAY;
+      const ref = db.ref(inventoryDayPathForDay(dayKey));
+      inventoryListenerRef = ref;
+      ref.on('value', snapshot=>{
+        const node = snapshot.val() || {};
+        const menu = menuForDay(dayKey);
+        menu.forEach(item=>{
+          const codeNode = node[item.code] || {};
+          const recordSnapshot = (codeNode && typeof codeNode === 'object' && codeNode.inventory && typeof codeNode.inventory === 'object') ? codeNode.inventory : null;
+          setInventoryRecordFromSnapshot(dayKey, item.code, recordSnapshot);
+        });
+        inventoryLoaded[dayKey] = true;
+        handleInventoryStateUpdate(dayKey);
+      });
+    }
+
+    function runInventoryTransaction(dayKey, code, delta, options={}){
+      const path = inventoryItemPathForDay(dayKey, code);
+      let previousValue = 0;
+      return new Promise((resolve, reject)=>{
+        db.ref(path).transaction(current=>{
+          const snapshotRecord = current && typeof current === 'object' ? current : null;
+          const base = snapshotRecord ? Object.assign({}, snapshotRecord) : {};
+          const initial = sanitizeInventoryValue(base.initial);
+          const hasCurrent = Object.prototype.hasOwnProperty.call(base,'current');
+          const currentValue = hasCurrent ? sanitizeInventoryValue(base.current) : initial;
+          previousValue = currentValue;
+          const nextValue = currentValue + delta;
+          if(nextValue < 0){
+            return;
+          }
+          const nextRecord = Object.assign({}, base, {
+            initial,
+            current: sanitizeInventoryValue(nextValue),
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
+          });
+          return nextRecord;
+        }, (error, committed, snapshot)=>{
+          if(error){
+            reject(error);
+            return;
+          }
+          if(!committed){
+            resolve({ committed:false, available: previousValue });
+            return;
+          }
+          const value = snapshot && snapshot.val ? snapshot.val() : null;
+          setInventoryRecordFromSnapshot(dayKey, code, value);
+          if(dayKey === DAY && !options.skipRender){
+            renderInventoryView();
+            updateItemCardInventoryBars();
+          }
+          resolve({ committed:true, available: previousValue, value });
+        }, false);
+      });
+    }
+
+    async function applyInventoryTransactionDelta(dayKey, deltaMap, options={}){
+      const entries = Object.entries(deltaMap || {}).filter(([code, delta])=>{
+        if(!Number(delta)) return false;
+        const record = getInventoryRecordForCode(code, dayKey);
+        return record.track !== false;
+      });
+      if(entries.length === 0){
+        if(dayKey === DAY && !options.skipRender){
+          renderInventoryView();
+          updateItemCardInventoryBars();
+        }
+        return;
+      }
+      const applied = [];
+      try{
+        for(const [code, delta] of entries){
+          const result = await runInventoryTransaction(dayKey, code, delta, { skipRender:true });
+          if(!result.committed){
+            const available = Math.max(0, result.available || 0);
+            const error = new Error(`Only ${available} left`);
+            error.code = code;
+            error.available = available;
+            throw error;
+          }
+          applied.push({ code, delta });
+        }
+      }catch(err){
+        for(let i = applied.length-1; i>=0; i--){
+          const entry = applied[i];
+          try{
+            await runInventoryTransaction(dayKey, entry.code, -entry.delta, { skipRender:true });
+          }catch(revertErr){
+            console.error('Inventory revert failed', revertErr);
+          }
+        }
+        throw err;
+      }finally{
+        if(dayKey === DAY && !options.skipRender){
+          renderInventoryView();
+          updateItemCardInventoryBars();
+        }
+      }
+    }
+
+    function updateItemCardInventoryBars(){
+      const cards = document.querySelectorAll('.item-box');
+      cards.forEach(card=>{
+        const code = card.getAttribute('data-code');
+        if(!code) return;
+        const record = getInventoryRecordForCode(code, DAY);
+        const tracked = record.track !== false;
+        const percent = computeInventoryPercent(record.initial, record.current);
+        const fill = card.querySelector('.inline-inventory-fill');
+        const bar = card.querySelector('.inline-inventory-bar');
+        const chip = card.querySelector('.inventory-chip');
+        if(tracked){
+          if(fill) fill.style.width = `${percent}%`;
+          if(bar){
+            const message = record.current > 0 ? `${record.current} left` : 'No stock';
+            bar.setAttribute('data-tooltip-message', message);
+            bar.title = message;
+            bar.style.display = '';
+          }
+          if(chip) chip.style.display = 'none';
+        }else{
+          if(fill) fill.style.width = '0%';
+          if(bar){
+            bar.style.display = 'none';
+            bar.removeAttribute('data-tooltip-message');
+            bar.title = '';
+          }
+          if(chip) chip.style.display = 'inline-flex';
+        }
+        const manual = Boolean(manualOosMap[code]);
+        const isOut = Boolean(oosMap[code]);
+        card.classList.toggle('is-oos', isOut);
+        const titleEl = card.querySelector('strong');
+        if(titleEl){
+          let badge = titleEl.querySelector('.oos-tag');
+          if(isOut){
+            if(!badge){
+              badge = document.createElement('span');
+              badge.className = 'oos-tag';
+              badge.textContent = 'OOS';
+              titleEl.appendChild(badge);
+            }
+          }else if(badge){
+            badge.remove();
+          }
+        }
+        const oosBtn = card.querySelector('.oos-btn');
+        if(oosBtn){
+          oosBtn.textContent = manual ? 'RESTOCK' : 'OOS';
+        }
+      });
+    }
+
+    function showInlineInventoryTooltip(container, message){
+      hideInlineInventoryTooltip();
+      if(!container) return;
+      const tooltip = document.createElement('div');
+      tooltip.className = 'inventory-tooltip';
+      tooltip.textContent = message || '';
+      container.appendChild(tooltip);
+      activeInventoryTooltip = tooltip;
+      if(activeInventoryTooltipTimeout){
+        clearTimeout(activeInventoryTooltipTimeout);
+      }
+      activeInventoryTooltipTimeout = setTimeout(()=>{
+        hideInlineInventoryTooltip();
+      }, 1600);
+    }
+
+    function hideInlineInventoryTooltip(){
+      if(activeInventoryTooltip && activeInventoryTooltip.parentNode){
+        activeInventoryTooltip.parentNode.removeChild(activeInventoryTooltip);
+      }
+      activeInventoryTooltip = null;
+      if(activeInventoryTooltipTimeout){
+        clearTimeout(activeInventoryTooltipTimeout);
+        activeInventoryTooltipTimeout = null;
+      }
+    }
+
+    /* ==========================
        Out-of-Stock tracking + Stock Log helpers (fixed)
        ========================== */
     function stockPath(code){ return `stock/${SEASON}/${DAY}/${code}`; }
@@ -2824,8 +3922,9 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         return;
       }
       const code = item.code;
-      const newVal = !oosMap[code];
-      oosMap[code] = newVal;
+      const newVal = !manualOosMap[code];
+      manualOosMap[code] = newVal;
+      handleInventoryStateUpdate(DAY);
 
       const ref = db.ref(stockPath(code)).push();
       ref.set({
@@ -2835,26 +3934,26 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         ts: firebase.database.ServerValue.TIMESTAMP
       });
 
-      // Refresh the POS buttons immediately
-      initializeMenuItems();
+      updateItemCardInventoryBars();
     }
 
     function loadOOSMap(){
       const path = stockPathDay();
       db.ref(path).once('value',(snap)=>{
         const node = snap.val() || {};
-        currentMenu().forEach(item=>{ oosMap[item.code] = false; });
+        currentMenu().forEach(item=>{ manualOosMap[item.code] = false; });
         Object.keys(node).forEach(code=>{
-          const arr = Object.values(node[code]||{});
-          if(arr.length){
-            arr.sort((a,b)=>(a.ts||0)-(b.ts||0));
-            const last = arr[arr.length-1];
-            oosMap[code] = !!(last && last.status === 'OOS');
-          } else {
-            oosMap[code] = false;
+          const entries = node[code] || {};
+          const logs = Object.keys(entries).map(key=>entries[key]).filter(entry=>entry && entry.status);
+          if(logs.length){
+            logs.sort((a,b)=>(a.ts||0)-(b.ts||0));
+            const last = logs[logs.length-1];
+            manualOosMap[code] = !!(last && last.status === 'OOS');
+          }else{
+            manualOosMap[code] = false;
           }
         });
-        initializeMenuItems();
+        handleInventoryStateUpdate(DAY);
       });
     }
 
@@ -2882,6 +3981,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         Object.keys(byCode).forEach(code=>{
           const entries = byCode[code] || {};
           Object.keys(entries).forEach(key=>{
+            if(key === 'inventory') return;
             const e = entries[key] || {};
             rows.push({
               code: e.code || code,
@@ -2949,6 +4049,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         Object.keys(byCode).forEach(code=>{
           const entries = byCode[code] || {};
           Object.keys(entries).forEach(key=>{
+            if(key === 'inventory') return;
             const e = entries[key] || {};
             rows.push([
               new Date(e.ts||Date.now()).toLocaleString(),
@@ -2981,9 +4082,22 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         return;
       }
       if(!confirm('Clear the entire stock log for this day? This cannot be undone.')) return;
-      db.ref(stockPathDay()).remove().then(()=>{
+      db.ref(stockPathDay()).once('value').then(snap=>{
+        const node = snap.val() || {};
+        const updates = {};
+        Object.keys(node).forEach(code=>{
+          const entries = node[code] || {};
+          Object.keys(entries).forEach(key=>{
+            if(key === 'inventory') return;
+            updates[`${code}/${key}`] = null;
+          });
+        });
+        if(Object.keys(updates).length===0){
+          return;
+        }
+        return db.ref(stockPathDay()).update(updates);
+      }).then(()=>{
         alert('Stock log cleared for ' + DAY + '.');
-        // Live listener will show the empty state automatically
         loadOOSMap();
       }).catch(err=>{
         console.error('Error clearing stock log:', err);
@@ -3060,8 +4174,12 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       currentMenu().forEach(item=>{
         const effectivePrice = getEffectivePriceFor(item);
         const effectiveTicketColorLabel = getEffectiveTicketColorLabel(item);
+        const record = getInventoryRecordForCode(item.code, DAY);
+        const tracked = record.track !== false;
         const card = document.createElement('div');
         card.className='item-box';
+        card.setAttribute('data-code', item.code);
+        card.setAttribute('data-name', item.name);
         if(oosMap[item.code]) card.classList.add('is-oos');
         card.onclick = ()=>{
           if(!oosMap[item.code]){
@@ -3072,11 +4190,63 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           }
         };
 
-        card.innerHTML = `
-          <strong>${item.name} ${oosMap[item.code] ? '<span class="oos-tag">OOS</span>' : ''}</strong>
-          <span class="price">$${effectivePrice.toFixed(2)}</span>
-          <img src="${item.image}" alt="${item.name}">
-        `;
+        const title = document.createElement('strong');
+        title.textContent = item.name;
+        if(oosMap[item.code]){
+          const badge = document.createElement('span');
+          badge.className = 'oos-tag';
+          badge.textContent = 'OOS';
+          title.appendChild(badge);
+        }
+        card.appendChild(title);
+
+        const priceEl = document.createElement('span');
+        priceEl.className = 'price';
+        priceEl.textContent = `$${effectivePrice.toFixed(2)}`;
+        card.appendChild(priceEl);
+
+        const barWrapper = document.createElement('div');
+        barWrapper.className = 'inline-inventory-bar';
+        const track = document.createElement('div');
+        track.className = 'inline-inventory-track';
+        const fill = document.createElement('div');
+        fill.className = 'inline-inventory-fill';
+        const percent = tracked ? computeInventoryPercent(record.initial, record.current) : 0;
+        fill.style.width = `${percent}%`;
+        track.appendChild(fill);
+        barWrapper.appendChild(track);
+        if(tracked){
+          const message = record.current > 0 ? `${record.current} left` : 'No stock';
+          barWrapper.setAttribute('data-tooltip-message', message);
+          barWrapper.title = message;
+        }else{
+          barWrapper.style.display = 'none';
+        }
+        barWrapper.addEventListener('click', event=>{
+          event.stopPropagation();
+          const message = barWrapper.getAttribute('data-tooltip-message') || '';
+          if(message) showInlineInventoryTooltip(card, message);
+        });
+        barWrapper.addEventListener('pointerdown', event=>{
+          if(event.pointerType === 'touch' || event.pointerType === 'pen'){
+            event.stopPropagation();
+            const message = barWrapper.getAttribute('data-tooltip-message') || '';
+            if(message) showInlineInventoryTooltip(card, message);
+          }
+        });
+        card.appendChild(barWrapper);
+
+        const untrackedChip = document.createElement('span');
+        untrackedChip.className = 'inventory-chip';
+        untrackedChip.textContent = 'Untracked';
+        untrackedChip.style.display = tracked ? 'none' : 'inline-flex';
+        card.appendChild(untrackedChip);
+
+        const img = document.createElement('img');
+        img.src = item.image;
+        img.alt = item.name;
+        card.appendChild(img);
+
         if(IS_POS1){
           const actions = document.createElement('div');
           actions.className='item-actions';
@@ -3089,7 +4259,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           actions.appendChild(editBtn);
           const oosBtn = document.createElement('button');
           oosBtn.className='oos-btn';
-          oosBtn.textContent = oosMap[item.code] ? 'RESTOCK' : 'OOS';
+          oosBtn.textContent = manualOosMap[item.code] ? 'RESTOCK' : 'OOS';
           oosBtn.onclick = (e)=>{ e.stopPropagation(); toggleOOS(item); };
           actions.appendChild(oosBtn);
           card.appendChild(actions);
@@ -3264,25 +4434,29 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     /* ==========================
        Tabs + Day Subtabs
        ========================== */
-    function switchTab(tab){
-      const posView = document.querySelector('.container');
-      const orderTrackingView = document.getElementById('order-tracking');
-      const zelleView = document.getElementById('zelle-confirmations');
-      const stockLogView = document.getElementById('stock-log');
-      const analyticsView = document.getElementById('analytics');
+      function switchTab(tab){
+        const posView = document.querySelector('.container');
+        const orderTrackingView = document.getElementById('order-tracking');
+        const zelleView = document.getElementById('zelle-confirmations');
+        const stockLogView = document.getElementById('stock-log');
+        const inventoryView = document.getElementById('inventory-view');
+        const analyticsView = document.getElementById('analytics');
 
       // reset all
       posView.style.display='none';
       orderTrackingView.style.display='none';
       if(zelleView) zelleView.style.display='none';
-      analyticsView.style.display='none';
+        analyticsView.style.display='none';
+        if(inventoryView) inventoryView.style.display='none';
       if(stockLogView) stockLogView.style.display='none';
 
       document.getElementById('pos-tab-button').classList.remove('active');
       document.getElementById('order-tracking-tab-button').classList.remove('active');
       document.getElementById('zelle-tab-button').classList.remove('active');
       if(document.getElementById('stock-tab-button')) document.getElementById('stock-tab-button').classList.remove('active');
-      document.getElementById('analytics-tab-button').classList.remove('active');
+        document.getElementById('analytics-tab-button').classList.remove('active');
+        const inventoryTabButton = document.getElementById('inventory-tab-button');
+        if(inventoryTabButton) inventoryTabButton.classList.remove('active');
 
       if(tab==='POS'){
         posView.style.display='flex';
@@ -3299,18 +4473,24 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
           attachZelleListener();
           attachZelleSwitchLogListener();
         }
-      }else if(tab==='Stock Log'){
-        if(stockLogView){
-          stockLogView.style.display='block';
-          document.getElementById('stock-tab-button').classList.add('active');
-          loadStockLogFromFirebase();
+        }else if(tab==='Stock Log'){
+          if(stockLogView){
+            stockLogView.style.display='block';
+            document.getElementById('stock-tab-button').classList.add('active');
+            loadStockLogFromFirebase();
+          }
+        }else if(tab==='Inventory'){
+          if(inventoryView){
+            inventoryView.style.display='block';
+            if(inventoryTabButton) inventoryTabButton.classList.add('active');
+            renderInventoryView();
+          }
+        }else if(tab==='Analytics'){
+          analyticsView.style.display='block';
+          document.getElementById('analytics-tab-button').classList.add('active');
+          generateAnalytics();
         }
-      }else{
-        analyticsView.style.display='block';
-        document.getElementById('analytics-tab-button').classList.add('active');
-        generateAnalytics();
       }
-    }
 
     function setDay(next){
       if(DAY===next) return;
@@ -3319,6 +4499,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       // Toggle active states in top bar
       document.getElementById('btn-day-sat').classList.toggle('active', DAY==='SAT');
       document.getElementById('btn-day-sun').classList.toggle('active', DAY==='SUN');
+      syncInventoryDayButtons();
 
       // Toggle active states in subtabs, if present
       const otSat = document.getElementById('ot-sat'); if(otSat) otSat.classList.toggle('active', DAY==='SAT');
@@ -3347,6 +4528,8 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
 
       // Then load OOS map to update badges/buttons from Firebase
       loadOOSMap();
+      refreshInventoryListener();
+      renderInventoryView();
 
       // Refresh other views if currently visible
       if(document.getElementById('order-tracking').style.display==='block'){
@@ -3399,6 +4582,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       // Sync top bar buttons
       document.getElementById('btn-day-sat').classList.toggle('active', DAY==='SAT');
       document.getElementById('btn-day-sun').classList.toggle('active', DAY==='SUN');
+      syncInventoryDayButtons();
 
       // Rebuild POS grid and refresh OOS state
       initializeMenuItems();
@@ -3414,6 +4598,7 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         const list = Object.values(orders);
         renderAnalyticsItemsTable(list);
         renderAnalyticsPaymentSplit(list);
+        renderAnalyticsExpectedPanel(list);
         renderAnalyticsHourlyChart(list);
       });
     }
@@ -3490,6 +4675,78 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       const revenueData = methodLabels.map(label=>round2(totals[label]?.revenue || 0));
       renderPaymentDoughnutChart('paymentCount','payment-count-chart', methodLabels, countData, { currency:false });
       renderPaymentDoughnutChart('paymentRevenue','payment-revenue-chart', methodLabels, revenueData, { currency:true });
+    }
+
+    function renderAnalyticsExpectedPanel(orderList){
+      const tbody = document.getElementById('analytics-expected-body');
+      if(!tbody) return;
+      const menu = currentMenu();
+      const soldByCode = {};
+      orderList.forEach(order=>{
+        (order.items || []).forEach(it=>{
+          const code = it && (it.code || itemCodeMap[it.name]);
+          const qty = Number(it && it.quantity) || 0;
+          if(!code || qty <= 0) return;
+          soldByCode[code] = (soldByCode[code] || 0) + qty;
+        });
+      });
+      let expectedRevenue = 0;
+      let actualRevenue = 0;
+      let shrinkUnitsTotal = 0;
+      let shrinkDollarsTotal = 0;
+      const rows = [];
+      menu.forEach(item=>{
+        const code = item.code;
+        const record = getInventoryRecordForCode(code, DAY);
+        const price = getEffectivePriceFor(item);
+        const initial = record.initial || 0;
+        const current = record.current || 0;
+        const soldFromInventory = Math.max(0, initial - current);
+        const soldActual = soldByCode[code] || 0;
+        const unaccountedUnits = soldFromInventory - soldActual;
+        const expectedItemRevenue = soldFromInventory * price;
+        const unaccountedDollars = unaccountedUnits * price;
+        expectedRevenue += expectedItemRevenue;
+        shrinkUnitsTotal += unaccountedUnits;
+        shrinkDollarsTotal += unaccountedDollars;
+        rows.push({
+          name: item.name,
+          initial,
+          current,
+          soldActual,
+          unaccountedUnits,
+          unaccountedDollars
+        });
+      });
+      actualRevenue = orderList.reduce((sum, order)=>sum + (Number(order.total) || 0), 0);
+      const expectedEl = document.getElementById('analytics-expected-revenue');
+      if(expectedEl) expectedEl.textContent = `$${expectedRevenue.toFixed(2)}`;
+      const actualEl = document.getElementById('analytics-actual-revenue');
+      if(actualEl) actualEl.textContent = `$${actualRevenue.toFixed(2)}`;
+      const shrinkUnitsEl = document.getElementById('analytics-shrinkage-units');
+      if(shrinkUnitsEl) shrinkUnitsEl.textContent = shrinkUnitsTotal.toFixed(0);
+      const shrinkDollarsEl = document.getElementById('analytics-shrinkage-dollars');
+      if(shrinkDollarsEl) shrinkDollarsEl.textContent = `$${shrinkDollarsTotal.toFixed(2)}`;
+      tbody.innerHTML = '';
+      if(rows.length === 0){
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="6" style="text-align:center;color:#666;padding:18px;">No data yet.</td>';
+        tbody.appendChild(tr);
+        return;
+      }
+      rows.sort((a,b)=> b.unaccountedUnits - a.unaccountedUnits);
+      rows.forEach(row=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHTML(row.name)}</td>
+          <td>${row.initial}</td>
+          <td>${row.current}</td>
+          <td>${row.soldActual}</td>
+          <td>${row.unaccountedUnits}</td>
+          <td>$${row.unaccountedDollars.toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     function renderPaymentDoughnutChart(storeKey, canvasId, labels, data, options={}){
@@ -3599,6 +4856,11 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
         if(event.target === customerNameModalEl) closeCustomerNameModal();
       });
     }
+    document.addEventListener('pointerdown', event=>{
+      if(activeInventoryTooltip && !activeInventoryTooltip.contains(event.target)){
+        hideInlineInventoryTooltip();
+      }
+    });
     zellePhoneModalEl = document.getElementById('zelle-phone-modal');
     zellePhoneInputEl = document.getElementById('zelle-phone-input');
     if(zellePhoneModalEl){
@@ -3612,6 +4874,19 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
     if(paymentChangeLinkEl){
       paymentChangeLinkEl.addEventListener('click', handlePaymentChangeClick);
     }
+    const inventorySearchInput = document.getElementById('inventory-filter-input');
+    if(inventorySearchInput){
+      inventorySearchInput.addEventListener('input', event=>{
+        setInventorySearch(event.target.value);
+      });
+      setInventorySearch(inventorySearchInput.value);
+    }
+    document.querySelectorAll('[data-inventory-filter]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const filter = btn.getAttribute('data-inventory-filter');
+        setInventoryFilter(filter);
+      });
+    });
     function initApp(){
       refreshMenuOverridesListener();
       refreshDisplayNameListener();
@@ -3626,6 +4901,10 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
       refreshZelleCurrentAccountListener();
       refreshZelleFeeListener();
       loadOOSMap();
+      refreshInventoryListener();
+      renderInventoryView();
+      syncInventoryFilterButtons();
+      syncInventoryDayButtons();
       loadOrdersFromFirebase();
     }
     applyPosModeUI();
@@ -3649,7 +4928,6 @@ function currentMenu(){ return DAY === 'SAT' ? menuItemsSAT : menuItemsSUN; }
   </script>
 </body>
 </html>
-
 
 
 
